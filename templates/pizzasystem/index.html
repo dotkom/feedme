@@ -1,3 +1,10 @@
-
-iHernadfgpojdsfgtølidjg
+{% if orders %}
+    <ul>
+    {% for order in orders %}
+        <li>{{order.soda}}</li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No orders available.</p>
+{% endif %}
 

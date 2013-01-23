@@ -12,7 +12,7 @@ class PizzaSystem(models.Model):
     pizza = models.IntegerField(_('pizzanummer'), max_length=2, default=8)
     
     def __unicode__(self):
-        return self.user
+        return "Pizza bestilling"
 
     class Meta:
         verbose_name = _('Pizza')
