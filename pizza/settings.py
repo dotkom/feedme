@@ -1,7 +1,14 @@
 # Django settings for pizza project.
 
+import sys
+import os
+
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+
+PROJECT_SETTINGS_DIRECTORY = os.path.dirname(globals()['__file__'])
+# Root directory. Contains manage.py
+PROJECT_ROOT_DIRECTORY = os.path.join(PROJECT_SETTINGS_DIRECTORY, '..')
 
 ADMINS = (
     # ('Your Name', 'your_email@example.com'),
@@ -109,6 +116,7 @@ TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    os.path.join(PROJECT_ROOT_DIRECTORY, 'templates/')
 )
 
 INSTALLED_APPS = (

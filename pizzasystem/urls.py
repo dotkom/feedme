@@ -1,0 +1,5 @@
+from django.conf.urls import patterns, include, url
+
+urlpatterns = patterns('pizzasystem.views',
+    url(r'^$', 'index', name='pizza_index'),
+)
