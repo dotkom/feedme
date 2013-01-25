@@ -1,9 +1,21 @@
 {% if orders %}
-    <ul>
+    <table border ="1">
+    <tr>
+    <th>Pizza</th>
+    <th>Brus</th>
+    <th>Hvitløksdressing</th>
+    <th>Bestiller</th>
+    <th>PizzaBuddy</th>
+    </tr>
     {% for order in orders %}
-        <li>{{order.soda}}</li>
+        <tr>
+        <td>{{order.pizza}}</td>
+        <td>{{order.soda}}</td>
+        <td>{{order.dressing}}</td>
+        <td>{{order.user.username}}</td>
+        </tr>
     {% endfor %}
-    </ul>
+    </table>
 {% else %}
     <p>No orders available.</p>
 {% endif %}
