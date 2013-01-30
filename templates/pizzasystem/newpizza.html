@@ -8,9 +8,11 @@
         Brus: <input type="text", name="soda", value={{pizza.soda}}><br>
         Hvitøksdressing: <input type="checkbox", name="dressing", checked><br>
     {% if pizza.users_in_group %}
-        {% for user in pizza.users_in_group %}
-            {{user.username}}
+        <select>
+        {% for buddy in pizza.users_in_group %}
+           <option value={{user}}> {{buddy.username}}</option>
         {% endfor %}
+        </select>
     {% endif %}
     </body>
 </html>
