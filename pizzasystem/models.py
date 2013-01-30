@@ -8,9 +8,12 @@ class Order(models.Model):
     date = models.DateTimeField(_("dato"), auto_now_add=True, editable=False)
     total_sum = models.IntegerField(_("Sum"), max_length=4, default=0)
 
-    def pizza_users():
-        return Group.objects.get(name="pizza").user_set.all()     
+    def pizza_users(self):
+        return Group.objects.get(name='pizza').user_set.all()     
 
+    class Meta:
+        get_latest_by = 'date'
+    
 class Pizza(models.Model):
     # dynamisk hent ut folk fra gruppa som ikke er satt opp og lagre som choices
     #group = Group.objects.get(name='pizza')

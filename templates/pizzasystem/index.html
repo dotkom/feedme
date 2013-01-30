@@ -1,4 +1,4 @@
-{% if orders %}
+{% if order %}
     <table border ="1">
     <tr>
     <th>Pizza</th>
@@ -7,12 +7,12 @@
     <th>Bestiller</th>
     <th>PizzaBuddy</th>
     </tr>
-    {% for order in orders %}
+    {% for pizza in order.pizza_set.all %}
         <tr>
-        <td>{{order.pizza}}</td>
-        <td>{{order.soda}}</td>
-        <td>{{order.dressing}}</td>
-        <td>{{order.user.username}}</td>
+        <td>{{pizza.pizza}}</td>
+        <td>{{pizza.soda}}</td>
+        <td>{{pizza.dressing}}</td>
+        <td>{{pizza.user.username}}</td>
         </tr>
     {% endfor %}
     </table>

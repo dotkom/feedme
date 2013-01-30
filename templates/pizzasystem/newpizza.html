@@ -3,14 +3,15 @@
     <head>
     </head>
     <body>
-        Bestiller: {{user.username}}<br>
+        Bestiller: {{request.user.username}}<br>
         Pizza: <input type="number", name="pizza", value={{pizza.pizza}}><br>
         Brus: <input type="text", name="soda", value={{pizza.soda}}><br>
         Hvitøksdressing: <input type="checkbox", name="dressing", checked><br>
-    {% if pizza.users_in_group %}
+    {% if order.pizza_users %}
+        Buddy: 
         <select>
-        {% for buddy in pizza.users_in_group %}
-           <option value={{user}}> {{buddy.username}}</option>
+        {% for buddy in order.pizza_users %}
+           <option value={{buddy}}> {{buddy.username}}</option>
         {% endfor %}
         </select>
     {% endif %}
