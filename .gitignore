@@ -1,0 +1,12 @@
+*.swp
+*.project
+*.settings
+*.pydevproject
+.nfs*
+.idea/
+
+static/
+fixtures/
+sqlite/
+onlineweb/settings/local.py
+_generated_media*
