@@ -6,3 +6,9 @@ from pizzasystem.models import PizzaSystem
 def index(request):
     orders = PizzaSystem.objects.all()
     return render_to_response('pizzasystem/index.html', {'orders' : orders})
+
+def newpizza(request):
+    user = request.user
+    pizza = PizzaSystem()
+    return render_to_response('pizzasystem/newpizza.html', {'pizza' : pizza, 'user' : user})
+    
