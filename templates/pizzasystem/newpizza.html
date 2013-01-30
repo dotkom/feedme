@@ -1,0 +1,19 @@
+
+<html>
+    <head>
+    </head>
+    <body>
+        Bestiller: {{user.username}}<br>
+        Pizza: <input type="number", name="pizza", value={{pizza.pizza}}><br>
+        Brus: <input type="text", name="soda", value={{pizza.soda}}><br>
+        Hvitøksdressing: <input type="checkbox", name="dressing", checked><br>
+    {% if pizza.users_in_group %}
+        {% for user in pizza.users_in_group %}
+            {{user.username}}
+        {% endfor %}
+    {% endif %}
+    </body>
+</html>
+         
+
+
