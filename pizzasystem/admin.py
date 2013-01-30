@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib import admin
-from models import PizzaSystem
+from models import Order, Pizza
 
-class PizzaSystemAdmin(admin.ModelAdmin):
-    list_display = ('user','buddy','soda','dressing','pizza')
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('date', 'total_sum')
 
-admin.site.register(PizzaSystem, PizzaSystemAdmin)
+admin.site.register(Order, OrderAdmin)
