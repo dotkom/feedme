@@ -13,7 +13,6 @@ def newpizza(request):
     default_pizza.order = order    
     return render(request, 'pizzasystem/newpizza.html', {'pizza' : default_pizza, 'order' : order})
 
-def add(request, command):
-    #p = get_object_or_404(Pizza)
-    return render(request, 'Bestilt(NOT)')
+def add(request):
+    return HttpResponse(request.POST['soda'])
     
