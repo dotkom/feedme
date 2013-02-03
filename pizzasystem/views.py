@@ -10,7 +10,7 @@ def index(request):
 
 def newpizza(request):
     default_pizza = Pizza()
-    form = PizzaForm(instance=default_pizza)    
+    form = PizzaForm(instance=default_pizza)
     return render(request, 'pizzasystem/newpizza.html', {'form' : form})
 
 def add(request):
