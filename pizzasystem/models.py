@@ -9,7 +9,19 @@ class Order(models.Model):
     total_sum = models.IntegerField(_("Sum"), max_length=4, default=0)
 
     def pizza_users(self):
-        return Group.objects.get(name='pizza').user_set.all()     
+        return Group.objects.get(name='pizza').user_set.all()
+
+    def used_users(self):
+        users = []
+        for pizza in self.pizza_set.all():
+            users.append(pizza.user)
+            users.append(pizza.buddy)
+        return users
+
+    def free_users(self):
+        #Filters the used users from the list of users in the pizza group
+        return [x for x in self.pizza_users() if x not in self.used_users()]
+            
 
     class Meta:
         get_latest_by = 'date'
