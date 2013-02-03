@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
-from fields import PizzaMembersChoiceField
 
 from django.utils.translation import ugettext_lazy as _
 
@@ -15,7 +14,8 @@ class Order(models.Model):
         users = []
         for pizza in self.pizza_set.all():
             users.append(pizza.user)
-            users.append(pizza.buddy)
+            if pizza.buddy:
+                users.append(pizza.buddy)
         return users
 
     def free_users(self):
@@ -27,9 +27,6 @@ class Order(models.Model):
         get_latest_by = 'date'
     
 class Pizza(models.Model):
-    # dynamisk hent ut folk fra gruppa som ikke er satt opp og lagre som choices
-    #group = Group.objects.get(name='pizza')
-    #users_in_group = group.user_set.all()
     order = models.ForeignKey(Order)
     user = models.ForeignKey(User, related_name="Owner")
     buddy = models.ForeignKey(User, related_name="Pizzabuddy", null=True)

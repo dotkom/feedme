@@ -5,26 +5,35 @@ from pizzasystem.models import Order, Pizza
 from forms import PizzaForm
 
 def index(request):
-    order = Order.objects.all().latest()
-    return render(request, 'pizzasystem/index.html', {'order' : order})
+    if(is_allowed(request)):
+        order = Order.objects.all().latest()
+        return render(request, 'pizzasystem/index.html', {'order' : order})
+    return HttpResponse('Nope')
 
 def newpizza(request):
-    default_pizza = Pizza()
-    form = PizzaForm(instance=default_pizza)
-    return render(request, 'pizzasystem/newpizza.html', {'form' : form})
+    if is_allowed(request):
+        default_pizza = Pizza()
+        form = PizzaForm(instance=default_pizza)
+        return render(request, 'pizzasystem/newpizza.html', {'form' : form})
+    return HttpResponse('Nope')
 
 def add(request):
-    form = PizzaForm(request.POST)
-    if form.is_valid():
-        order = Order.objects.all().latest()
-        pizza = form.save(commit=False)
-        pizza.user = request.user
-        pizza.order = order
-        ##cd = form.cleaned_data
-        #soda = cd['soda']
-        #dressing = cd['dressing']
-        #pizza = cd['pizza']
-        form.save()
-        return render(request, 'pizzasystem/index.html', {'order' : order})
-    return HttpResponse('Not a valid form')
+    if is_allowed(request):
+        form = PizzaForm(request.POST)
+        if form.is_valid():
+            order = Order.objects.all().latest()
+            pizza = form.save(commit=False)
+            pizza.user = request.user
+            pizza.order = order
+            form.save()
+            return render(request, 'pizzasystem/index.html', {'order' : order})
+        return HttpResponse('Not a valid form')
+    return HttpResponse('Nope')
     
+
+def is_allowed(request):
+    allowed = Order.objects.all().latest().pizza_users()
+    for user in allowed:
+        if user == request.user:
+            return True
+    return False
