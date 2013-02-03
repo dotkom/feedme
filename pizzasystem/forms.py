@@ -1,8 +1,12 @@
-from django import forms
+from django.forms import ModelForm
 from models import Pizza
 
-class PizzaForm(forms.Form):
+class PizzaForm(ModelForm):
     #buddy = forms.ForeignField()
-    soda = forms.CharField()
-    dressing = forms.BooleanField()
-    pizza = forms.IntegerField()
+    #soda = forms.CharField()
+    #dressing = forms.BooleanField()
+    #pizza = forms.IntegerField()
+    
+    class Meta:
+        model = Pizza
+        exclude = ('order', 'user')
