@@ -8,40 +8,33 @@ def index(request):
     if(is_allowed(request)):
         order = Order.objects.all().latest()
         return render(request, 'pizzasystem/index.html', {'order' : order})
-    return HttpResponse('Nope')
+    return denied()
 
-def newpizza(request):
+def newpizza(request, pizza_id=None):
     if is_allowed(request):
-        default_pizza = Pizza()
-        form = PizzaForm(instance=default_pizza)
-        return render(request, 'pizzasystem/newpizza.html', {'form' : form})
-    return HttpResponse('Nope')
+        if pizza_id == None:
+            pizza = Pizza()
+        else:
+            pizza = get_object_or_404(Pizza, pk=pizza_id)
 
-def save(request):
-    if is_allowed(request):
-        form = PizzaForm(request.POST)
-        if form.is_valid():
-            pizza = form.save(commit=False)
-            pizza.user = request.user
-            pizza.order = Order.objects.all().latest()
-            pizza.save()
-            return index(request)
-        return HttpResponse('Not a valid form')
-    return HttpResponse('Nope')
+        if request.method == 'POST':
+            form = PizzaForm(request.POST, instance=pizza)
+            if form.is_valid():
+                forminstance = form.save(commit=False)
+                forminstance.user = request.user
+                forminstance.save()
+                return index(request)
+            else:
+                return HttpResponse('Invalid input')
+        else:
+            form = PizzaForm(instance=pizza)
+            return render(request, 'pizzasystem/newpizza.html', {'form' : form})
+    return denied()
     
 def edit(request, pizza_id):
     if is_allowed(request):
-        pizza = get_object_or_404(Pizza, pk=pizza_id)
-        form = PizzaForm(instance=pizza)
-        return render(request, 'pizzasystem/editpizza.html', {'form' : form})
-    return HttpResponse('Nope')
-
-def edit_function(request):
-    pizza = PizzaForm(request.POST).save(commit=False)
-    pizza.save()
-    return index(request)
-        
-        
+        return newpizza(request, pizza_id)
+    return denied()
 
 
 def is_allowed(request):
@@ -50,3 +43,6 @@ def is_allowed(request):
         if user == request.user:
             return True
     return False
+
+def denied():
+    return HttpResponse('Permission denied')

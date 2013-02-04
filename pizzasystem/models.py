@@ -34,6 +34,10 @@ class Pizza(models.Model):
     dressing = models.BooleanField(_('hvitloksdressing'), default=True)
     pizza = models.IntegerField(_('pizzanummer'), max_length=2, default=8)
 
+    def __init__(self, *args, **kwargs):
+        super(Pizza, self).__init__(*args, **kwargs)
+        self.order = Order.objects.all().latest()
+
     def __unicode__(self):
         return self.user.username
 
