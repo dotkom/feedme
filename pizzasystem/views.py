@@ -10,7 +10,7 @@ def index(request):
         return render(request, 'pizzasystem/index.html', {'order' : order})
     return denied()
 
-def newpizza(request, pizza_id=None):
+def pizzaview(request, pizza_id=None):
     if is_allowed(request):
         if pizza_id == None:
             pizza = Pizza()
@@ -28,13 +28,11 @@ def newpizza(request, pizza_id=None):
                 return HttpResponse('Invalid input')
         else:
             form = PizzaForm(instance=pizza)
-            return render(request, 'pizzasystem/newpizza.html', {'form' : form})
+            return render(request, 'pizzasystem/pizzaview.html', {'form' : form})
     return denied()
     
 def edit(request, pizza_id):
-    if is_allowed(request):
-        return newpizza(request, pizza_id)
-    return denied()
+    return pizzaview(request, pizza_id)
 
 
 def is_allowed(request):
