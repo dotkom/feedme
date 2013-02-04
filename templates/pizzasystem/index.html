@@ -3,20 +3,22 @@
     <h4>{{order.date}}</h4>
     <table border ="1">
     <tr>
-    <th>Pizza</th>
-    <th>Brus</th>
-    <th>Hvitløksdressing</th>
-    <th>Bestiller</th>
-    <th>PizzaBuddy</th>
+        <th>Pizza</th>
+        <th>Brus</th>
+        <th>Hvitløksdressing</th>
+        <th>Bestiller</th>
+        <th>PizzaBuddy</th>
+        <th>Edit</th>
     </tr>
     {% for pizza in order.pizza_set.all %}
         <tr>
-        <td>{{pizza.pizza}}</td>
-        <td>{{pizza.soda}}</td>
-        <td>{{pizza.dressing}}</td>
-        <td>{{pizza.user.username}}</td>
-        <td>{{pizza.buddy.username}}</td>
-        </tr>
+            <td>{{pizza.pizza}}</td>
+            <td>{{pizza.soda}}</td>
+            <td>{{pizza.dressing}}</td>
+            <td>{{pizza.user.username}}</td>
+            <td>{{pizza.buddy.username}}</td>
+            <td><a href=/pizza/{{pizza.id}}>edit</a></td>
+         </tr>
     {% endfor %}
     </table>
 {% else %}
