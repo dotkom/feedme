@@ -9,6 +9,7 @@
         <th>Bestiller</th>
         <th>PizzaBuddy</th>
         <th>Edit</th>
+        <th>Delete</th>
     </tr>
     {% for pizza in order.pizza_set.all %}
         <tr>
@@ -17,7 +18,10 @@
             <td>{{pizza.dressing}}</td>
             <td>{{pizza.user.username}}</td>
             <td>{{pizza.buddy.username}}</td>
-            <td><a href=/pizza/{{pizza.id}}>edit</a></td>
+            {% if user == pizza.user %}
+                <td><a href=/pizza/{{pizza.id}}><button>edit</button></a></td>
+                <td><a href=/pizza/delete/{{pizza.id}}><button>delete</button></a></td>
+            {% endif %}
          </tr>
     {% endfor %}
     </table>
