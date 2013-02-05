@@ -34,6 +34,12 @@ def pizzaview(request, pizza_id=None):
 def edit(request, pizza_id):
     return pizzaview(request, pizza_id)
 
+def delete(request, pizza_id):
+    if is_allowed(request):
+        pizza = get_object_or_404(Pizza, pk=pizza_id)
+        pizza.delete()
+        return index(request)
+    return denied()
 
 def is_allowed(request):
     allowed = Order.objects.all().latest().pizza_users()
