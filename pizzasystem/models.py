@@ -49,3 +49,13 @@ class Pizza(models.Model):
         verbose_name = _('Pizza')
         verbose_name_plural = _('Pizzar')
 
+
+class Saldo(models.Model):
+    saldo = models.IntegerField(_('saldo'), max_length=5, default=0)
+    user = models.ForeignKey(User, related_name="Saldomaster")
+
+
+
+
+
+    
