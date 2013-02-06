@@ -1,8 +1,8 @@
 from django.template import Template, Context, loader, RequestContext
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse
-from pizzasystem.models import Order, Pizza
-from forms import PizzaForm
+from pizzasystem.models import Order, Pizza, Admin
+from forms import PizzaForm, AdminForm
 
 def index(request):
     if(is_allowed(request)):
@@ -30,7 +30,11 @@ def pizzaview(request, pizza_id=None):
             form = PizzaForm(instance=pizza)
             return render(request, 'pizzaview.html', {'form' : form})
     return denied()
-    
+
+def admin(request):
+    form = AdminForm(instance=Admin())
+    return render(request, 'admin.html', {'form' : form})
+
 def edit(request, pizza_id):
     return pizzaview(request, pizza_id)
 

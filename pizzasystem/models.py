@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
-
 from django.utils.translation import ugettext_lazy as _
 
 class Order(models.Model):
@@ -21,7 +20,9 @@ class Order(models.Model):
     def free_users(self):
         #Filters the used users from the list of users in the pizza group
         return [x for x in self.pizza_users() if x not in self.used_users()]
-            
+
+#    def __unicode__(self):
+#        return self.date.date()
 
     class Meta:
         get_latest_by = 'date'
@@ -49,6 +50,13 @@ class Pizza(models.Model):
         verbose_name = _('Pizza')
         verbose_name_plural = _('Pizzar')
 
+class Admin(models.Model):
+
+    #Generates order choices based on which one has not yet been paid
+    ORDER_CHOICES=[(order.id,order.date) for order in Order.objects.filter(total_sum=0)]
+
+    orders = models.OneToOneField(Order, choices=ORDER_CHOICES)
+    total_sum = models.IntegerField(max_length=4, default=0)
 
 class Saldo(models.Model):
     saldo = models.IntegerField(_('saldo'), max_length=5, default=0)
