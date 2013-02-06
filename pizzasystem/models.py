@@ -40,9 +40,12 @@ class Pizza(models.Model):
 
     def __unicode__(self):
         return self.user.username
+    
+    @models.permalink
+    def get_absolute_url(self):
+        return ('edit', (), {'pizza_id' : self.id})
 
     class Meta:
         verbose_name = _('Pizza')
         verbose_name_plural = _('Pizzar')
 
-    
