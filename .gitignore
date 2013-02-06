@@ -8,7 +8,6 @@
 .idea*
 .ropeproject
 .coverage
-*.db*
 
 collected_static
 sqlite/
