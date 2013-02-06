@@ -7,7 +7,7 @@ from forms import PizzaForm
 def index(request):
     if(is_allowed(request)):
         order = Order.objects.all().latest()
-        return render(request, 'pizzasystem/index.html', {'order' : order})
+        return render(request, 'index.html', {'order' : order})
     return denied()
 
 def pizzaview(request, pizza_id=None):
@@ -28,7 +28,7 @@ def pizzaview(request, pizza_id=None):
                 return HttpResponse('Invalid input')
         else:
             form = PizzaForm(instance=pizza)
-            return render(request, 'pizzasystem/pizzaview.html', {'form' : form})
+            return render(request, 'pizzaview.html', {'form' : form})
     return denied()
     
 def edit(request, pizza_id):
