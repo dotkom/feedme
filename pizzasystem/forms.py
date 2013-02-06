@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from models import Pizza, Admin
+from models import Pizza, Admin, Order
 
 class PizzaForm(ModelForm):
     

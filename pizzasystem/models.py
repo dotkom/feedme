@@ -28,6 +28,7 @@ class Order(models.Model):
         get_latest_by = 'date'
     
 class Pizza(models.Model):
+    
     order = models.ForeignKey(Order)
     user = models.ForeignKey(User, related_name="Owner")
     buddy = models.ForeignKey(User, related_name="Pizzabuddy", null=True)
