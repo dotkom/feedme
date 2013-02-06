@@ -1,6 +1,6 @@
 {% if order %}
     <h1>Pizzabestilling</h1>
-    <h4>{{order.date}}</h4>
+    <h4>{{ order.date }}</h4>
     <table border ="1">
     <tr>
         <th>Pizza</th>
@@ -11,11 +11,11 @@
     </tr>
     {% for pizza in order.pizza_set.all %}
         <tr>
-            <td>{{pizza.pizza}}</td>
-            <td>{{pizza.soda}}</td>
-            <td>{{pizza.dressing}}</td>
-            <td>{{pizza.user.username}}</td>
-            <td>{{pizza.buddy.username}}</td>
+            <td>{{ pizza.pizza }}</td>
+            <td>{{ pizza.soda }}</td>
+            <td>{{ pizza.dressing }}</td>
+            <td>{{ pizza.user.username }}</td>
+            <td>{{ pizza.buddy.username }}</td>
             {% if user == pizza.user or user == pizza.buddy %}
                 <td><a href=/pizza/{{pizza.id}}><button>edit</button></a></td>
                 <td><a href=/pizza/delete/{{pizza.id}}><button>delete</button></a></td>
