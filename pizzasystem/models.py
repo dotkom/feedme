@@ -19,7 +19,12 @@ class Order(models.Model):
 
     def free_users(self):
         #Filters the used users from the list of users in the pizza group
-        return [x for x in self.pizza_users() if x not in self.used_users()]
+        #free_users = [x for x in self.pizza_users() if x not in self.used_users()]
+        #return User.objects.filter(id=[user.id for user in free_users])
+        free_users = self.pizza_users()
+        for user in self.used_users():
+            free_users = free_users.exclude(id=user.id)
+        return free_users
 
 #    def __unicode__(self):
 #        return self.date.date()
@@ -62,9 +67,6 @@ class Admin(models.Model):
 class Saldo(models.Model):
     saldo = models.IntegerField(_('saldo'), max_length=5, default=0)
     user = models.ForeignKey(User, related_name="Saldomaster")
-
-
-
 
 
     
