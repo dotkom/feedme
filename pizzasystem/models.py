@@ -27,7 +27,7 @@ class Order(models.Model):
         return free_users
 
 #    def __unicode__(self):
-#        return self.date.date()
+ #       return self.id
 
     class Meta:
         get_latest_by = 'date'
@@ -57,16 +57,15 @@ class Pizza(models.Model):
         verbose_name_plural = _('Pizzar')
 
 class Admin(models.Model):
-
-    #Generates order choices based on which one has not yet been paid
-    ORDER_CHOICES=[(order.id,order.date) for order in Order.objects.filter(total_sum=0)]
-
-    orders = models.OneToOneField(Order, choices=ORDER_CHOICES)
+    orders = models.OneToOneField(Order)
     total_sum = models.IntegerField(max_length=4, default=0)
+
+    users = models.ManyToManyField(User)
+    add_value = models.IntegerField(max_length=4, default=0)
 
 class Saldo(models.Model):
     saldo = models.IntegerField(_('saldo'), max_length=5, default=0)
-    user = models.ForeignKey(User, related_name="Saldomaster")
+    user = models.ForeignKey(User)
 
 
     

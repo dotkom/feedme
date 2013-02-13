@@ -34,6 +34,8 @@ def pizzaview(request, pizza_id=None):
 
 def admin(request):
     form = AdminForm(instance=Admin())
+    form.fields["orders"].queryset = Order.objects.filter(total_sum=0)
+    form.fields["users"].queryset = Order.objects.all().latest().pizza_users()
     return render(request, 'admin.html', {'form' : form})
 
 def edit(request, pizza_id):
