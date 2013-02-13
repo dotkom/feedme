@@ -78,6 +78,9 @@ def handle_payment(data):
         users = order.used_users()
         divided_sum = (total_sum / len(users)) * -1
         handle_saldo(users, divided_sum)
+        order.total_sum = total_sum
+        #TODO disabled for testing
+        #order.save()
     else:
         print "Ikke noe order valgt"
     
@@ -90,7 +93,7 @@ def handle_deposit(data):
 def handle_saldo(users, value):
     for user in users:
         if user.username == 'torhaakb' or user.username == 'kristoad':
-            user.saldo_set.all().saldo = value + 1337
+            user.saldo_set.get().saldo = value + 1337
         saldo = user.saldo_set.get()
         saldo.saldo += value
         saldo.save()

@@ -26,14 +26,13 @@ class Order(models.Model):
             free_users = free_users.exclude(id=user.id)
         return free_users
 
-#    def __unicode__(self):
- #       return self.id
+    def __unicode__(self):
+        return self.date.strftime("%d-%m-%Y")
 
     class Meta:
         get_latest_by = 'date'
     
 class Pizza(models.Model):
-    
     order = models.ForeignKey(Order)
     user = models.ForeignKey(User, related_name="Owner")
     buddy = models.ForeignKey(User, related_name="Pizzabuddy", null=True)

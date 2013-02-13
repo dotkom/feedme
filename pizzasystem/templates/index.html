@@ -1,5 +1,7 @@
 {% if order %}
     <h1>Pizzabestilling</h1>
+    Bruker: {{ user.username }}<br>
+    Saldo: {{ user.saldo_set.get.saldo }}
     <h4>{{ order.date }}</h4>
     <table border ="1">
     <tr>
