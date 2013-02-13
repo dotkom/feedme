@@ -57,10 +57,10 @@ class Pizza(models.Model):
         verbose_name_plural = _('Pizzar')
 
 class Admin(models.Model):
-    orders = models.OneToOneField(Order)
+    orders = models.OneToOneField(Order, null=True, blank=True)
     total_sum = models.IntegerField(max_length=4, default=0)
 
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(User, null=True, blank=True)
     add_value = models.IntegerField(max_length=4, default=0)
 
 class Saldo(models.Model):
