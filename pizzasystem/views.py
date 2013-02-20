@@ -1,8 +1,8 @@
 from django.template import Template, Context, loader, RequestContext
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from pizzasystem.models import Order, Pizza, Admin, Saldo
-from forms import PizzaForm, AdminForm
+from pizzasystem.models import Order, Pizza, Admin, Saldo, OrderLimit
+from forms import PizzaForm, AdminForm, OrderLimitForm
 
 def index(request):
     if(is_allowed(request)):
@@ -20,10 +20,9 @@ def pizzaview(request, pizza_id=None):
         if request.method == 'POST':
             form = PizzaForm(request.POST, instance=pizza)
             if form.is_valid():
-                forminstance = form.save(commit=False)
-                forminstance.user = request.user
-                forminstance.save()
-                return index(request)
+                form = form.save(commit=False)
+                form.user = request.user
+                return validate_users_saldo(request, form)
             else:
                 return HttpResponse('Invalid input')
         else:
@@ -36,14 +35,18 @@ def pizzaview(request, pizza_id=None):
     return denied()
 
 def admin(request):
+    order_limit = get_order_limit()
+
     if request.method == 'POST':
         form = AdminForm(request.POST, instance=Admin())
-        if form.is_valid():
+        order_limit_form = OrderLimitForm(request.POST, instance=order_limit)
+        if form.is_valid() and order_limit_form.is_valid():
             data = form.cleaned_data
             if data['total_sum'] != 0:
                 handle_payment(data)
             if data['add_value'] != 0:
                 handle_deposit(data)
+            order_limit.save()
             return HttpResponseRedirect('admin.html')
         else:
             return HttpResponse('Invalid Input')
@@ -52,7 +55,8 @@ def admin(request):
         form = AdminForm(instance=Admin())                
         form.fields["orders"].queryset = Order.objects.filter(total_sum=0)
         form.fields["users"].queryset = Order.objects.all().latest().pizza_users()
-        return render(request, 'admin.html', {'form' : form})
+        order_limit_form = OrderLimitForm(instance=order_limit)
+        return render(request, 'admin.html', {'form' : form, 'order_limit_form' : order_limit_form})
 
 def edit(request, pizza_id):
     return pizzaview(request, pizza_id)
@@ -63,6 +67,31 @@ def delete(request, pizza_id):
         pizza.delete()
         return index(request)
     return denied()
+
+def get_order_limit():
+    order_limit = OrderLimit.objects.all()
+    if order_limit:
+        order_limit = OrderLimit.objects.get(pk=1)
+    else:
+        order_limit = OrderLimit()
+    return order_limit
+
+def validate_users_saldo(request, form):
+    validate_or_create_saldo()
+    order_limit = get_order_limit().order_limit
+    saldo = form.user.saldo_set.get()
+    if form.user == form.buddy:
+        if saldo.saldo < (order_limit * 2):
+           return HttpResponse(form.user.username + ' : insufficient funds')
+    else:
+        if saldo.saldo < order_limit:
+            return HttpResponse(form.user.username + ' : insufficient funds')
+
+        saldo = form.buddy.saldo_set.get()
+        if saldo.saldo < order_limit:
+            return HttpResponse(form.buddy.username + ' : insufficient funds')
+    form.save()
+    return index(request)   
 
 def is_allowed(request):
     allowed = Order.objects.all().latest().pizza_users()
@@ -95,8 +124,6 @@ def handle_deposit(data):
         
 def handle_saldo(users, value):
     for user in users:
-        if user.username == 'torhaakb' or user.username == 'kristoad':
-            user.saldo_set.get().saldo = value + 1337
         saldo = user.saldo_set.get()
         saldo.saldo += value
         saldo.save()

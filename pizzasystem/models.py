@@ -64,8 +64,9 @@ class Admin(models.Model):
     add_value = models.IntegerField(max_length=4, default=0)
 
 class Saldo(models.Model):
-    saldo = models.IntegerField(_('saldo'), max_length=5, default=0)
+    saldo = models.FloatField(_('saldo'), default=0)
     user = models.ForeignKey(User)
 
-
+class OrderLimit(models.Model):
+    order_limit = models.IntegerField(_('Bestillings grense'), default=100)
     
