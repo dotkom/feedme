@@ -17,13 +17,14 @@ class Order(models.Model):
                 users.append(pizza.buddy)
         return users
 
-    def free_users(self):
+    def free_users(self, buddy=None, pizzauser=None):
         #Filters the used users from the list of users in the pizza group
         #free_users = [x for x in self.pizza_users() if x not in self.used_users()]
         #return User.objects.filter(id=[user.id for user in free_users])
         free_users = self.pizza_users()
         for user in self.used_users():
-            free_users = free_users.exclude(id=user.id)
+            if not (user == buddy or user == pizzauser):
+                free_users = free_users.exclude(id=user.id)
         return free_users
 
     def __unicode__(self):

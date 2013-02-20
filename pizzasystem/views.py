@@ -28,7 +28,10 @@ def pizzaview(request, pizza_id=None):
                 return HttpResponse('Invalid input')
         else:
             form = PizzaForm(instance=pizza)
-            form.fields["buddy"].queryset = Order.objects.all().latest().free_users()
+            if pizza_id:
+                form.fields["buddy"].queryset = Order.objects.all().latest().free_users(pizza.buddy, pizza.user)
+            else: 
+                form.fields["buddy"].queryset = Order.objects.all().latest().free_users()
             return render(request, 'pizzaview.html', {'form' : form})
     return denied()
 
