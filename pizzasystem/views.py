@@ -24,7 +24,7 @@ def pizzaview(request, pizza_id=None):
         if form.is_valid():
             form = form.save(commit=False)
             form.user = request.user
-            return validate_users_saldo(request, form)
+            return validate_request(request, form)
         else:
             return HttpResponse('Invalid input')
     else:
@@ -81,10 +81,16 @@ def get_order_limit():
         order_limit = OrderLimit()
     return order_limit
 
-def validate_users_saldo(request, form):
+def validate_request(request, form):
     validate_or_create_saldo()
     order_limit = get_order_limit().order_limit
     saldo = form.user.saldo_set.get()
+    if any(u == form.user for u in Order.objects.all().latest().used_users()):
+        return HttpResponse(form.user.username + ' is already registred with a pizza')
+
+    if any(u == form.buddy for u in Order.objects.all().latest().used_users()):
+        return HttpResponse(form.buddy.username + ' is already registred with a pizza')
+
     if form.user == form.buddy:
         if saldo.saldo < (order_limit * 2):
            return HttpResponse(form.user.username + ' : insufficient funds')
