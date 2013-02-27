@@ -136,7 +136,7 @@ INSTALLED_APPS = (
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 SERVER_EMAIL = 'dotkom@online.ntnu.no'
-EMAIL_HOST = 'smtp.stud.ntnu.no'
+EMAIL_HOST = 'dworak.online.ntnu.no'
 EMAIL_PORT = 25
 
 # A sample logging configuration. The only tangible logging
