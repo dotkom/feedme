@@ -134,6 +134,11 @@ INSTALLED_APPS = (
     # 'django.contrib.admindocs',
 )
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+SERVER_EMAIL = 'dotkom@online.ntnu.no'
+EMAIL_HOST = 'smtp.stud.ntnu.no'
+EMAIL_PORT = 25
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
