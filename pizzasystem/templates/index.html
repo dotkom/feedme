@@ -1,15 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
 {% if order %}
-    <h1>Pizzabestilling</h1>
-    Bruker: {{ user.username }}<br>
-    Saldo: {{ user.saldo_set.get.saldo }}
     <h4>{{ order.date }}</h4>
-    <table border ="1">
+    <table class="table table-striped table-bordered">
     <tr>
         <th>Pizza</th>
         <th>Brus</th>
         <th>Hvitløksdressing</th>
         <th>Bestiller</th>
         <th>PizzaBuddy</th>
+        <th></th>
     </tr>
     {% for pizza in order.pizza_set.all %}
         <tr>
@@ -19,8 +20,8 @@
             <td>{{ pizza.user.username }}</td>
             <td>{{ pizza.buddy.username }}</td>
             {% if user == pizza.user or user == pizza.buddy %}
-                <td><a href="{{ pizza.get_absolute_url }}"><button>edit</button></a></td>
-                <td><a href=/pizza/delete/{{pizza.id}}><button>delete</button></a></td>
+                <td><a href="{{ pizza.get_absolute_url }}"><button class="btn btn-primary">edit</button></a>
+                <a href=/pizza/delete/{{pizza.id}}><button class="btn btn-danger">delete</button></a></td>
             {% endif %}
          </tr>
     {% endfor %}
@@ -28,4 +29,7 @@
 {% else %}
     <p>No orders available.</p>
 {% endif %}
-<a href="/pizza/pizzaview/">Ny pizza</a>
+    {% if user not in free_users  %}  
+    <a href="/pizza/pizzaview/">Ny pizza</a>
+    {% endif %}   
+{% endblock content %}
