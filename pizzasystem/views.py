@@ -28,12 +28,11 @@ def pizzaview(request, pizza_id=None):
         else:
             return HttpResponse('Invalid input')
     else:
-        form = PizzaForm(instance=pizza)
+        form = PizzaForm(instance=pizza, initial={'buddy' : request.user})
         if pizza_id:
             form.fields["buddy"].queryset = Order.objects.all().latest().free_users(pizza.buddy, pizza.user)
         else: 
             form.fields["buddy"].queryset = Order.objects.all().latest().free_users()
-            form.fields["buddy"].selected = request.user
         return render(request, 'pizzaview.html', {'form' : form})
 
 @login_required
@@ -42,7 +41,7 @@ def admin(request):
     order_limit = get_order_limit()
 
     if request.method == 'POST':
-        form = AdminForm(request.POST, instance=Admin())
+        form = AdminForm(request.POST)
         order_limit_form = OrderLimitForm(request.POST, instance=order_limit)
         if form.is_valid() and order_limit_form.is_valid():
             data = form.cleaned_data
