@@ -18,9 +18,6 @@ class Order(models.Model):
         return users
 
     def free_users(self, buddy=None, pizzauser=None):
-        #Filters the used users from the list of users in the pizza group
-        #free_users = [x for x in self.pizza_users() if x not in self.used_users()]
-        #return User.objects.filter(id=[user.id for user in free_users])
         free_users = self.pizza_users()
         for user in self.used_users():
             if not (user == buddy or user == pizzauser):
@@ -36,6 +33,7 @@ class Order(models.Model):
 class Pizza(models.Model):
     order = models.ForeignKey(Order)
     user = models.ForeignKey(User, related_name="Owner")
+    need_buddy = models.BooleanField(_('Trenger Buddy'), default=False)
     buddy = models.ForeignKey(User, related_name="Pizzabuddy", null=True)
     soda = models.CharField(_('brus'), blank=True, null=True, default='cola', max_length=25)
     dressing = models.BooleanField(_('hvitloksdressing'), default=True)

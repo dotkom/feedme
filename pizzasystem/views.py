@@ -24,6 +24,8 @@ def pizzaview(request, pizza_id=None):
         if form.is_valid():
             form = form.save(commit=False)
             form.user = request.user
+            if form.need_buddy:
+                form.buddy = request.user
             return validate_request(request, form)
         else:
             return HttpResponse('Invalid input')
@@ -77,7 +79,7 @@ def delete(request, pizza_id):
     if pizza.user != request.user and pizza.buddy != request.user:
         return HttpResponse("Permission denied")
     pizza.delete()
-    return index(request)
+    return redirect('/pizza') 
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='pizza').count() == 1)
@@ -88,8 +90,9 @@ def join(request, pizza_id):
     if request.user.saldo_set.get().saldo < get_order_limit().order_limit:
         return HttpResponse(request.user.username + ' Insufficient funds')
     pizza.buddy = request.user
+    pizza.need_buddy = False
     pizza.save()
-    return index(request)
+    return redirect('/pizza') 
 
 def get_order_limit():
     order_limit = OrderLimit.objects.all()
@@ -115,7 +118,7 @@ def validate_request(request, form):
         if saldo.saldo < order_limit:
             return HttpResponse(form.buddy.username + ' : insufficient funds')
     form.save()
-    return index(request)   
+    return redirect('/pizza') 
 
 #Depricated
 def is_allowed(request):
