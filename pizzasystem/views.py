@@ -29,6 +29,7 @@ def pizzaview(request, pizza_id=None):
             return HttpResponse('Invalid input')
     else:
         form = PizzaForm(instance=pizza, initial={'buddy' : request.user})
+        form.fields["buddy"].empty_label = None
         if pizza_id:
             form.fields["buddy"].queryset = Order.objects.all().latest().free_users(pizza.buddy, pizza.user)
         else: 
