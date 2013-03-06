@@ -61,6 +61,7 @@ class Admin(models.Model):
     total_sum = models.IntegerField(max_length=4, default=0)
 
     users = models.ManyToManyField(User, null=True, blank=True)
+    users.help_text = ''
     add_value = models.IntegerField(max_length=4, default=0)
 
 class Saldo(models.Model):

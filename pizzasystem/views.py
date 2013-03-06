@@ -33,6 +33,7 @@ def pizzaview(request, pizza_id=None):
             form.fields["buddy"].queryset = Order.objects.all().latest().free_users(pizza.buddy, pizza.user)
         else: 
             form.fields["buddy"].queryset = Order.objects.all().latest().free_users()
+            form.fields["buddy"].selected = request.user
         return render(request, 'pizzaview.html', {'form' : form})
 
 @login_required
@@ -64,13 +65,30 @@ def admin(request):
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='pizza').count() == 1)
 def edit(request, pizza_id):
+    pizza = get_object_or_404(Pizza, pk=pizza_id)
+    if pizza.user != request.user and pizza.buddy != request.user:
+        return HttpResponse("Permission denied")
     return pizzaview(request, pizza_id)
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='pizza').count() == 1)
 def delete(request, pizza_id):
     pizza = get_object_or_404(Pizza, pk=pizza_id)
+    if pizza.user != request.user and pizza.buddy != request.user:
+        return HttpResponse("Permission denied")
     pizza.delete()
+    return index(request)
+
+@login_required
+@user_passes_test(lambda u: u.groups.filter(name='pizza').count() == 1)
+def join(request, pizza_id):
+    pizza = get_object_or_404(Pizza, pk=pizza_id)
+    if pizza.user != pizza.buddy:
+        return HttpResponse("Permission denied")
+    if request.user.saldo_set.get().saldo < get_order_limit().order_limit:
+        return HttpResponse(request.user.username + ' Insufficient funds')
+    pizza.buddy = request.user
+    pizza.save()
     return index(request)
 
 def get_order_limit():
@@ -85,11 +103,6 @@ def validate_request(request, form):
     validate_or_create_saldo()
     order_limit = get_order_limit().order_limit
     saldo = form.user.saldo_set.get()
-    if any(u == form.user for u in Order.objects.all().latest().used_users()):
-        return HttpResponse(form.user.username + ' is already registred with a pizza')
-
-    if any(u == form.buddy for u in Order.objects.all().latest().used_users()):
-        return HttpResponse(form.buddy.username + ' is already registred with a pizza')
 
     if form.user == form.buddy:
         if saldo.saldo < (order_limit * 2):
