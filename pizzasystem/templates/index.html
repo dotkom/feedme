@@ -23,7 +23,7 @@
                 <td><a href="{{ pizza.get_absolute_url }}"><button class="btn btn-primary">edit</button></a>
                 <a href=/pizza/delete/{{pizza.id}}><button class="btn btn-danger">delete</button></a></td>
             {% endif %}
-            {% if user != pizza.user and pizza.user == pizza.buddy %}
+            {% if user not in order.used_users and user != pizza.user and pizza.user == pizza.buddy %}
                 <td><a href=/pizza/join/{{pizza.id}}><button class="btn btn-primary">join</button></a></td>
             {% endif %}
          </tr>
