@@ -9,4 +9,9 @@
     {{ order_limit_form.as_p }}
 <input type="submit" value="Save" />
 </form>
+<form action="new_order" method="post">
+    {% csrf_token %} 
+    {{ new_order_form }}
+<input type="submit" value="New Order" />
+</form>
 {% endblock content %}

@@ -2,8 +2,9 @@ from django.template import Template, Context, loader, RequestContext
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from pizzasystem.models import Order, Pizza, Admin, Saldo, OrderLimit
-from forms import PizzaForm, AdminForm, OrderLimitForm
+from forms import PizzaForm, AdminForm, OrderLimitForm, NewOrderForm
 from django.contrib.auth.decorators import login_required, user_passes_test
+from datetime import date, timedelta
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='pizza').count() == 1)
@@ -62,7 +63,20 @@ def admin(request):
         form.fields["orders"].queryset = Order.objects.filter(total_sum=0)
         form.fields["users"].queryset = Order.objects.all().latest().pizza_users()
         order_limit_form = OrderLimitForm(instance=order_limit)
-        return render(request, 'admin.html', {'form' : form, 'order_limit_form' : order_limit_form})
+        new_order_form = NewOrderForm()
+        new_order_form.fields["date"].initial = get_next_wednesday()
+        return render(request, 'admin.html', {'form' : form, 'order_limit_form' : order_limit_form, 'new_order_form' : new_order_form})
+
+@user_passes_test(lambda u: u.groups.filter(name='pizzaadmin').count() == 1)
+def new_order(request):
+    new_order_form = NewOrderForm(request.POST)
+    if new_order_form.is_valid():
+        data = new_order_form.cleaned_data
+        order = Order()
+        order.date = data['date']
+        order.save()
+        return HttpResponseRedirect('admin.html')
+    return HttpResponse('Invalid input')
 
 @login_required
 @user_passes_test(lambda u: u.groups.filter(name='pizza').count() == 1)
@@ -166,4 +180,14 @@ def validate_or_create_saldo():
             saldo.user = user
             saldo.save()
         
-
+def get_next_wednesday():
+    today = date.today()
+    day = today.weekday()
+    if day < 2:
+        diff = timedelta(days=(2 - day))
+    elif day > 2:
+        diff = timedelta(days=(7- day + 2))
+    else:
+        diff = timedelta(days=7)
+    
+    return today + diff

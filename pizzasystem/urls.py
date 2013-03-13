@@ -7,4 +7,5 @@ urlpatterns = patterns('pizzasystem.views',
     url(r'^delete/(?P<pizza_id>\d+)/$','delete', name='delete'),
     url(r'^join/(?P<pizza_id>\d+)/$','join', name='join'),
     url(r'^admin', 'admin', name='admin'),
+    url(r'^new_order', 'new_order', name='new_order'),
 )

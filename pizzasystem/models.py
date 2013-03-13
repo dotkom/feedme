@@ -3,7 +3,7 @@ from django.contrib.auth.models import User, Group
 from django.utils.translation import ugettext_lazy as _
 
 class Order(models.Model):
-    date = models.DateTimeField(_("dato"), auto_now_add=True, editable=False)
+    date = models.DateField(_("dato"))
     total_sum = models.IntegerField(_("Sum"), max_length=4, default=0)
 
     def pizza_users(self):

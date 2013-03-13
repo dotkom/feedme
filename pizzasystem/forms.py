@@ -12,6 +12,12 @@ class AdminForm(ModelForm):
     class Meta:
         model = Admin
 
+class NewOrderForm(ModelForm):
+
+    class Meta:
+        model = Order
+        fields = ('date',)
+
 class OrderLimitForm(ModelForm):
 
     class Meta:
