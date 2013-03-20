@@ -154,8 +154,7 @@ def handle_payment(data):
         divided_sum = (total_sum / len(users)) * -1
         handle_saldo(users, divided_sum)
         order.total_sum = total_sum
-        #TODO disabled for testing
-        #order.save()
+        order.save()
     else:
         print "Ikke noe order valgt"
 
