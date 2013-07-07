@@ -20,11 +20,12 @@
             <td>{{ pizza.user.username }}</td>
             <td>{{ pizza.buddy.username }}</td>
             {% if user == pizza.user or user == pizza.buddy %}
-                <td><a href="{{ pizza.get_absolute_url }}"><button class="btn btn-primary">edit</button></a>
-                <a href=/pizza/delete/{{pizza.id}}><button class="btn btn-danger">delete</button></a></td>
+                <td>
+                    <a href="{% url edit pizza.id %}"><button class="btn btn-primary">edit</button></a>
+                    <a href="{% url delete pizza.id %}"><button class="btn btn-danger">delete</button></a></td>
             {% endif %}
             {% if user not in order.used_users and user != pizza.user and pizza.need_buddy %}
-                <td><a href=/pizza/join/{{pizza.id}}><button class="btn btn-primary">join</button></a></td>
+                <td><a href={% url join pizza.id %}><button class="btn btn-primary">join</button></a></td>
             {% endif %}
          </tr>
     {% endfor %}
@@ -33,7 +34,7 @@
     <p>No orders available.</p>
 {% endif %}
 {% if user not in order.used_users %}
-    <a href="/pizza/pizzaview/">Ny pizza</a>
+    <a href="{% url new %}"><button class="btn btn-primary">New pizza</button></a>
 {% endif %}
        
 {% endblock content %}
