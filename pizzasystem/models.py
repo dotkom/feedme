@@ -36,7 +36,7 @@ class Pizza(models.Model):
     order = models.ForeignKey(Order)
     user = models.ForeignKey(User, related_name="Owner")
     need_buddy = models.BooleanField(_('Trenger Buddy'), default=False)
-    buddy = models.ForeignKey(User, related_name="Pizzabuddy", null=True)
+    buddy = models.ForeignKey(User, related_name="Pizzabuddy", null=True, blank=True)
     soda = models.CharField(_('brus'), blank=True, null=True, default='cola', max_length=25)
     dressing = models.BooleanField(_(u'hvitløksdressing'), default=True)
     pizza = models.IntegerField(_('pizzanummer'), max_length=2, default=8)
@@ -55,6 +55,13 @@ class Pizza(models.Model):
     class Meta:
         verbose_name = _('Pizza')
         verbose_name_plural = _('Pizzar')
+
+class Other(models.Model):
+    order = models.ForeignKey(Order)
+    content = models.TextField(_(u'beskrivelse'))
+
+    def __unicode__(self):
+        return self.user.username
 
 class Saldo(models.Model):
     saldo = models.FloatField(_('saldo'), default=0)

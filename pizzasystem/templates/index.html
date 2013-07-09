@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 {% if order %}
     <h4>{{ order.date }}</h4>
     <table class="table table-striped table-bordered">
@@ -25,7 +26,7 @@
                     <a href="{% url delete pizza.id %}"><button class="btn btn-danger">delete</button></a></td>
             {% endif %}
             {% if user not in order.used_users and user != pizza.user and pizza.need_buddy %}
-                <td><a href={% url join pizza.id %}><button class="btn btn-primary">join</button></a></td>
+                <td><a href={% url join pizza.id %}><button class="btn btn-warning">join</button></a></td>
             {% endif %}
          </tr>
     {% endfor %}
@@ -34,7 +35,7 @@
     <p>No orders available.</p>
 {% endif %}
 {% if user not in order.used_users %}
-    <a href="{% url new %}"><button class="btn btn-primary">New pizza</button></a>
+    <a href="{% url newpizza %}"><button class="btn btn-primary">New order</button></a>
 {% endif %}
        
 {% endblock content %}
