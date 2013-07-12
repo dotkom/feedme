@@ -4,7 +4,7 @@ from django.db import models
 from django.contrib.auth.models import User, Group
 from django.utils.translation import ugettext_lazy as _
 
-class Order(models.Model):
+class OrderLine(models.Model):
     date = models.DateField(_("dato"))
     total_sum = models.IntegerField(_("Sum"), max_length=4, default=0)
 
@@ -33,17 +33,13 @@ class Order(models.Model):
         get_latest_by = 'date'
     
 class Pizza(models.Model):
-    order = models.ForeignKey(Order)
+    order_line = models.ForeignKey(OrderLine)
     user = models.ForeignKey(User, related_name="Owner")
     need_buddy = models.BooleanField(_('Trenger Buddy'), default=False)
     buddy = models.ForeignKey(User, related_name="Pizzabuddy", null=True, blank=True)
     soda = models.CharField(_('brus'), blank=True, null=True, default='cola', max_length=25)
     dressing = models.BooleanField(_(u'hvitløksdressing'), default=True)
     pizza = models.IntegerField(_('pizzanummer'), max_length=2, default=8)
-
-    def __init__(self, *args, **kwargs):
-        super(Pizza, self).__init__(*args, **kwargs)
-        self.order = Order.objects.all().latest()
 
     def __unicode__(self):
         return self.user.username
@@ -56,8 +52,9 @@ class Pizza(models.Model):
         verbose_name = _('Pizza')
         verbose_name_plural = _('Pizzar')
 
-class Other(models.Model):
-    order = models.ForeignKey(Order)
+class Order(models.Model):
+    order_line = models.ForeignKey(OrderLine)
+    user = models.ForeignKey(User)
     content = models.TextField(_(u'beskrivelse'))
 
     def __unicode__(self):
@@ -67,17 +64,17 @@ class Saldo(models.Model):
     saldo = models.FloatField(_('saldo'), default=0)
     user = models.ForeignKey(User)
 
-class AdminOrders(models.Model):
-    orders = models.OneToOneField(Order, related_name=_('Ordre'))
+class ManageOrderLines(models.Model):
+    order_lines = models.OneToOneField(OrderLine, related_name=_('Ordre'))
     total_sum = models.IntegerField(_('Total regning'), max_length=4)
 
-class AdminUsers(models.Model):
+class ManageUsers(models.Model):
     users = models.ManyToManyField(User, related_name=_('Brukere'))
     #users.help_text = ''
     add_value = models.IntegerField(_('Verdi'), max_length=4)
     add_value.help_text = _(u'Legger til verdien på alle valgte brukere') 
 
 
-class AdminOrderLimit(models.Model):
+class ManageOrderLimit(models.Model):
     order_limit = models.IntegerField(_('Bestillings grense'), default=100)
     

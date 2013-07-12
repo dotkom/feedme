@@ -1,49 +1,49 @@
 from django.forms import ModelForm
-from models import Pizza, Other, Order, AdminOrderLimit, AdminOrders, AdminUsers
+from models import Pizza, Order, OrderLine, ManageOrderLimit, ManageOrderLines, ManageUsers
 
 class PizzaForm(ModelForm):
     name ='pizza'
 
     class Meta:
         model = Pizza
-        exclude = ('order', 'user')
+        exclude = ('order_line', 'user')
        
     def __init__(self, *args, **kwargs):
         super(PizzaForm, self).__init__(*args, **kwargs)
         self.fields['buddy'].empty_label = None 
 
-class OtherForm(ModelForm):
-    name=u'other'
+class OrderForm(ModelForm):
+    name=u'order'
 
     class Meta:
-        model = Other
+        model = Order
         fields = ('content' ,)
 
 
 
-class AdminOrdersForm(ModelForm):
+class ManageOrderLinesForm(ModelForm):
     name=u'orders'
 
     class Meta:
-        model = AdminOrders
+        model = ManageOrderLines
 
-class AdminUsersForm(ModelForm):
+class ManageUsersForm(ModelForm):
     name=u'users'
 
     class Meta:
-        model = AdminUsers
+        model = ManageUsers
 
-class AdminOrderLimitForm(ModelForm):
+class ManageOrderLimitForm(ModelForm):
     name=u'order limit'
 
     class Meta:
-        model = AdminOrderLimit
+        model = ManageOrderLimit
 
-class NewOrderForm(ModelForm):
+class NewOrderLineForm(ModelForm):
     name=u'new order'
 
     class Meta:
-        model = Order
+        model = OrderLine
         fields = ('date',)
 
 

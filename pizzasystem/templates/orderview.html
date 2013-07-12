@@ -1,5 +1,4 @@
-{% extends "base.html" %}
-{% load pizza_tags %}
+{% extends "base_pizzasystem.html" %}
 
 {% block content %}
 <script>
@@ -7,8 +6,7 @@
 </script>
 
 <form action="" method="post">
-   {% csrf_token %}
-   {% pizza_tabs form.name %}
+    {% csrf_token %}
    <fieldset>
         <legend>{{ form.name|title }}</legend>
         {% for field in form %}

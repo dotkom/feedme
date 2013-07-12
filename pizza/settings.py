@@ -140,6 +140,12 @@ SERVER_EMAIL = 'dotkom@online.ntnu.no'
 EMAIL_HOST = 'dworek.online.ntnu.no'
 EMAIL_PORT = 25
 
+######################################################
+#pizza
+######################################################
+PIZZA_GROUP = 'pizza'
+PIZZA_ADMIN_GROUP = 'pizzaadmin'
+
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to
 # the site admins on every HTTP 500 error when DEBUG=False.
