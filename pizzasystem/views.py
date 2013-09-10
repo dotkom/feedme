@@ -144,7 +144,7 @@ def new_order_line(request):
             return redirect(new_order_line)
     else:
         form = NewOrderLineForm()
-        form.fields["date"].initial = get_next_wednesday()
+        form.fields["date"].initial = get_next_tuesday()
 
     return render(request, 'admin.html', {'form' : form })
 
@@ -272,15 +272,15 @@ def validate_saldo():
             saldo.user = user
             saldo.save()
         
-def get_next_wednesday():
+def get_next_tuesdate():
     today = date.today()
     day = today.weekday()
-    if day < 2:
-        diff = timedelta(days=(2 - day))
-    elif day > 2:
-        diff = timedelta(days=(7- day + 2))
+    if day < 1:
+        diff = timedelta(days=(1 - day))
+    elif day > 1:
+        diff = timedelta(days=(7- day + 1))
     else:
-        diff = timedelta(days=7)
+        diff = 0
     
     return today + diff
 
