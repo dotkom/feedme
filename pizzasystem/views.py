@@ -272,7 +272,7 @@ def validate_saldo():
             saldo.user = user
             saldo.save()
         
-def get_next_tuesdate():
+def get_next_tuesday():
     today = date.today()
     day = today.weekday()
     if day < 1:
@@ -280,7 +280,7 @@ def get_next_tuesdate():
     elif day > 1:
         diff = timedelta(days=(7- day + 1))
     else:
-        diff = 0
+        diff = timedelta(days=0)
     
     return today + diff
 
