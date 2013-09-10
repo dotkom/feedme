@@ -3,13 +3,14 @@
 from django.db import models
 from django.contrib.auth.models import User, Group
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 class OrderLine(models.Model):
     date = models.DateField(_("dato"))
     total_sum = models.IntegerField(_("Sum"), max_length=4, default=0)
 
     def pizza_users(self):
-        return Group.objects.get(name='pizza').user_set.all()
+        return Group.objects.get(name=settings.PIZZA_GROUP).user_set.all()
 
     def used_users(self):
         users = []
