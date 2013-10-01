@@ -23,7 +23,7 @@
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
-          <a class="brand" href="#">Pizzasystem</a>
+          <a class="brand" href="{% url "index" %}">Pizzasystem</a>
             <ul class="nav pull-right">
                 {% if is_admin %}
                     <li><a href="{% url "admin" %}">Admin</a></li>
