@@ -1,12 +1,14 @@
 from django.contrib import messages
-from django.contrib.auth.models import Group
 from django.conf import settings
 
 from django.shortcuts import render, get_object_or_404, redirect
-from pizzasystem.models import OrderLine, Pizza, Order, Saldo, ManageOrderLimit, ManageUsers, ManageOrderLimit
+from pizzasystem.models import OrderLine, Pizza, Order, Saldo, ManageOrderLimit
 from forms import PizzaForm, OrderForm,  ManageOrderLinesForm, ManageOrderLimitForm, NewOrderLineForm, ManageUsersForm
 from django.contrib.auth.decorators import user_passes_test
 from datetime import date, timedelta
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.PIZZA_GROUP).count() == 1)
 def index(request):
@@ -285,10 +287,10 @@ def get_next_tuesday():
     return today + diff
 
 def is_admin(request):
-    return request.user in Group.objects.get(name="pizzaadmin").user_set.all()
+    return request.user in User.objects.filter(groups__name=settings.PIZZA_ADMIN_GROUP)
 
 def get_pizza_users():
-   return Group.objects.get(name=settings.PIZZA_GROUP).user_set.all()
+   return User.objects.filter(groups__name=settings.PIZZA_GROUP)
 
 def get_order_line():
     if OrderLine.objects.all():

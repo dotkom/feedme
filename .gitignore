@@ -30,3 +30,4 @@ uploaded_media/*
 filedump
 _tmp
 local.py
+dist/
