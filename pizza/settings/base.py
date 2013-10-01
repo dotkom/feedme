@@ -1,9 +1,6 @@
 # Django settings for pizza project.
 
-import sys
 import os
-import ldap
-from django_auth_ldap.config import LDAPSearch, PosixGroupType
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -178,47 +175,3 @@ LOGGING = {
         },
     }
 }
-
-###############################################################
-#LDAP stuff
-
-AUTHENTICATION_BACKENDS = (
-    'django_auth_ldap.backend.LDAPBackend',
-    'django.contrib.auth.backends.ModelBackend',
-)
-
-#Looks up user in ldap
-AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=people,dc=online,dc=ntnu,dc=no",
-    ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
-
-#Looks up groups in ldap
-AUTH_LDAP_GROUP_SEARCH = LDAPSearch("ou=groups, dc=online, dc=ntnu, dc=no",
-    ldap.SCOPE_SUBTREE, "(objectClass=posixGroup)")
-
-#Ldap Group Type for linux:
-AUTH_LDAP_GROUP_TYPE = PosixGroupType()
-
-#Population Groups after a member joins.
-AUTH_LDAP_MIRROR_GROUPS = True
-
-#Gives dotkom users superuser and staff permissions in django.
-AUTH_LDAP_USER_FLAGS_BY_GROUP = {
-    #"is_superuser": "cn=dotkom, ou=groups, dc=online, dc=ntnu, dc=no",
-    "is_staff": "cn=dotkom, ou=groups, dc=online, dc=ntnu, dc=no",
-}
-
-for settings_module in ['local']:  # local last
-    if not os.path.exists(os.path.join(PROJECT_SETTINGS_DIRECTORY,
-            settings_module + ".py")):
-        sys.stderr.write("Could not find settings module '%s'.\n" %
-                settings_module)
-        if settings_module == 'local':
-            sys.stderr.write("You need to copy the settings file "
-                             "'pizza/settings/example-local.py' to "
-                             "'pizza/settings/local.py'.\n")
-        sys.exit(1)
-    try:
-        exec('from %s import *' % settings_module)
-    except ImportError, e:
-        print "Could not import settings for '%s' : %s" % (settings_module,
-                str(e))
