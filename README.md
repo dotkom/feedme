@@ -14,6 +14,7 @@ Install:
 2. Add the following to settings:
 
       PIZZA_GROUP = 'dotkom'
+      
       PIZZA_ADMIN_GROUP = 'pizzaadmin'
 
 3. Include the pizzasystem URLconf in your project urls.py like this:
