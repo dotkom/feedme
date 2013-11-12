@@ -24,3 +24,5 @@ Install:
 4. Run `python manage.py syncdb` to create the pizzasystem models.
 
 5. Visit http://127.0.0.1:8000/pizza/
+
+**Remember to update version number in setup.py before making a new release!**
