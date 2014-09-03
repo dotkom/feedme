@@ -31,3 +31,6 @@ filedump
 _tmp
 local.py
 dist/
+
+# online ordering system virtualenv @ sklirg
+onlineorder/
