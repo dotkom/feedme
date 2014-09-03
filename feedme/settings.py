@@ -1,5 +1,6 @@
 # Django settings for pizza project.
 
+import sys
 import os
 
 DEBUG = True
@@ -75,7 +76,7 @@ STATIC_URL = '/static/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
-    PROJECT_ROOT_DIRECTORY + "/pizzasystem/static/",    
+    PROJECT_ROOT_DIRECTORY + "/files/static/",
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -109,10 +110,10 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'pizza.urls'
+ROOT_URLCONF = 'feedme.urls'
 
 # Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'pizza.wsgi.application'
+WSGI_APPLICATION = 'feedme.wsgi.application'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
@@ -123,14 +124,14 @@ TEMPLATE_DIRS = (
 
 INSTALLED_APPS = (
     'django.contrib.admin',
-    
+
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'pizzasystem',
+    'feedme',
     # Uncomment the next line to enable the admin:
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
@@ -142,10 +143,10 @@ EMAIL_HOST = 'dworek.online.ntnu.no'
 EMAIL_PORT = 25
 
 ######################################################
-#pizza
+#FEEDME
 ######################################################
-PIZZA_GROUP = 'dotkom'
-PIZZA_ADMIN_GROUP = 'pizzaadmin'
+FEEDME_GROUP = 'dotkom'
+FEEDME_ADMIN_GROUP = 'feedmeadmin'
 
 # A sample logging configuration. The only tangible logging
 # performed by this configuration is to send an email to

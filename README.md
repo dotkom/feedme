@@ -4,25 +4,25 @@ Pizzasystem
 Pizza ordering managing
 
 Install:
-1. Add "pizzasystem" to your INSTALLED_APPS setting like this:
+1. Add "feedme" to your INSTALLED_APPS setting like this:
 
       INSTALLED_APPS = (
           ...
-          'pizzasystem',
+          'feedme',
       )
 
 2. Add the following to settings:
 
-      PIZZA_GROUP = 'dotkom'
-      
-      PIZZA_ADMIN_GROUP = 'pizzaadmin'
+      FEEDME_GROUP = 'dotkom'
 
-3. Include the pizzasystem URLconf in your project urls.py like this:
+      FEEDME_ADMIN_GROUP = 'feedmeadmin'
 
-      url(r'^pizza/', include('pizzasystem.urls')),
+3. Include the feedme URLconf in your project urls.py like this:
 
-4. Run `python manage.py syncdb` to create the pizzasystem models.
+      url(r'^feedme/', include('feedme.urls')),
 
-5. Visit http://127.0.0.1:8000/pizza/
+4. Run `python manage.py syncdb` to create the feedme models.
+
+5. Visit http://127.0.0.1:8000/feedme/
 
 **Remember to update version number in setup.py before making a new release!**

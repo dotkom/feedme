@@ -1,16 +1,16 @@
 from django.forms import ModelForm
-from models import Pizza, Order, OrderLine, ManageOrderLimit, ManageOrderLines, ManageUsers
+from models import Order, OrderLine, ManageOrderLimit, ManageOrderLines, ManageUsers
 
-class PizzaForm(ModelForm):
-    name ='pizza'
+class OrderLineForm(ModelForm):
+    name ='orderline'
 
     class Meta:
-        model = Pizza
+        model = OrderLine
         exclude = ('order_line', 'user')
-       
+
     def __init__(self, *args, **kwargs):
-        super(PizzaForm, self).__init__(*args, **kwargs)
-        self.fields['buddy'].empty_label = None 
+        super(OrderLineForm, self).__init__(*args, **kwargs)
+        self.fields['buddy'].empty_label = None
 
 class OrderForm(ModelForm):
     name=u'order'
@@ -39,11 +39,9 @@ class ManageOrderLimitForm(ModelForm):
     class Meta:
         model = ManageOrderLimit
 
-class NewOrderLineForm(ModelForm):
+class NewOrderForm(ModelForm):
     name=u'new order'
 
     class Meta:
-        model = OrderLine
+        model = Order
         fields = ('date',)
-
-

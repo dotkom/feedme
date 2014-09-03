@@ -1,4 +1,4 @@
 include README.md
-recursive-include pizzasystem/static *
-recursive-include pizzasystem/templates *
-recursive-include pizzasystem/templatetags *
+recursive-include files/static *
+recursive-include files/templates *
+recursive-include files/templatetags *

@@ -6,27 +6,32 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 #from django.contrib.auth import get_user_model
 
-User = getattr(settings, 'AUTH_USER_MODEL', 'auth.User') 
+User = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
-class OrderLine(models.Model):
+class Order(models.Model):
     date = models.DateField(_("dato"))
     total_sum = models.IntegerField(_("Sum"), max_length=4, default=0)
+    # ?
+    #order_line = models.ForeignKey(OrderLine)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    content = models.TextField(_(u'beskrivelse'))
+    # ?
 
-    def pizza_users(self):
-        return User.objects.filter(groups__name=settings.PIZZA_GROUP)
+    def order_users(self):
+        return User.objects.filter(groups__name=settings.FEEDME_GROUP)
 
     def used_users(self):
         users = []
-        for pizza in self.pizza_set.all():
-            users.append(pizza.user)
-            if pizza.buddy:
-                users.append(pizza.buddy)
+        for order in self.order_set.all():
+            users.append(order.user)
+            if order.buddy:
+                users.append(order.buddy)
         return users
 
-    def free_users(self, buddy=None, pizzauser=None):
-        free_users = self.pizza_users()
+    def free_users(self, buddy=None, orderuser=None):
+        free_users = self.order_users()
         for user in self.used_users():
-            if not (user == buddy or user == pizzauser):
+            if not (user == buddy or user == orderuser):
                 free_users = free_users.exclude(id=user.id)
         return free_users
 
@@ -35,34 +40,35 @@ class OrderLine(models.Model):
 
     class Meta:
         get_latest_by = 'date'
-    
-class Pizza(models.Model):
-    order_line = models.ForeignKey(OrderLine)
+
+class OrderLine(models.Model):
+    order = models.ForeignKey(Order)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="Owner")
     need_buddy = models.BooleanField(_('Trenger Buddy'), default=False)
-    buddy = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="Pizzabuddy", null=True, blank=True)
+    buddy = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="Orderbuddy", null=True, blank=True)
     soda = models.CharField(_('brus'), blank=True, null=True, default='cola', max_length=25)
     dressing = models.BooleanField(_(u'hvitløksdressing'), default=True)
-    pizza = models.IntegerField(_('pizzanummer'), max_length=2, default=8)
+    menu_item = models.IntegerField(_('menynummer'), max_length=2, default=8)
 
     def __unicode__(self):
         return self.user.username
-    
+
     @models.permalink
     def get_absolute_url(self):
-        return ('edit', (), {'pizza_id' : self.id})
+        return ('edit', (), {'orderline_id' : self.id})
 
     class Meta:
-        verbose_name = _('Pizza')
-        verbose_name_plural = _('Pizzar')
+        verbose_name = _('Ordre')
+        verbose_name_plural = _('Ordre')
 
-class Order(models.Model):
+"""class Order(models.Model):
     order_line = models.ForeignKey(OrderLine)
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     content = models.TextField(_(u'beskrivelse'))
 
     def __unicode__(self):
         return self.user.username
+""" # @TODO Scratch this
 
 class Saldo(models.Model):
     saldo = models.FloatField(_('saldo'), default=0)
@@ -76,9 +82,8 @@ class ManageUsers(models.Model):
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name=_('Brukere'))
     #users.help_text = ''
     add_value = models.IntegerField(_('Verdi'), max_length=4)
-    add_value.help_text = _(u'Legger til verdien på alle valgte brukere') 
+    add_value.help_text = _(u'Legger til verdien på alle valgte brukere')
 
 
 class ManageOrderLimit(models.Model):
     order_limit = models.IntegerField(_('Bestillings grense'), default=100)
-    

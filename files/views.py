@@ -1,74 +1,75 @@
+from datetime import date, timedelta
+
 from django.contrib import messages
 from django.conf import settings
-
-from django.shortcuts import render, get_object_or_404, redirect
-from pizzasystem.models import OrderLine, Pizza, Order, Saldo, ManageOrderLimit
-from forms import PizzaForm, OrderForm,  ManageOrderLinesForm, ManageOrderLimitForm, NewOrderLineForm, ManageUsersForm
-from django.contrib.auth.decorators import user_passes_test
-from datetime import date, timedelta
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import user_passes_test
+from django.shortcuts import render, get_object_or_404, redirect
+
+from files.models import OrderLine, Order, Saldo, ManageOrderLimit
+from forms import OrderLineForm, OrderForm,  ManageOrderLinesForm, ManageOrderLimitForm, NewOrderForm, ManageUsersForm
 
 User = get_user_model()
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.PIZZA_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def index(request):
-    order_line = get_order_line()
-    return render(request, 'index.html', {'order_line' : order_line, 'is_admin' : is_admin(request)})
+    order = get_order()
+    return render(request, 'index.html', {'order_line' : order, 'is_admin' : is_admin(request)})
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.PIZZA_GROUP).count() == 1)
-def pizzaview(request, pizza_id=None):
-    if pizza_id == None:
-        pizza = Pizza()
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
+def orderlineview(request, orderline_id=None):
+    if orderline_id == None:
+        orderline = OrderLine()
     else:
-        pizza = get_object_or_404(Pizza, pk=pizza_id)
+        orderline = get_object_or_404(OrderLine, pk=orderline_id)
 
     if request.method == 'POST':
-        form = PizzaForm(request.POST, instance=pizza)
+        form = OrderLineForm(request.POST, instance=orderline)
         if form.is_valid():
             form = form.save(commit=False)
             form.user = request.user
-            form.order_line = get_order_line()
+            form.order_line = get_order()
             if form.need_buddy:
                 form.buddy = request.user
-            
-            if check_pizza_order(request, form, pizza_id):
+
+            if check_orderline(request, form, orderline_id):
                 form.save()
                 return redirect(index)
             else:
-                form = PizzaForm(request.POST, auto_id=True)
+                form = OrderLineForm(request.POST, auto_id=True)
         else:
-            form = PizzaForm(request.POST, auto_id=True)
+            form = OrderLineForm(request.POST, auto_id=True)
     else:
-        if pizza_id:
-            form = PizzaForm(instance=pizza)
-            form.fields["buddy"].queryset = get_order_line().free_users(pizza.buddy, pizza.user)
-        else: 
-            form = PizzaForm(instance=pizza, initial={'buddy' : request.user})
-            form.fields["buddy"].queryset = get_order_line().free_users()
-    
+        if orderline_id:
+            form = OrderLineForm(instance=orderline)
+            form.fields["buddy"].queryset = get_order().free_users(orderline.buddy, orderline.user)
+        else:
+            form = OrderLineForm(instance=orderline, initial={'buddy' : request.user})
+            form.fields["buddy"].queryset = get_order().free_users()
+
     return render(request, 'orderview.html', {'form' : form, 'is_admin' : is_admin(request)})
 
-def edit_pizza(request, pizza_id):
-    pizza = get_object_or_404(Pizza, pk=pizza_id)
-    if not is_in_current_order('pizza', pizza_id):
-        messages.error(request, 'you can not edit pizzas from old orders')
-    elif pizza.user != request.user and pizza.buddy != request.user:
+def edit_orderline(request, orderline_id):
+    orderline = get_object_or_404(OrderLine, pk=orderline_id)
+    if not is_in_current_order('orderline', orderline_id):
+        messages.error(request, 'you can not edit orderlines from old orders')
+    elif orderline.user != request.user and orderline.buddy != request.user:
         messages.error(request, 'You need to be the creator or the buddy')
         return redirect(index)
-    return pizzaview(request, pizza_id)
+    return orderlineview(request, orderline_id)
 
-def delete_pizza(request, pizza_id):
-    pizza = get_object_or_404(Pizza, pk=pizza_id)
-    if not is_in_current_order('pizza', pizza_id):
-        messages.error(request, 'you can not delete pizzas from old orders')
-    elif pizza.user == request.user or pizza.buddy == request.user:
-        pizza.delete()
-        messages.success(request,'Pizza deleted')
+def delete_orderline(request, orderline_id):
+    orderline = get_object_or_404(OrderLine, pk=orderline_id)
+    if not is_in_current_order('orderline', orderline_id):
+        messages.error(request, 'you can not delete orderlines from old orders')
+    elif orderline.user == request.user or orderline.buddy == request.user:
+        orderline.delete()
+        messages.success(request,'Order line deleted')
     else:
         messages.error(request, 'You need to be the creator or the buddy')
     return redirect(index)
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.PIZZA_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def orderview(request, order_id=None):
     if order_id:
         order = get_object_or_404(Order, pk=order_id)
@@ -80,11 +81,11 @@ def orderview(request, order_id=None):
         if form.is_valid():
             form = form.save(commit=False)
             form.user = request.user
-            form.order_line = get_order_line()
+            form.order_line = get_order()
             form.save()
             messages.success(request, 'Order added')
             return redirect(index)
-        
+
         form = OrderForm(request.POST)
     else:
         form = OrderForm(instance=order)
@@ -114,29 +115,29 @@ def edit_order(request, order_id):
     return redirect(index)
 
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.PIZZA_GROUP).count() == 1)
-def join_pizza(request, pizza_id):
-    pizza = get_object_or_404(Pizza, pk=pizza_id)
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
+def join_orderline(request, orderline_id):
+    orderline = get_object_or_404(OrderLine, pk=orderline_id)
     if user_is_taken(request.user):
-        messages.error(request, 'You are already a part of a pizza')
-    elif not is_in_current_order('pizza', pizza_id):
-        messages.error(request, 'you can not join pizzas from old orders')
-    elif not pizza.need_buddy:
-        messages.error(request, 'You can\'t join that pizza')
+        messages.error(request, 'You are already part of an order line')
+    elif not is_in_current_order('orderline', orderline_id):
+        messages.error(request, 'You can not join orderlines from old orders')
+    elif not orderline.need_buddy:
+        messages.error(request, 'You can\'t join that order line')
     elif not request.user.saldo_set.all():
         messages.error(request, 'No saldo connected to the user')
     elif request.user.saldo_set.get().saldo < get_order_limit().order_limit:
         messages.error(request, 'You have insufficent funds. Current limit : ' + str(get_order_limit().order_limit))
     else:
-        pizza.buddy = request.user
-        pizza.need_buddy = False
-        pizza.save()
+        orderline.buddy = request.user
+        orderline.need_buddy = False
+        orderline.save()
         messages.success(request, 'Success!')
-    return redirect(index) 
+    return redirect(index)
 
 # ADMIN
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.PIZZA_ADMIN_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def new_order_line(request):
     if request.method == 'POST':
         form = NewOrderLineForm(request.POST)
@@ -150,7 +151,7 @@ def new_order_line(request):
 
     return render(request, 'admin.html', {'form' : form })
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.PIZZA_ADMIN_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def set_order_limit(request):
     limit = get_order_limit()
     if request.method == 'POST':
@@ -166,7 +167,7 @@ def set_order_limit(request):
 
     return render(request, 'admin.html', {'form' : form })
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.PIZZA_ADMIN_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def manage_users(request):
     if request.method == 'POST':
         form = ManageUsersForm(request.POST)
@@ -178,11 +179,11 @@ def manage_users(request):
     else:
         validate_saldo()
         form = ManageUsersForm()
-        form.fields["users"].queryset = get_pizza_users()
-    
+        form.fields["users"].queryset = get_orderline_users()
+
     return render(request, 'admin.html', {'form' : form })
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.PIZZA_ADMIN_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def manage_order_lines(request):
     if request.method == 'POST':
         form = ManageOrderLinesForm(request.POST)
@@ -194,7 +195,7 @@ def manage_order_lines(request):
             form = ManageOrderLinesForm(request.POST)
     else:
         form = ManageOrderLinesForm()
-    
+
     unhandeled_orders = OrderLine.objects.filter(total_sum=0)
     form.fields["order_lines"].queryset = unhandeled_orders
     return render(request, 'admin.html', {'form' : form, 'order_lines' : unhandeled_orders})
@@ -210,19 +211,19 @@ def get_order_limit():
 #methods
 
 def user_is_taken(user):
-    return user in get_order_line().used_users()
+    return user in get_order().used_users()
 
-def check_pizza_order(request, form, pizza_id=None):
+def check_orderline(request, form, orderline_id=None):
     validate_saldo()
     order_limit = get_order_limit().order_limit
     saldo = form.user.saldo_set.get()
 
-    if not pizza_id:
+    if not orderline_id:
         if user_is_taken(form.user):
-            messages.error(request, form.user.username + ' has already ordered a pizza')
+            messages.error(request, form.user.username + ' has already ordered')
             return False
         if user_is_taken(form.buddy):
-            messages.error(request, form.buddy.username + ' has already ordered a pizza')
+            messages.error(request, form.buddy.username + ' has already ordered')
             return False
     if form.user == form.buddy:
         if saldo.saldo < (order_limit * 2):
@@ -237,7 +238,7 @@ def check_pizza_order(request, form, pizza_id=None):
         if saldo.saldo < order_limit:
             messages.error(request,u'' + form.buddy.username + ' has insufficient funds. Current limit: ' + str(order_limit) )
             return False
-    messages.success(request, 'Pizza added')
+    messages.success(request, 'Order line added')
     return True
 
 def handle_payment(request, data):
@@ -257,8 +258,8 @@ def handle_deposit(data):
     users = data['users']
     deposit = data['add_value']
 
-    handle_saldo(users, deposit) 
-    
+    handle_saldo(users, deposit)
+
 def handle_saldo(users, value):
     for user in users:
         saldo = user.saldo_set.get()
@@ -266,14 +267,14 @@ def handle_saldo(users, value):
         saldo.save()
 
 def validate_saldo():
-    users = get_pizza_users()
+    users = get_orderline_users()
     for user in users:
         saldo = user.saldo_set.all()
         if not saldo:
             saldo = Saldo()
             saldo.user = user
             saldo.save()
-        
+
 def get_next_tuesday():
     today = date.today()
     day = today.weekday()
@@ -283,28 +284,28 @@ def get_next_tuesday():
         diff = timedelta(days=(7- day + 1))
     else:
         diff = timedelta(days=0)
-    
+
     return today + diff
 
 def is_admin(request):
-    return request.user in User.objects.filter(groups__name=settings.PIZZA_ADMIN_GROUP)
+    return request.user in User.objects.filter(groups__name=settings.FEEDME_ADMIN_GROUP)
 
-def get_pizza_users():
-   return User.objects.filter(groups__name=settings.PIZZA_GROUP)
+def get_orderline_users():
+   return User.objects.filter(groups__name=settings.FEEDME_GROUP)
 
-def get_order_line():
-    if OrderLine.objects.all():
-        return OrderLine.objects.all().latest()
+def get_order():
+    if Order.objects.all():
+        return Order.objects.all().latest()
     else:
         return False
 
 def is_in_current_order(order_type, order_id):
-    order_line = get_order_line()
-    if order_type == 'pizza':
-        pizza = get_object_or_404(Pizza, pk=order_id)
-        return pizza in order_line.pizza_set.all()
+    order = get_order()
+    if order_type == 'orderline':
+        orderline = get_object_or_404(OrderLine, pk=order_id)
+        return orderline in order.orderline_set.all()
     elif order_type == 'order':
         order = get_object_or_404(Order, pk=order_id)
-        return order in order_line.order_set.all()
+        return order in order.order_set.all()
     else:
         return False
