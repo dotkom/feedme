@@ -15,8 +15,8 @@
                 <div class="input">{{ field }}</div>
                 <div class="error">{{ field.errors }}</div>
         {% endfor %}
-        <a target="_blank" href="https://www.pizzabakeren.no/pizzameny"><btn class="btn btn-lg btn-danger" style="width: 500px; height: 10000px;">Meny</btn></a>
+
             </div>
     </fieldset>
-    <input type="submit" class="btn btn-primary" value="Save" />
+    <!--<a target="_blank" href="{{ form.order.restaurant.menu_url }}"><btn class="btn">Meny</btn></a>--> <input type="submit" class="btn btn-primary" value="Save" />
 {% endblock content %}
