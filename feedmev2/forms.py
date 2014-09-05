@@ -6,7 +6,7 @@ class OrderLineForm(ModelForm):
 
     class Meta:
         model = OrderLine
-        exclude = ('order', 'creator', 'buddy_system')
+        #exclude = ('order', 'creator', 'buddy_system')
 
     def __init__(self, *args, **kwargs):
         super(OrderLineForm, self).__init__(*args, **kwargs)
