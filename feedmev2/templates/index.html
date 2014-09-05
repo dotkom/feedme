@@ -8,8 +8,8 @@
     <tr>
         <th>Menu item</th>
         <th>Soda</th>
-        <th>Dressing</th>
         <th>Creator</th>
+        <th>Extras/comment</th>
         <th>Buddy (NYI)</th>
         <th>Administration</th>
     </tr>
@@ -17,12 +17,8 @@
         <tr>
             <td>{{ order_line.menu_item }}</td>
             <td>{{ order_line.soda }}</td>
-            {% if order_line.dressing %}
-                <td><img class="icon" src="{{ STATIC_URL }}img/check.png"/></td>
-            {% else %}
-                <td><img class="icon" src="{{ STATIC_URL }}img/x.jpg"/></td>
-            {% endif %}
             <td>{{ order_line.creator.username }}</td>
+            <td>{{ order_line.extras }}</td>
             <td>{{ order_line.buddy.username }}</td>
             {% if user == order_line.creator %}
                 <td>
