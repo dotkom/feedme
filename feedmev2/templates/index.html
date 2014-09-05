@@ -3,7 +3,7 @@
 {% block content %}
 
 {% if order %}
-    <h4>{{ order.date }}</h4>
+    <h4>{{ order.date }}: {{ order.restaurant.restaurant_name }} (<a href="{{ order.restaurant.menu_url }}" target="_blank">Menu</a>)</h4>
     <table class="table table-striped table-bordered">
     <tr>
         <th>Menu item</th>
