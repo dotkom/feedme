@@ -199,7 +199,7 @@ def manage_order(request):
     orders_price = {}
     for order in orders:
         orders_price[order] = order.get_total_sum()
-    print orders_price
+    #print orders_price
     form.fields["orders"].queryset = orders
     return render(request, 'admin.html', {'form' : form, 'orders' : orders})
 
@@ -215,11 +215,11 @@ def new_restaurant(request, restaurant_id=None):
         if form.is_valid():
             data = form.cleaned_data
             form.save()
-            return redirect(manage_order)
+            return redirect(index)
         else:
             form = NewRestaurantForm(request.POST)
     else:
-        form = NewRestaurantForm(request.POST)
+        form = NewRestaurantForm(instance=restaurant)
 
     return render(request, 'admin.html', {'form': form})
 
