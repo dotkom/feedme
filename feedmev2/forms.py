@@ -1,12 +1,12 @@
 from django.forms import ModelForm
-from models import Order, OrderLine, ManageOrderLimit, ManageOrders, ManageUsers
+from models import Order, OrderLine, ManageOrderLimit, ManageOrders, ManageUsers, Restaurant
 
 class OrderLineForm(ModelForm):
     name ='orderline'
 
     class Meta:
         model = OrderLine
-        #exclude = ('order', 'creator', 'buddy_system')
+        exclude = ('order', 'creator')
 
     def __init__(self, *args, **kwargs):
         super(OrderLineForm, self).__init__(*args, **kwargs)
@@ -44,4 +44,10 @@ class NewOrderForm(ModelForm):
 
     class Meta:
         model = Order
-        fields = ('date',)
+        #fields = ('date',)
+
+class NewRestaurantForm(ModelForm):
+  name=u'new restaurant'
+
+  class Meta:
+      model = Restaurant

@@ -14,4 +14,5 @@ urlpatterns = patterns('feedmev2.views',
     url(r'^admin/orders/$', 'manage_order', name='manage_order'),
     url(r'^admin/users/$', 'manage_users', name='manage_users'),
     url(r'^admin/orderlimit/$', 'set_order_limit', name='set_order_limit'),
+    url(r'^admin/newrestaurant/$', 'new_restaurant', name='new_restaurant'),
 )

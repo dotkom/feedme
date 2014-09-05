@@ -9,8 +9,19 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 #User = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
+class Restaurant(models.Model):
+    restaurant_name = models.CharField(_('name'), max_length=50)
+    menu_url = models.URLField(_('menu url'), max_length=250)
+    phone_number = models.CharField(_('phone number'), max_length=15)
+    email = models.EmailField(_('email address'), blank=True, null=True)
+    buddy_system = models.BooleanField(_('Enable buddy system'), default=False)
+
+    def __unicode__(self):
+        return self.restaurant_name
+
 class Order(models.Model):
     date = models.DateField(_("date"))
+    restaurant = models.ForeignKey(Restaurant)
 
     def get_total_sum(self):
         return self.orderline_set.aggregate(models.Sum('price'))
@@ -30,7 +41,6 @@ class Order(models.Model):
 class OrderLine(models.Model):
     order = models.ForeignKey(Order)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='Owner')
-    buddy_system = models.BooleanField(_('Enable buddy system', default=False))
     #users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name=_('buddies'), null=True, blank=True)
     menu_item = models.IntegerField(_('menu item'), max_length=2, default=8)
     soda = models.CharField(_('soda'), blank=True, null=True, default='cola', max_length=25)
@@ -63,9 +73,3 @@ class ManageUsers(models.Model):
 
 class ManageOrderLimit(models.Model):
     order_limit = models.IntegerField(_('Order limit'), default=100)
-
-class Restaurant(models.Model):
-    name = models.CharField(_('name'), max_length=50)
-    menu_url = models.CharField(_('menu url'), max_length=250)
-    phone_number = models.CharField(_('phone number'), max_length=15)
-    email = models.EmailField(_('email address'), blank=True, null=True)

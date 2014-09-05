@@ -7,8 +7,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Sum
 
-from feedmev2.models import OrderLine, Order, Funds, ManageOrderLimit
-from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitForm, NewOrderForm, ManageUsersForm
+from feedmev2.models import OrderLine, Order, Funds, ManageOrderLimit, Restaurant
+from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitForm, NewOrderForm, ManageUsersForm, NewRestaurantForm
 
 User = get_user_model()
 
@@ -202,6 +202,31 @@ def manage_order(request):
     print orders_price
     form.fields["orders"].queryset = orders
     return render(request, 'admin.html', {'form' : form, 'orders' : orders})
+
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+def new_restaurant(request, restaurant_id=None):
+    if restaurant_id == None:
+        restaurant = Restaurant()
+    else:
+        restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
+
+    if request.method == 'POST':
+        form = NewRestaurantForm(request.POST, instance=restaurant)
+        if form.is_valid():
+            data = form.cleaned_data
+            form.save()
+            return redirect(manage_order)
+        else:
+            form = NewRestaurantForm(request.POST)
+    else:
+        form = NewRestaurantForm(request.POST)
+
+    return render(request, 'admin.html', {'form': form})
+
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+def edit_restaurant(request, restaurant_id):
+    order = get_object_or_404(Restaurant, pk=restaurant_id)
+    return new_restaurant(request)
 
 def get_order_limit():
     order_limit = ManageOrderLimit.objects.all()
