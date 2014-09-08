@@ -19,13 +19,21 @@
             <td>{{ order_line.soda }}</td>
             <td>{{ order_line.creator.username }}</td>
             <td>{{ order_line.extras }}</td>
-            <td>{{ order_line.buddy.username }}</td>
+            <td>
+              {% if order_line.users %}
+              {% for user in order_line.users.all %}
+                {{ user }}
+              {% endfor %}
+              {% endif %}
+            </td>
             {% if user == order_line.creator %}
                 <td>
                     <a href="{% url "edit_orderline" order_line.id %}"><button class="btn btn-primary">edit</button></a>
                     <a href="{% url "delete_orderline" order_line.id %}"><button class="btn btn-danger">delete</button></a></td>
-            {% elif user not in order_line.used_users and user != pizza.user and pizza.need_buddy %}
-                <td><a href={% url "join_pizza" pizza.id %}><button class="btn btn-warning">join</button></a></td>
+            {% elif user not in order_line.users.all %}
+                <td><a href={% url "join_orderline" order_line.id %}><button class="btn btn-primary">join</button></a></td>
+            {% elif user in order_line.users.all %}
+                <td><a href={% url "leave_orderline" order_line.id %}><button class="btn btn-danger">leave</button></a></td>
             {% else %}
                 <td></td>
             {% endif %}
@@ -53,7 +61,7 @@
         {% endfor %}
         </table>
     {% endif %}
-    {% if user.id not in order.taken_users %}
+    {% if can_join %}
         <a href="{% url "new_orderline" %}"><button class="btn btn-primary">Ny bestilling</button></a>
     {% endif %}
     <!--<a href="{% url "new_orderline" %}"><button class="btn btn-primary">Annet</button></a>-->

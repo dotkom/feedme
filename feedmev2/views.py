@@ -15,7 +15,7 @@ User = get_user_model()
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def index(request):
     order = get_order()
-    return render(request, 'index.html', {'order' : order, 'is_admin' : is_admin(request)})
+    return render(request, 'index.html', {'order' : order, 'is_admin' : is_admin(request), 'can_join': not in_other_orderline(request.user) and not is_in_current_order(request.user, order)})
 
 def orderlineview(request, orderline_id=None):
     if orderline_id == None:
@@ -29,8 +29,8 @@ def orderlineview(request, orderline_id=None):
             form = form.save(commit=False)
             form.creator = request.user
             form.order = get_order()
-            #if form.buddy_system:
-            #    form.users = request.user
+            #if form.order.buddy_system:
+            #    form.users.append(request.user)
             #import pdb; pdb.set_trace()
             if check_orderline(request, form, orderline_id):
                 form.save()
@@ -121,17 +121,32 @@ def join_orderline(request, orderline_id):
         #messages.error(request, 'You are already part of an order line')
     if not is_in_current_order('orderline', orderline_id):
         messages.error(request, 'You can not join orderlines from old orders')
-    elif not orderline.need_buddy:
-        messages.error(request, 'You can\'t join that order line')
-    elif not request.user.saldo_set.all():
-        messages.error(request, 'No saldo connected to the user')
-    elif request.user.saldo_set.get().saldo < get_order_limit().order_limit:
-        messages.error(request, 'You have insufficent funds. Current limit : ' + str(get_order_limit().order_limit))
+    elif in_other_orderline(request.user):
+        messages.error(request, 'You cannot be in multiple orders')
+    #elif not orderline.need_buddy:
+    #    messages.error(request, 'You can\'t join that order line')
+    #elif not request.user.saldo_set.all():
+    #    messages.error(request, 'No saldo connected to the user')
+    #elif request.user.saldo_set.get().saldo < get_order_limit().order_limit:
+    #    messages.error(request, 'You have insufficent funds. Current limit : ' + str(get_order_limit().order_limit))
     else:
-        orderline.buddy = request.user
-        orderline.need_buddy = False
+        orderline.users.add(request.user)
+        #orderline.need_buddy = False
         orderline.save()
         messages.success(request, 'Success!')
+    return redirect(index)
+
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
+def leave_orderline(request, orderline_id):
+    orderline = get_object_or_404(OrderLine, pk=orderline_id)
+    if not is_in_current_order('orderline', orderline_id):
+        messages.error(request, 'You cannot leave old orders')
+    elif request.user not in orderline.users.all():
+        messages.error(request, 'You cannot leave since you are not in the users')
+    else:
+        orderline.users.remove(request.user)
+        orderline.save()
+        messages.success(request, 'Success - left orderline')
     return redirect(index)
 
 # ADMIN
@@ -340,3 +355,15 @@ def is_in_current_order(order_type, order_id):
         return order in order.order_set.all()
     else:
         return False
+
+def in_other_orderline(user):
+    #order = get_object_or_404(OrderLine, pk=orderline_id)
+    order = get_order()
+    #import pdb; pdb.set_trace()
+    #print order.orderline_set.filter(user)
+    if not order.orderline_set.filter(users=user.id):
+        return False
+    return user in order.orderline_set.filter(users=user.id)[0].users.all()
+    #for order_line in order.orderline_set():
+    #    if user in order_line.users.all:
+    #        return True
