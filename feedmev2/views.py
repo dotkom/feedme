@@ -26,7 +26,7 @@ def orderlineview(request, orderline_id=None):
     if request.method == 'POST':
         form = OrderLineForm(request.POST, instance=orderline)
         if form.is_valid():
-            #form = form.save(commit=False)
+            form = form.save(commit=False)
             form.creator = request.user
             form.order = get_order()
             #if form.buddy_system:
@@ -244,7 +244,7 @@ def get_order_limit():
 def check_orderline(request, form, orderline_id=None):
     validate_saldo()
     order_limit = get_order_limit().order_limit
-    saldo = form.creator.funds_set.get()
+    #saldo = form.creator.funds_set.get()
 
     messages.success(request, 'Order line added')
     return True

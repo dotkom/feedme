@@ -32,6 +32,10 @@ class Order(models.Model):
     def taken_users(self):
         return self.orderline_set.values_list('creator', flat=True)
 
+    def get_latest(self):
+        if Order.objects.all():
+            return Order.objects.all().latest()
+
     def __unicode__(self):
         return self.date.strftime("%d-%m-%Y")
 
@@ -39,16 +43,22 @@ class Order(models.Model):
         get_latest_by = 'date'
 
 class OrderLine(models.Model):
-    order = models.ForeignKey(Order)
+    order = models.ForeignKey(Order, default=lambda: Order.objects.all().latest())
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='Owner')
-    #users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name=_('buddies'), null=True, blank=True)
-    menu_item = models.IntegerField(_('menu item'), max_length=2, default=8)
-    soda = models.CharField(_('soda'), blank=True, null=True, default='cola', max_length=25)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name=_('buddies'), null=True, blank=True, default=creator)
+    menu_item = models.IntegerField(_('menu item'), max_length=2)
+    soda = models.CharField(_('soda'), blank=True, null=True, max_length=25)
     extras = models.CharField(_('extras/comments'), blank=True, null=True, max_length=50)
     price = models.IntegerField(_('price'), max_length=4, default=100)
 
     def get_order(self):
         return self.order
+
+    def get_buddies(self):
+        return self.users
+
+    def get_num_users(self):
+        return len(self.users)
 
     def __unicode__(self):
         return self.creator.username
