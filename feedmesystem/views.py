@@ -5,18 +5,18 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Sum
 
-from feedmev2.models import OrderLine, Order, Funds, ManageOrderLimit, Restaurant
-from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitForm, NewOrderForm, ManageUsersForm, NewRestaurantForm
+from files.models import OrderLine, Order, Saldo, ManageOrderLimit
+from forms import OrderLineForm, OrderForm,  ManageOrderLinesForm, ManageOrderLimitForm, NewOrderForm, ManageUsersForm
 
 User = get_user_model()
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def index(request):
     order = get_order()
-    return render(request, 'index.html', {'order' : order, 'is_admin' : is_admin(request), 'can_join': not in_other_orderline(request.user) and not is_in_current_order(request.user, order)})
+    return render(request, 'index.html', {'order_line' : order, 'is_admin' : is_admin(request)})
 
+@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def orderlineview(request, orderline_id=None):
     if orderline_id == None:
         orderline = OrderLine()
@@ -27,11 +27,11 @@ def orderlineview(request, orderline_id=None):
         form = OrderLineForm(request.POST, instance=orderline)
         if form.is_valid():
             form = form.save(commit=False)
-            form.creator = request.user
-            form.order = get_order()
-            #if form.order.buddy_system:
-            #    form.users.append(request.user)
-            #import pdb; pdb.set_trace()
+            form.user = request.user
+            form.order_line = get_order()
+            if form.need_buddy:
+                form.buddy = request.user
+
             if check_orderline(request, form, orderline_id):
                 form.save()
                 return redirect(index)
@@ -42,10 +42,10 @@ def orderlineview(request, orderline_id=None):
     else:
         if orderline_id:
             form = OrderLineForm(instance=orderline)
-            #form.fields["users"].queryset = get_order().free_users(orderline.users, orderline.creator)
+            form.fields["buddy"].queryset = get_order().free_users(orderline.buddy, orderline.user)
         else:
             form = OrderLineForm(instance=orderline, initial={'buddy' : request.user})
-            #form.fields["users"].queryset = get_order().order_users()
+            form.fields["buddy"].queryset = get_order().free_users()
 
     return render(request, 'orderview.html', {'form' : form, 'is_admin' : is_admin(request)})
 
@@ -53,8 +53,8 @@ def edit_orderline(request, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     if not is_in_current_order('orderline', orderline_id):
         messages.error(request, 'you can not edit orderlines from old orders')
-    elif orderline.creator != request.user: # and orderline.buddy != request.user:
-        messages.error(request, 'You need to be the creator')
+    elif orderline.user != request.user and orderline.buddy != request.user:
+        messages.error(request, 'You need to be the creator or the buddy')
         return redirect(index)
     return orderlineview(request, orderline_id)
 
@@ -62,7 +62,7 @@ def delete_orderline(request, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     if not is_in_current_order('orderline', orderline_id):
         messages.error(request, 'you can not delete orderlines from old orders')
-    elif orderline.creator == request.user:
+    elif orderline.user == request.user or orderline.buddy == request.user:
         orderline.delete()
         messages.success(request,'Order line deleted')
     else:
@@ -80,7 +80,7 @@ def orderview(request, order_id=None):
         form = OrderForm(request.POST, instance=order)
         if form.is_valid():
             form = form.save(commit=False)
-            form.creator = request.user
+            form.user = request.user
             form.order_line = get_order()
             form.save()
             messages.success(request, 'Order added')
@@ -114,54 +114,39 @@ def edit_order(request, order_id):
         return orderview(request, order_id)
     return redirect(index)
 
+
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def join_orderline(request, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
-    #if user_is_taken(request.user):
-        #messages.error(request, 'You are already part of an order line')
-    #if orderline.order.buddy_system @TODO if not buddy system enabled, disable join
-    if not is_in_current_order('orderline', orderline_id):
+    if user_is_taken(request.user):
+        messages.error(request, 'You are already part of an order line')
+    elif not is_in_current_order('orderline', orderline_id):
         messages.error(request, 'You can not join orderlines from old orders')
-    elif in_other_orderline(request.user):
-        messages.error(request, 'You cannot be in multiple orders')
-    #elif not orderline.need_buddy:
-    #    messages.error(request, 'You can\'t join that order line')
-    #elif not request.user.saldo_set.all():
-    #    messages.error(request, 'No saldo connected to the user')
-    #elif request.user.saldo_set.get().saldo < get_order_limit().order_limit:
-    #    messages.error(request, 'You have insufficent funds. Current limit : ' + str(get_order_limit().order_limit))
+    elif not orderline.need_buddy:
+        messages.error(request, 'You can\'t join that order line')
+    elif not request.user.saldo_set.all():
+        messages.error(request, 'No saldo connected to the user')
+    elif request.user.saldo_set.get().saldo < get_order_limit().order_limit:
+        messages.error(request, 'You have insufficent funds. Current limit : ' + str(get_order_limit().order_limit))
     else:
-        orderline.users.add(request.user)
-        #orderline.need_buddy = False
+        orderline.buddy = request.user
+        orderline.need_buddy = False
         orderline.save()
         messages.success(request, 'Success!')
-    return redirect(index)
-
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
-def leave_orderline(request, orderline_id):
-    orderline = get_object_or_404(OrderLine, pk=orderline_id)
-    if not is_in_current_order('orderline', orderline_id):
-        messages.error(request, 'You cannot leave old orders')
-    elif request.user not in orderline.users.all():
-        messages.error(request, 'You cannot leave since you are not in the users')
-    else:
-        orderline.users.remove(request.user)
-        orderline.save()
-        messages.success(request, 'Success - left orderline')
     return redirect(index)
 
 # ADMIN
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
-def new_order(request):
+def new_order_line(request):
     if request.method == 'POST':
-        form = NewOrderForm(request.POST)
+        form = NewOrderLineForm(request.POST)
         if form.is_valid():
             form.save()
             messages.success(request,'New order line added')
-            return redirect(new_order)
+            return redirect(new_order_line)
     else:
-        form = NewOrderForm()
+        form = NewOrderLineForm()
         form.fields["date"].initial = get_next_tuesday()
 
     return render(request, 'admin.html', {'form' : form })
@@ -199,50 +184,21 @@ def manage_users(request):
     return render(request, 'admin.html', {'form' : form })
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
-def manage_order(request):
+def manage_order_lines(request):
     if request.method == 'POST':
-        form = ManageOrderForm(request.POST)
+        form = ManageOrderLinesForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            #handle_payment(request, data)
-            return redirect(manage_order)
+            handle_payment(request, data)
+            return redirect(manage_order_lines)
         else:
-            form = ManageOrderForm(request.POST)
+            form = ManageOrderLinesForm(request.POST)
     else:
-        form = ManageOrderForm()
+        form = ManageOrderLinesForm()
 
-    orders = Order.objects.all()
-    orders_price = {}
-    for order in orders:
-        orders_price[order] = order.get_total_sum()
-    #print orders_price
-    form.fields["orders"].queryset = orders
-    return render(request, 'admin.html', {'form' : form, 'orders' : orders})
-
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
-def new_restaurant(request, restaurant_id=None):
-    if restaurant_id == None:
-        restaurant = Restaurant()
-    else:
-        restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
-
-    if request.method == 'POST':
-        form = NewRestaurantForm(request.POST, instance=restaurant)
-        if form.is_valid():
-            data = form.cleaned_data
-            form.save()
-            return redirect(index)
-        else:
-            form = NewRestaurantForm(request.POST)
-    else:
-        form = NewRestaurantForm(instance=restaurant)
-
-    return render(request, 'admin.html', {'form': form})
-
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
-def edit_restaurant(request, restaurant_id):
-    order = get_object_or_404(Restaurant, pk=restaurant_id)
-    return new_restaurant(request)
+    unhandeled_orders = OrderLine.objects.filter(total_sum=0)
+    form.fields["order_lines"].queryset = unhandeled_orders
+    return render(request, 'admin.html', {'form' : form, 'order_lines' : unhandeled_orders})
 
 def get_order_limit():
     order_limit = ManageOrderLimit.objects.all()
@@ -252,24 +208,20 @@ def get_order_limit():
         order_limit = ManageOrderLimit()
     return order_limit
 
-# @TODO Move logics to models
+#methods
 
-#def user_is_taken(user):
-#    return user in get_order().used_users()
+def user_is_taken(user):
+    return user in get_order().used_users()
 
 def check_orderline(request, form, orderline_id=None):
     validate_saldo()
     order_limit = get_order_limit().order_limit
-    #saldo = form.creator.funds_set.get()
+    saldo = form.user.saldo_set.get()
 
-    messages.success(request, 'Order line added')
-    return True
-
-"""
-    #if not orderline_id:
-        #if user_is_taken(form.user):
-        #    messages.error(request, form.user.username + ' has already ordered')
-        #    return False
+    if not orderline_id:
+        if user_is_taken(form.user):
+            messages.error(request, form.user.username + ' has already ordered')
+            return False
         if user_is_taken(form.buddy):
             messages.error(request, form.buddy.username + ' has already ordered')
             return False
@@ -285,8 +237,9 @@ def check_orderline(request, form, orderline_id=None):
         saldo = form.buddy.saldo_set.get()
         if saldo.saldo < order_limit:
             messages.error(request,u'' + form.buddy.username + ' has insufficient funds. Current limit: ' + str(order_limit) )
-            return False"""
-
+            return False
+    messages.success(request, 'Order line added')
+    return True
 
 def handle_payment(request, data):
     order_line = data['order_lines']
@@ -316,11 +269,11 @@ def handle_saldo(users, value):
 def validate_saldo():
     users = get_orderline_users()
     for user in users:
-        funds = user.funds_set.all()
-        if not funds:
-            funds = Funds()
-            funds.user = user
-            funds.save()
+        saldo = user.saldo_set.all()
+        if not saldo:
+            saldo = Saldo()
+            saldo.user = user
+            saldo.save()
 
 def get_next_tuesday():
     today = date.today()
@@ -356,15 +309,3 @@ def is_in_current_order(order_type, order_id):
         return order in order.order_set.all()
     else:
         return False
-
-def in_other_orderline(user):
-    #order = get_object_or_404(OrderLine, pk=orderline_id)
-    order = get_order()
-    #import pdb; pdb.set_trace()
-    #print order.orderline_set.filter(user)
-    if not order.orderline_set.filter(users=user.id):
-        return False
-    return user in order.orderline_set.filter(users=user.id)[0].users.all()
-    #for order_line in order.orderline_set():
-    #    if user in order_line.users.all:
-    #        return True
