@@ -164,7 +164,7 @@ def new_order(request):
         form = NewOrderForm()
         form.fields["date"].initial = get_next_tuesday()
 
-    return render(request, 'admin.html', {'form' : form })
+    return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def set_order_limit(request):
@@ -180,7 +180,7 @@ def set_order_limit(request):
     else:
         form = ManageOrderLimitForm(instance=limit)
 
-    return render(request, 'admin.html', {'form' : form })
+    return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def manage_users(request):
@@ -196,7 +196,7 @@ def manage_users(request):
         form = ManageUsersForm()
         form.fields["users"].queryset = get_orderline_users()
 
-    return render(request, 'admin.html', {'form' : form })
+    return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def manage_order(request):
@@ -217,7 +217,7 @@ def manage_order(request):
         orders_price[order] = order.get_total_sum()
     #print orders_price
     form.fields["orders"].queryset = orders
-    return render(request, 'admin.html', {'form' : form, 'orders' : orders})
+    return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request), 'orders' : orders})
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def new_restaurant(request, restaurant_id=None):
@@ -237,7 +237,7 @@ def new_restaurant(request, restaurant_id=None):
     else:
         form = NewRestaurantForm(instance=restaurant)
 
-    return render(request, 'admin.html', {'form': form})
+    return render(request, 'admin.html', {'form': form, 'is_admin' : is_admin(request)})
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def edit_restaurant(request, restaurant_id):
