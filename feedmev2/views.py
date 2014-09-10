@@ -119,6 +119,7 @@ def join_orderline(request, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     #if user_is_taken(request.user):
         #messages.error(request, 'You are already part of an order line')
+    #if orderline.order.buddy_system @TODO if not buddy system enabled, disable join
     if not is_in_current_order('orderline', orderline_id):
         messages.error(request, 'You can not join orderlines from old orders')
     elif in_other_orderline(request.user):
