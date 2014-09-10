@@ -46,7 +46,7 @@ class OrderLine(models.Model):
     #order = models.ForeignKey(Order, default=lambda: Order.objects.all().latest())
     order = models.ForeignKey(Order)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='Owner')
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name=_('buddies'), null=True, blank=True, default=creator)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name=_('buddies'), null=True, blank=True)
     #num_users = models.IntegerField(_('number of buddies'), max_length=2)
     menu_item = models.IntegerField(_('menu item'), max_length=2)
     soda = models.CharField(_('soda'), blank=True, null=True, max_length=25)
