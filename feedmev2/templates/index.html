@@ -30,9 +30,9 @@
                 <td>
                     <a href="{% url "edit_orderline" order_line.id %}"><button class="btn btn-primary">edit</button></a>
                     <a href="{% url "delete_orderline" order_line.id %}"><button class="btn btn-danger">delete</button></a></td>
-            {% elif user not in order_line.users.all %}
+            {% elif user not in order_line.users.all and order.restaurant.buddy_system %}
                 <td><a href={% url "join_orderline" order_line.id %}><button class="btn btn-primary">join</button></a></td>
-            {% elif user in order_line.users.all %}
+            {% elif user in order_line.users.all and order.restaurant.buddy_system %}
                 <td><a href={% url "leave_orderline" order_line.id %}><button class="btn btn-danger">leave</button></a></td>
             {% else %}
                 <td></td>
