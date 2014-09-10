@@ -1,21 +1,41 @@
-{% extends "base_pizzasystem.html" %}
+{% extends "base.html" %}
+
+{% block title %}
+FeedMe
+{% endblock title %}
+
+{% load filters %}
+
+{% block styles %}
+{{ block.super }}
+<link href="{{ STATIC_URL }}css/feedme.css" rel="stylesheet">
+{% endblock styles %}
+
 {% load admin_tags %}
 
 {% block content %}
 
-<form action="" method="post">
-    {% csrf_token %}
-    <div class="content">
-        <h1>{{ form.name|title }}</h1>
-        {% admin_tabs form.name  %}
-        {% for field in form %}
-        <div class="fieldWrapper clearfix">
-            <label>{{ field.label_tag }}</label>
-            <div class="input">{{ field }}</div>
-            <div class="error">{{ field.errors }}</div>
+{% include "nav.html" %}
+
+<section id="feedMeAdmin">
+  <div class="container">
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="content">
+            <h1>{{ form.name|title }}</h1>
+            {% admin_tabs form.name  %}
+            {% for field in form %}
+            <div class="fieldWrapper clearfix">
+                <label>{{ field.label_tag }}</label>
+                <div class="input">{{ field }}</div>
+                <div class="error">{{ field.errors }}</div>
+            </div>
+            {% endfor %}
+            <input class="btn btn-primary" type="submit" value="Save" />
         </div>
-        {% endfor %}
-        <input class="btn btn-primary" type="submit" value="Save" />
-    </div>
-</form>
-{% endblock content %}
+    </form>
+    {% endblock content %}
+
+
+  </div>
+</section>

@@ -1,0 +1,14 @@
+<nav class="subnavbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="collapse navbar-collapse navbar-ex1-collapse">
+            <ul class="nav navbar-nav">
+                        <li><a href="{% url "index" %}">FeedMe</a></li>
+                    {% if is_admin %}
+                        <li><a href="{% url "admin" %}">Admin</a></li>
+                    {% endif %}
+                  <li><a href="#">Bruker: {{ user.username }}</a></li>
+                  <!--<li><a href="#">Saldo: {{ user.saldo_set.get.saldo }}</a></li>-->
+            </ul>
+        </div>
+    </div>
+</nav>
