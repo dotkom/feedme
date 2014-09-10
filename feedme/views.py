@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Sum
 
-from feedmev2.models import OrderLine, Order, Funds, ManageOrderLimit, Restaurant
+from models import OrderLine, Order, Funds, ManageOrderLimit, Restaurant
 from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitForm, NewOrderForm, ManageUsersForm, NewRestaurantForm
 
 User = get_user_model()

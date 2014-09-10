@@ -1,6 +1,6 @@
 from django.conf.urls import patterns, include, url
 
-urlpatterns = patterns('feedmev2.views',
+urlpatterns = patterns('feedme.views',
     url(r'^$', 'index', name='index'),
     url(r'^neworder/$', 'orderlineview', name='new_orderline'),
     url(r'^edit/(?P<orderline_id>\d+)/$','edit_orderline', name='edit_orderline'),
