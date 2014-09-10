@@ -1,21 +1,47 @@
 {% extends "base.html" %}
 
+{% block title %}
+FeedMe
+{% endblock title %}
+
+{% load filters %}
+
+{% block styles %}
+{{ block.super }}
+<link href="{{ STATIC_URL }}css/feedme.css" rel="stylesheet">
+{% endblock styles %}
+
+{% load admin_tags %}
+
 {% block content %}
+
+{% include "nav.html" %}
 <script>
     var username = "{{ user.username }}";
 </script>
 
-<form action="" method="post">
-    {% csrf_token %}
-   <fieldset>
-        <legend>{{ form.name|title }}</legend>
-        {% for field in form %}
+<section id="feedMeAdmin">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-12">
+        <div class="page-header">
+          <h1>{{ form.name|title }}</h1
+        </div>
+        <!--{% include "messages.html" %}-->
+        <form action="" method="post">
+        {% csrf_token %}
+        <fieldset>
+          {% for field in form %}
             <div class="fieldWrapper">
-                <label>{{ field.label_tag }}</label>
-                <div class="input">{{ field }}</div>
-                <div class="error">{{ field.errors }}</div>
-        {% endfor %}
-
+              <label>{{ field.label_tag }}</label>
+              <div class="input">{{ field }}</div>
+              <div class="error">{{ field.errors }}</div>
             </div>
-    </fieldset>
+          {% endfor %}
+          </fieldset>
+        <input type="submit" class="btn btn-primary" value="Save" />
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock content %}

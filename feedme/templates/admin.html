@@ -19,23 +19,28 @@ FeedMe
 
 <section id="feedMeAdmin">
   <div class="container">
-    <form action="" method="post">
-        {% csrf_token %}
-        <div class="content">
-            <h1>{{ form.name|title }}</h1>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="page-header">
+          <h1>{{ form.name|title }}</h1>
+        </div>
+        <!--{% include "messages.html" %}-->
+        <form action="" method="post">
+          {% csrf_token %}
+          <div class="content">
             {% admin_tabs form.name  %}
             {% for field in form %}
-            <div class="fieldWrapper clearfix">
+              <div class="fieldWrapper clearfix">
                 <label>{{ field.label_tag }}</label>
                 <div class="input">{{ field }}</div>
                 <div class="error">{{ field.errors }}</div>
-            </div>
+              </div>
             {% endfor %}
-            <input class="btn btn-primary" type="submit" value="Save" />
-        </div>
-    </form>
-    {% endblock content %}
-
-
+          <input class="btn btn-primary" type="submit" value="Save" />
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </section>
+{% endblock content %}
