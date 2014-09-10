@@ -123,7 +123,7 @@ def join_orderline(request, orderline_id):
     if not is_in_current_order('orderline', orderline_id):
         messages.error(request, 'You can not join orderlines from old orders')
     elif in_other_orderline(request.user):
-        messages.error(request, 'You cannot be in multiple orders')
+        messages.error(request, 'You cannot be in multiple orderlines')
     #elif not orderline.need_buddy:
     #    messages.error(request, 'You can\'t join that order line')
     #elif not request.user.saldo_set.all():
