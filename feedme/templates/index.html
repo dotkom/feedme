@@ -41,7 +41,7 @@ FeedMe
                 <td>
                   {% if order_line.users %}
                     {% for user in order_line.users.all %}
-                      {{ user }}
+                      {{ user.nickname }}
                     {% endfor %}
                   {% endif %}
                 </td>
@@ -49,7 +49,7 @@ FeedMe
                   {% if user == order_line.creator %}
                     <a href="{% url "edit_orderline" order_line.id %}"><button class="btn btn-primary">edit</button></a>
                     <a href="{% url "delete_orderline" order_line.id %}"><button class="btn btn-danger">delete</button></a>
-                  {% elif user not in order_line.users.all and order.restaurant.buddy_system %}
+                  {% elif user not in order_line.users.all and order.restaurant.buddy_system and can_join %}
                     <a href={% url "join_orderline" order_line.id %}><button class="btn btn-primary">join</button></a>
                   {% elif user in order_line.users.all and order.restaurant.buddy_system %}
                     <a href={% url "leave_orderline" order_line.id %}><button class="btn btn-danger">leave</button></a>

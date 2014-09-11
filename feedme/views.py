@@ -15,7 +15,7 @@ User = get_user_model()
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def index(request):
     order = get_order()
-    return render(request, 'index.html', {'order' : order, 'is_admin' : is_admin(request), 'can_join': not in_other_orderline(request.user) and not is_in_current_order(request.user, order)})
+    return render(request, 'index.html', {'order' : order, 'is_admin' : is_admin(request), 'can_join': not in_other_orderline(request.user)})
 
 def orderlineview(request, orderline_id=None):
     if orderline_id == None:
@@ -358,13 +358,11 @@ def is_in_current_order(order_type, order_id):
         return False
 
 def in_other_orderline(user):
-    #order = get_object_or_404(OrderLine, pk=orderline_id)
     order = get_order()
-    #import pdb; pdb.set_trace()
-    #print order.orderline_set.filter(user)
-    if not order.orderline_set.filter(users=user.id):
-        return False
-    return user in order.orderline_set.filter(users=user.id)[0].users.all()
-    #for order_line in order.orderline_set():
-    #    if user in order_line.users.all:
-    #        return True
+    r1 = ""
+    r2 = ""
+    if order.orderline_set.filter(creator=user.id):
+        r1 = user == order.orderline_set.filter(creator=user.id)[0].creator
+    if order.orderline_set.filter(users=user.id):
+        r2 = user in order.orderline_set.filter(users=user.id)[0].users.all()
+    return r1 or r2
