@@ -3,7 +3,10 @@ FeedMe
 
 A food ordering system for OnlineWeb4 and Django. 
 
-Install (probably deprecated): 
+### Install via requirements/http+git
+@TODO
+
+### Install (probably deprecated): 
 
 1. Add "feedme" to INSTALLED_APPS  
  - `INSTALLED_APPS = (…, 'feedme', …)  
