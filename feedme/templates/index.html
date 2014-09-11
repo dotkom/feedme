@@ -83,7 +83,7 @@ FeedMe
               <a href="{% url "new_orderline" %}"><button class="btn btn-primary">New order line</button></a>
           {% endif %}
         {% else %}
-          <p>No orders available.</p>
+          <div class="page-header"><h1>No orders available.</h1></div>
         {% endif %}
       </div>
     </div>
