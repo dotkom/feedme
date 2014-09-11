@@ -362,8 +362,10 @@ def in_other_orderline(user):
     order = get_order()
     r1 = ""
     r2 = ""
-    if order.orderline_set.filter(creator=user.id):
-        r1 = user == order.orderline_set.filter(creator=user.id)[0].creator
-    if order.orderline_set.filter(users=user.id):
-        r2 = user in order.orderline_set.filter(users=user.id)[0].users.all()
+    if order:
+        if order.orderline:
+            if order.orderline_set.filter(creator=user.id):
+                r1 = user == order.orderline_set.filter(creator=user.id)[0].creator
+            if order.orderline_set.filter(users=user.id):
+                r2 = user in order.orderline_set.filter(users=user.id)[0].users.all()
     return r1 or r2
