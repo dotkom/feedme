@@ -101,7 +101,7 @@ def delete_order(request, order_id):
         messages.success(request,'Order deleted')
     else:
         messages.error(request, 'You need to be the creator')
-    return redirect(index)
+    return redirect(orderview)
 
 
 def edit_order(request, order_id):
@@ -112,7 +112,7 @@ def edit_order(request, order_id):
         messages.error(request, 'You need to be the creator to edit orders')
     else:
         return orderview(request, order_id)
-    return redirect(index)
+    return redirect(orderview)
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def join_orderline(request, orderline_id):
@@ -231,7 +231,8 @@ def new_restaurant(request, restaurant_id=None):
         if form.is_valid():
             data = form.cleaned_data
             form.save()
-            return redirect(index)
+            messages.success(request, "Success - restaurant added")
+            return redirect(new_restaurant)
         else:
             form = NewRestaurantForm(request.POST)
     else:
