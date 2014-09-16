@@ -20,17 +20,17 @@ class Restaurant(models.Model):
         return self.restaurant_name
 
 class Order(models.Model):
-    date = models.DateField(_("date"))
+    date = models.DateField(_('date'))
     restaurant = models.ForeignKey(Restaurant)
 
     def get_total_sum(self):
-        return self.orderline_set.aggregate(models.Sum('price'))
+        return self.orderline_set.aggregate(models.Sum(_('price')))
 
     def order_users(self):
         return User.objects.filter(groups__name=settings.FEEDME_GROUP)
 
     def taken_users(self):
-        return self.orderline_set.values_list('creator', flat=True)
+        return self.orderline_set.values_list(_('creator'), flat=True)
 
     def get_latest(self):
         if Order.objects.all():
@@ -45,7 +45,7 @@ class Order(models.Model):
 class OrderLine(models.Model):
     #order = models.ForeignKey(Order, default=lambda: Order.objects.all().latest())
     order = models.ForeignKey(Order)
-    creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='Owner')
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('owner'))
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name=_('buddies'), null=True, blank=True)
     #num_users = models.IntegerField(_('number of buddies'), max_length=2)
     menu_item = models.IntegerField(_('menu item'), max_length=2)
