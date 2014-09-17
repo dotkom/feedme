@@ -185,14 +185,14 @@ def set_order_limit(request):
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def manage_users(request):
     if request.method == 'POST':
-        form = ManageUsersForm(request.POST)
+        form = ManageBalanceForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             handle_deposit(data)
             messages.success(request, 'Deposit successful')
             return redirect(manage_users)
     else:
-        form = ManageUsersForm()
+        form = ManageBalanceForm()
         form.fields["users"].queryset = get_orderline_users()
 
     return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
