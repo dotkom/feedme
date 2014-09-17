@@ -19,8 +19,6 @@ class OrderForm(ModelForm):
         model = Order
         fields = ('date', )
 
-
-
 class ManageOrderForm(ModelForm):
     name=u'orders'
 
@@ -47,7 +45,13 @@ class NewOrderForm(ModelForm):
         #fields = ('date',)
 
 class NewRestaurantForm(ModelForm):
-  name=u'new restaurant'
+    name=u'new restaurant'
 
-  class Meta:
-      model = Restaurant
+    class Meta:
+        model = Restaurant
+
+class AddFundsForm(ModelForm):
+    name = u'add funds to user'
+
+    class Meta:
+        model = Funds
