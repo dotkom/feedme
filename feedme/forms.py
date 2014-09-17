@@ -50,8 +50,8 @@ class NewRestaurantForm(ModelForm):
     class Meta:
         model = Restaurant
 
-class AddFundsForm(ModelForm):
-    name = u'add funds to user'
-
-    class Meta:
-        model = Funds
+#class AddFundsForm(ModelForm):
+#    name = u'add funds to user'
+#
+#    class Meta:
+#        model = Funds
