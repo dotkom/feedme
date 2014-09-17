@@ -193,7 +193,7 @@ def manage_users(request):
             return redirect(manage_users)
     else:
         form = ManageBalanceForm()
-        form.fields["users"].queryset = get_orderline_users()
+        form.fields["user"].queryset = get_orderline_users()
 
     return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
