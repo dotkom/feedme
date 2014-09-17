@@ -29,7 +29,7 @@ class ManageBalanceForm(ModelForm):
     name=u'users'
 
     class Meta:
-        model = Balance
+        model = ManageFunds
 
 class ManageOrderLimitForm(ModelForm):
     name=u'order limit'
