@@ -363,7 +363,7 @@ def in_other_orderline(user):
     r1 = ""
     r2 = ""
     if order:
-        if order.orderline:
+        if order.orderline_set:
             if order.orderline_set.filter(creator=user.id):
                 r1 = user == order.orderline_set.filter(creator=user.id)[0].creator
             if order.orderline_set.filter(users=user.id):
