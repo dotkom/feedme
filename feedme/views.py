@@ -8,7 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Sum
 
 from models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance
-from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm,
+from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
 
 User = get_user_model()
 
