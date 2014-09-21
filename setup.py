@@ -10,7 +10,6 @@ setup(
     name='feedme',
     version='1.0.5',
     packages=['feedme'],
-    include_package_data=True,
     license='BSD License',  # example license
     description='Food ordering management for onlineweb4',
     license='BSD License',
@@ -30,4 +29,5 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
+    include_package_data=True,
 )
