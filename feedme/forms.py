@@ -1,5 +1,9 @@
 from django.forms import ModelForm
+<<<<<<< Updated upstream
 from models import Order, OrderLine, ManageOrderLimit, ManageOrders, ManageUsers, Restaurant
+=======
+from models import Order, OrderLine, ManageOrderLimit, ManageOrders, ManageUsers, Restaurant, Balance, ManageFunds
+>>>>>>> Stashed changes
 
 class OrderLineForm(ModelForm):
     name ='orderline'

@@ -75,7 +75,17 @@ class OrderLine(models.Model):
 
 class Funds(models.Model):
     funds = models.FloatField(_('funds'), default=0)
+<<<<<<< Updated upstream
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
+=======
+
+    def __unicode__(self):
+        return "%s: %.0f" % (self.user.username, self.funds)
+
+class ManageFunds(models.Model):
+    user_funds = models.ForeignKey(Balance)
+    deposit = models.FloatField(_('deposit amount'), default=0)
+>>>>>>> Stashed changes
 
 class ManageOrders(models.Model):
     orders = models.OneToOneField(Order, related_name=_('Orders'))

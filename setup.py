@@ -13,10 +13,11 @@ setup(
     include_package_data=True,
     license='BSD License',  # example license
     description='Food ordering management for onlineweb4',
+    license='BSD License',
+#    packages=['feedme'],
+    include_package_data=True,
     long_description=README,
     url='http://online.ntnu.no/feedme',
-    author='dotkom',
-    author_email='dotkom@online.ntnu.no',
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',

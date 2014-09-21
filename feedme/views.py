@@ -192,9 +192,17 @@ def manage_users(request):
             messages.success(request, 'Deposit successful')
             return redirect(manage_users)
     else:
+<<<<<<< Updated upstream
         validate_saldo()
         form = ManageUsersForm()
         form.fields["users"].queryset = get_orderline_users()
+=======
+        form = ManageBalanceForm()
+        users = []
+        for user in get_orderline_users():
+            users.add(get_or_create_balance(user))
+        form.fields["user_funds"].queryset = get_orderline_users()
+>>>>>>> Stashed changes
 
     return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
