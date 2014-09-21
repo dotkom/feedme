@@ -9,12 +9,11 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name='feedme',
     version='1.0.5',
-    packages=['feedme'],
-    license='BSD License',  # example license
+    author='dotkom',
+    author_email='dotkom@online.ntnu.no',
     description='Food ordering management for onlineweb4',
     license='BSD License',
 #    packages=['feedme'],
-    include_package_data=True,
     long_description=README,
     url='http://online.ntnu.no/feedme',
     classifiers=[
