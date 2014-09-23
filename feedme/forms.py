@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from models import Order, OrderLine, ManageOrderLimit, ManageOrders, ManageUsers, Restaurant, Balance
+from models import Order, OrderLine, ManageOrderLimit, ManageOrders, ManageUsers, Restaurant, Balance, ManageBalance
 
 class OrderLineForm(ModelForm):
     name ='orderline'
@@ -29,7 +29,7 @@ class ManageBalanceForm(ModelForm):
     name=u'users'
 
     class Meta:
-        model = ManageFunds
+        model = ManageBalance
 
 class ManageOrderLimitForm(ModelForm):
     name=u'order limit'

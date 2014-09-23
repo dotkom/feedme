@@ -9,14 +9,15 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 setup(
     name='feedme',
     version='1.0.10',
-    packages=['feedme'],
+    author='dotkom',
+    author_email='dotkom@online.ntnu.no',
+    #packages=['feedme'],
     include_package_data=True,
     license='BSD License',  # example license
     description='Food ordering management for onlineweb4',
+    license='BSD License',
     long_description=README,
     url='http://online.ntnu.no/feedme',
-    author='dotkom',
-    author_email='dotkom@online.ntnu.no',
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
@@ -29,4 +30,5 @@ setup(
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
+    include_package_data=True,
 )
