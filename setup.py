@@ -11,7 +11,7 @@ setup(
     version='1.0.12',
     author='dotkom',
     author_email='dotkom@online.ntnu.no',
-    #packages=['feedme'],
+    packages=['feedme'],
     license='BSD License',  # example license
     description='Food ordering management for onlineweb4',
     long_description=README,
