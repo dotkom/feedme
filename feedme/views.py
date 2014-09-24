@@ -25,28 +25,26 @@ def orderlineview(request, orderline_id=None):
 
     if request.method == 'POST':
         form = OrderLineForm(request.POST, instance=orderline)
+        print form
         if form.is_valid():
-            form = form.save(commit=False)
-            form.creator = request.user
-            form.order = get_order()
-            #if form.order.buddy_system:
-            #    form.users.append(request.user)
-            #import pdb; pdb.set_trace()
+            new_orderline = form.save(commit=False)
+            new_orderline.creator = request.user
+            new_orderline.order = get_order()
             if check_orderline(request, form, orderline_id):
-                form.save()
+                new_orderline.save()
+                form.save_m2m() # Manually save the m2m relations when using commit=False
                 return redirect(index)
             else:
-                form = OrderLineForm(request.POST, auto_id=True)
+                new_orderline = OrderLineForm(request.POST, auto_id=True)
         else:
-            form = OrderLineForm(request.POST, auto_id=True)
+            new_orderline = OrderLineForm(request.POST, auto_id=True)
     else:
         if orderline_id:
             form = OrderLineForm(instance=orderline)
-            #form.fields["users"].queryset = get_order().free_users(orderline.users, orderline.creator)
+            form.fields["users"].queryset = get_order().available_users()
         else:
-            form = OrderLineForm(instance=orderline, initial={'buddy' : request.user})
-            #form.fields["users"].queryset = get_order().order_users()
-
+            form = OrderLineForm(instance=orderline)
+            form.fields["users"].queryset = get_order().available_users()
     return render(request, 'orderview.html', {'form' : form, 'is_admin' : is_admin(request)})
 
 def edit_orderline(request, orderline_id):
@@ -193,10 +191,7 @@ def manage_users(request):
             return redirect(manage_users)
     else:
         form = ManageBalanceForm()
-        users = []
-        for user in get_orderline_users():
-            users.add(get_or_create_balance(user))
-        form.fields["user_funds"].queryset = get_orderline_users()
+        form.fields["user"].queryset = get_orderline_users()
 
     return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
