@@ -8,11 +8,10 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='feedme',
-    version='1.0.11',
+    version='1.0.12',
     author='dotkom',
     author_email='dotkom@online.ntnu.no',
     #packages=['feedme'],
-    include_package_data=True,
     license='BSD License',  # example license
     description='Food ordering management for onlineweb4',
     long_description=README,
