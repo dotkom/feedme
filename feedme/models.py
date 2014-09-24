@@ -73,19 +73,16 @@ class OrderLine(models.Model):
         verbose_name = _('Order line')
         verbose_name_plural = _('Order lines')
 
-class Funds(models.Model):
-    funds = models.FloatField(_('funds'), default=0)
-<<<<<<< Updated upstream
+class Balance(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-=======
+    funds = models.FloatField(_('funds'), default=0)
 
     def __unicode__(self):
-        return "%s: %.0f" % (self.user.username, self.funds)
+        return "%s: %.0f" % (self.user, self.funds)
 
-class ManageFunds(models.Model):
+class ManageBalance(models.Model):
     user_funds = models.ForeignKey(Balance)
     deposit = models.FloatField(_('deposit amount'), default=0)
->>>>>>> Stashed changes
 
 class ManageOrders(models.Model):
     orders = models.OneToOneField(Order, related_name=_('Orders'))

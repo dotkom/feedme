@@ -7,8 +7,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Sum
 
-from models import OrderLine, Order, Funds, ManageOrderLimit, Restaurant
-from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitForm, NewOrderForm, ManageUsersForm, NewRestaurantForm
+from models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance
+from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
 
 User = get_user_model()
 
@@ -185,24 +185,18 @@ def set_order_limit(request):
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def manage_users(request):
     if request.method == 'POST':
-        form = ManageUsersForm(request.POST)
+        form = ManageBalanceForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             handle_deposit(data)
             messages.success(request, 'Deposit successful')
             return redirect(manage_users)
     else:
-<<<<<<< Updated upstream
-        validate_saldo()
-        form = ManageUsersForm()
-        form.fields["users"].queryset = get_orderline_users()
-=======
         form = ManageBalanceForm()
         users = []
         for user in get_orderline_users():
             users.add(get_or_create_balance(user))
         form.fields["user_funds"].queryset = get_orderline_users()
->>>>>>> Stashed changes
 
     return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
@@ -267,7 +261,6 @@ def get_order_limit():
 #    return user in get_order().used_users()
 
 def check_orderline(request, form, orderline_id=None):
-    validate_saldo()
     order_limit = get_order_limit().order_limit
     #saldo = form.creator.funds_set.get()
 
@@ -311,25 +304,20 @@ def handle_payment(request, data):
         messages.error(request, 'Selected order contains no users')
 
 def handle_deposit(data):
-    users = data['users']
-    deposit = data['add_value']
+    user = data['user']
+    deposit = data['deposit']
+    balance = user.balance
+    balance.funds += deposit
+    balance.save()
 
-    handle_saldo(users, deposit)
-
-def handle_saldo(users, value):
-    for user in users:
-        saldo = user.saldo_set.get()
-        saldo.saldo += value
-        saldo.save()
-
-def validate_saldo():
-    users = get_orderline_users()
-    for user in users:
-        funds = user.funds_set.all()
-        if not funds:
-            funds = Funds()
-            funds.user = user
-            funds.save()
+def get_or_create_balance(user):
+    if user.balance:
+        return user.balance
+    else:
+        balance = Balance()
+        balance.user = user
+        balance.save()
+        return balance
 
 def get_next_tuesday():
     today = date.today()
