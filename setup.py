@@ -15,7 +15,6 @@ setup(
     include_package_data=True,
     license='BSD License',  # example license
     description='Food ordering management for onlineweb4',
-    license='BSD License',
     long_description=README,
     url='http://online.ntnu.no/feedme',
     classifiers=[
