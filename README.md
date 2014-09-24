@@ -18,10 +18,6 @@ A food ordering system for OnlineWeb4 and Django.
  - `url(r'^feedme/', include('feedme.urls'))`  
 
 ---
-
-If this app is installed into OnlineWeb4, remember to prepend `apps` to `feedme` where applicable (`apps.feedme`)
-
----
 # Standalone setup
 
 Create a "base.html" with the blocks
