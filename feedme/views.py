@@ -195,7 +195,7 @@ def manage_users(request):
         form = ManageBalanceForm()
         users = []
         for user in get_orderline_users():
-            users.add(get_or_create_balance(user))
+            users.append(get_or_create_balance(user))
         form.fields["user_funds"].queryset = get_orderline_users()
 
     return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
@@ -311,8 +311,8 @@ def handle_deposit(data):
     balance.save()
 
 def get_or_create_balance(user):
-    if user.balance:
-        return user.balance
+    if user.balance_set:
+        return user.balance_set
     else:
         balance = Balance()
         balance.user = user
