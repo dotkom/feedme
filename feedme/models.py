@@ -75,13 +75,32 @@ class OrderLine(models.Model):
 
 class Balance(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    funds = models.FloatField(_('funds'), default=0)
+    balance = models.FloatField(_('balance'), default=0)
+
+    def get_balance(self):
+        return self.balance
+
+    def deposit(self, amount):
+        if amount > 0:
+            self.balance += amount
+            return True
+        else:
+            print 'tried to deposit negative amount'
+            return False # Error handling?
+
+    def withdraw(self, amount):
+        if amount >= self.balance:
+            self.balance -= amount
+            return True
+        else:
+            print 'not enough funds'
+            return False
 
     def __unicode__(self):
-        return "%s: %.0f" % (self.user, self.funds)
+        return "%s: %.0f" % (self.user, self.balance)
 
 class ManageBalance(models.Model):
-    user_funds = models.ForeignKey(Balance)
+    user_funds = models.ForeignKey(Balance)#fix name
     deposit = models.FloatField(_('deposit amount'), default=0)
 
 class ManageOrders(models.Model):
