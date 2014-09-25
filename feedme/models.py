@@ -74,11 +74,11 @@ class OrderLine(models.Model):
         verbose_name_plural = _('Order lines')
 
 class Balance(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL)
     balance = models.FloatField(_('balance'), default=0)
 
     def get_balance(self):
-        return self.balance
+        return "%0.f" % self.balance
 
     def deposit(self, amount):
         if amount > 0:
@@ -100,7 +100,7 @@ class Balance(models.Model):
         return "%s: %.0f" % (self.user, self.balance)
 
 class ManageBalance(models.Model):
-    user_funds = models.ForeignKey(Balance)#fix name
+    user = models.ForeignKey(Balance)#fix name
     deposit = models.FloatField(_('deposit amount'), default=0)
 
 class ManageOrders(models.Model):
