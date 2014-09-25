@@ -29,6 +29,19 @@ class Order(models.Model):
     def order_users(self):
         return User.objects.filter(groups__name=settings.FEEDME_GROUP)
 
+    def available_users(self):
+        order_users = self.order_users()
+        taken_users = self.taken_users()
+        available_users = order_users.exclude(id__in=taken_users)
+        #print taken_users
+        #for user in order_users:
+        #    print user
+        #    if user.id in taken_users:
+        #        available_users.exclude(user)
+        #        print 'taken!'
+        #available_users = order_users.exclude(self.taken_users())
+        return available_users
+
     def taken_users(self):
         return self.orderline_set.values_list(_('creator'), flat=True)
 

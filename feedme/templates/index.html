@@ -41,7 +41,11 @@ FeedMe
                 <td>
                   {% if order_line.users %}
                     {% for user in order_line.users.all %}
-                      {{ user.nickname }}
+                      {% if user.nickname %}
+                        {{ user.nickname }}
+                      {% else %}
+                        {{ user.username }}
+                      {% endif %}
                     {% endfor %}
                   {% endif %}
                 </td>
