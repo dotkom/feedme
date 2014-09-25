@@ -183,9 +183,14 @@ def set_order_limit(request):
     return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
-def manage_users(request):
+def manage_users(request, balance=None):
     if request.method == 'POST':
+        if balance == None:
+            balance = Balance()
+        else:
+            balance = get_object_or_404(Balance, balance)
         form = ManageBalanceForm(request.POST)
+        form.user_funds = balance
         if form.is_valid():
             data = form.cleaned_data
             handle_deposit(data)
