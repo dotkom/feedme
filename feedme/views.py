@@ -266,11 +266,26 @@ def get_order_limit():
 #    return user in get_order().used_users()
 
 def check_orderline(request, form, orderline_id=None):
-    order_limit = get_order_limit().order_limit
-    #saldo = form.creator.funds_set.get()
+    if orderline_id == None:
+        orderline = OrderLine()
+    else:
+        orderline = get_object_or_404(OrderLine, orderline_id)
+    orderline.creator = User.objects.get(username=form.creator)
+    print orderline.creator
+    users = orderline.creator
+    if orderline.users:
+        users.append(orderline.users)
+    for user in users:
+        if not validate_user_funds(user, amount):
+            messages.error(request, 'Unsufficient funds')
+            return False
 
     messages.success(request, 'Order line added')
     return True
+
+def validate_user_funds(user, amount):
+    return user.get_balance() >= amount
+    
 
 """
     #if not orderline_id:
