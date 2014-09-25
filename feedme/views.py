@@ -186,7 +186,7 @@ def set_order_limit(request):
 def manage_users(request, balance=None):
     if request.method == 'POST':
         if balance == None:
-            balance = Balance()
+            balance = get_or_create_balance(request.user)
         else:
             balance = get_object_or_404(Balance, balance)
         form = ManageBalanceForm(request.POST)
@@ -201,7 +201,7 @@ def manage_users(request, balance=None):
         users = []
         for user in get_orderline_users():
             users.append(get_or_create_balance(user))
-        form.fields["user_funds"].queryset = get_orderline_users()
+        form.fields["user"].queryset = get_orderline_users()
 
     return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
@@ -309,20 +309,19 @@ def handle_payment(request, data):
         messages.error(request, 'Selected order contains no users')
 
 def handle_deposit(data):
-    user = data['user']
-    deposit = data['deposit']
-    balance = user.balance
-    balance.funds += deposit
+    balance = data['user']
+    amount = data['deposit']
+    balance.deposit(amount)
     balance.save()
 
 def get_or_create_balance(user):
-    if user.balance_set:
-        return user.balance_set
-    else:
-        balance = Balance()
-        balance.user = user
-        balance.save()
-        return balance
+    user_balance = Balance.objects.filter(user=user)
+    if user_balance:
+	    return user_balance
+    balance = Balance()
+    balance.user = user
+    balance.save()
+    return balance
 
 def get_next_tuesday():
     today = date.today()
