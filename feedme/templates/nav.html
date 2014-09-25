@@ -7,7 +7,7 @@
               <li><a href="{% url "admin" %}">Admin</a></li>
               {% endif %}
               <li><a href="#">Bruker: {{ user.username }}</a></li>
-              <!--<li><a href="#">Saldo: {{ user.saldo_set.get.saldo }}</a></li>-->
+              <li><a href="#">Saldo: {{ user.balance_set.get_balance }}</a></li>
             </ul>
         </div>
     </div>
