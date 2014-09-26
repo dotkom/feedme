@@ -25,12 +25,11 @@ def orderlineview(request, orderline_id=None):
 
     if request.method == 'POST':
         form = OrderLineForm(request.POST, instance=orderline)
-        print form
         if form.is_valid():
             new_orderline = form.save(commit=False)
             new_orderline.creator = request.user
             new_orderline.order = get_order()
-            if check_orderline(request, form, orderline_id):
+            if check_orderline(request, new_orderline, orderline_id):
                 new_orderline.save()
                 form.save_m2m() # Manually save the m2m relations when using commit=False
                 return redirect(index)
@@ -264,15 +263,18 @@ def get_order_limit():
 #    return user in get_order().used_users()
 
 def check_orderline(request, form, orderline_id=None):
+    hasBuddies = False
     if orderline_id == None:
         orderline = OrderLine()
+        orderline.creator = User.objects.get(username=form.creator)
     else:
         orderline = get_object_or_404(OrderLine, orderline_id)
-    orderline.creator = User.objects.get(username=form.creator)
-    print orderline.creator
-    users = orderline.creator
-    if orderline.users:
-        users.append(orderline.users)
+        hasBuddies = True
+    amount = form.price
+    users = [orderline.creator]
+    if hasBuddies:
+        if orderline.users:
+            users.append(orderline.users)
     for user in users:
         if not validate_user_funds(user, amount):
             messages.error(request, 'Unsufficient funds')
@@ -282,7 +284,7 @@ def check_orderline(request, form, orderline_id=None):
     return True
 
 def validate_user_funds(user, amount):
-    return user.get_balance() >= amount
+    return user.get(balance).get_balance() >= amount
     
 
 """
