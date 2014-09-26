@@ -263,18 +263,18 @@ def get_order_limit():
 #    return user in get_order().used_users()
 
 def check_orderline(request, form, orderline_id=None):
-    hasBuddies = False
+    orderline_exists = False
     if orderline_id == None:
         orderline = OrderLine()
         orderline.creator = User.objects.get(username=form.creator)
     else:
-        orderline = get_object_or_404(OrderLine, orderline_id)
-        hasBuddies = True
+        orderline = get_object_or_404(OrderLine, pk=orderline_id)
+        orderline_exists = True
     amount = form.price
     users = [orderline.creator]
-    if hasBuddies:
-        if orderline.users:
-            users.append(orderline.users)
+    if orderline_exists:
+        if len(orderline.users.all()) > 0:
+            users.extend(orderline.users.all())
     for user in users:
         if not validate_user_funds(user, amount):
             messages.error(request, 'Unsufficient funds')
@@ -282,9 +282,9 @@ def check_orderline(request, form, orderline_id=None):
 
     messages.success(request, 'Order line added')
     return True
-
+# @ToDo Refactor to a more sensible name
 def validate_user_funds(user, amount):
-    return user.get(balance).get_balance() >= amount
+    return get_or_create_balance(user)[0].balance >= amount
     
 
 """
