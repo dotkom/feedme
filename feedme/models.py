@@ -98,7 +98,7 @@ class Balance(models.Model):
             self.balance += amount
             return True
         else:
-            print 'tried to deposit negative amount'
+            #print 'tried to deposit negative amount'
             return False # Error handling?
 
     def withdraw(self, amount):
@@ -106,7 +106,7 @@ class Balance(models.Model):
             self.balance -= amount
             return True
         else:
-            print 'not enough funds'
+            #print 'not enough funds'
             return False
 
     def __unicode__(self):
