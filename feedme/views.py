@@ -208,8 +208,18 @@ def manage_order(request):
         form = ManageOrderForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
+            order = get_object_or_404(Order, pk=data['orders'].id)
+            orderlines = order.orderline_set.all()
+            total_price = 0
+            for orderline in orderlines:
+                total_price += orderline.price
             #handle_payment(request, data)
-            return redirect(manage_order)
+            #return redirect(manage_order)
+            if request.POST['act'] == 'load':
+                return render(request, 'manage_order.html', {'form' : form, 'is_admin' : is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price})
+            elif request.POST['act'] == 'pay':
+                handle_payment(request, order)
+                return redirect(manage_order)
         else:
             form = ManageOrderForm(request.POST)
     else:
@@ -221,7 +231,7 @@ def manage_order(request):
         orders_price[order] = order.get_total_sum()
     #print orders_price
     form.fields["orders"].queryset = orders
-    return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request), 'orders' : orders})
+    return render(request, 'manage_order.html', {'form' : form, 'is_admin' : is_admin(request), 'orders' : orders})
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def new_restaurant(request, restaurant_id=None):
@@ -310,18 +320,52 @@ def validate_user_funds(user, amount):
             return False"""
 
 
-def handle_payment(request, data):
-    order_line = data['order_lines']
+def handle_payment(request, order):
+    orderlines = order.orderline_set.all()
+    print orderlines
+
+    paid = []
+    already_paid = []
+    negatives = []
+
+    for orderline in orderlines:
+        if not orderline.paid_for:
+            if orderline.users.count() > 0:
+                print orderline.users
+                # Do some splitting
+            else:
+                print "balance pre %s" % orderline.creator.balance
+                orderline.creator.balance.withdraw(orderline.get_total_price())
+                print "balance post %s" % orderline.creator.balance
+                orderline.creator.balance.save()
+                orderline.paid_for = True
+                orderline.save()
+                paid.append(orderline.creator)
+                if orderline.creator.balance < 0:
+                    negatives.append(orderline.creator)
+        else:
+            already_paid.append(orderline.creator)
+    if len(paid) > 0:
+        messages.success(request, 'Paid orderlines for %s.' % ', '.join(paid))
+    if len(already_paid) > 0:
+        messages.error(request, 'Already paid orderlines for %s.' % ', '.join(already_paid))
+    if len(negatives) > 0:
+        messages.error(request, 'These users now have negative balances: %s' % ', '.join(negatives))
+
+
+    """
     total_sum = data['total_sum']
-    users = order_line.used_users()
+    #users = order_line.used_users()
     if users:
         divided_sum = (total_sum / len(users)) * -1
         handle_saldo(users, divided_sum)
         order_line.total_sum = total_sum
         order_line.save()
-        messages.success(request, 'Payment handeled')
+        messages.success(request, 'Paid orderlines for all users')
     else:
         messages.error(request, 'Selected order contains no users')
+
+    """
 
 def handle_deposit(data):
     balance = data['user']
