@@ -28,7 +28,8 @@ FeedMe
         <form action="" method="post">
           {% csrf_token %}
           <div class="content">
-            {% admin_tabs form.name  %}
+            {% admin_tabs form.name %}
+
             {% for field in form %}
               <div class="fieldWrapper clearfix">
                 <label>{{ field.label_tag }}</label>
@@ -36,6 +37,7 @@ FeedMe
                 <div class="error">{{ field.errors }}</div>
               </div>
             {% endfor %}
+
           <input class="btn btn-primary" type="submit" value="Save" />
           </div>
         </form>
