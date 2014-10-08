@@ -26,27 +26,24 @@ def orderlineview(request, orderline_id=None):
     if request.method == 'POST':
         form = OrderLineForm(request.POST, instance=orderline)
         if form.is_valid():
-            form = form.save(commit=False)
-            form.creator = request.user
-            form.order = get_order()
-            #if form.order.buddy_system:
-            #    form.users.append(request.user)
-            #import pdb; pdb.set_trace()
-            if check_orderline(request, form, orderline_id):
-                form.save()
+            new_orderline = form.save(commit=False)
+            new_orderline.creator = request.user
+            new_orderline.order = get_order()
+            if check_orderline(request, new_orderline, orderline_id):
+                new_orderline.save()
+                form.save_m2m() # Manually save the m2m relations when using commit=False
                 return redirect(index)
             else:
-                form = OrderLineForm(request.POST, auto_id=True)
+                new_orderline = OrderLineForm(request.POST, auto_id=True)
         else:
-            form = OrderLineForm(request.POST, auto_id=True)
+            new_orderline = OrderLineForm(request.POST, auto_id=True)
     else:
         if orderline_id:
             form = OrderLineForm(instance=orderline)
-            #form.fields["users"].queryset = get_order().free_users(orderline.users, orderline.creator)
+            form.fields["users"].queryset = get_order().available_users()
         else:
-            form = OrderLineForm(instance=orderline, initial={'buddy' : request.user})
-            #form.fields["users"].queryset = get_order().order_users()
-
+            form = OrderLineForm(instance=orderline)
+            form.fields["users"].queryset = get_order().available_users()
     return render(request, 'orderview.html', {'form' : form, 'is_admin' : is_admin(request)})
 
 def edit_orderline(request, orderline_id):
@@ -183,9 +180,14 @@ def set_order_limit(request):
     return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
-def manage_users(request):
+def manage_users(request, balance=None):
     if request.method == 'POST':
+        if balance == None:
+            balance = get_or_create_balance(request.user)
+        else:
+            balance = get_object_or_404(Balance, balance)
         form = ManageBalanceForm(request.POST)
+        form.user_funds = balance
         if form.is_valid():
             data = form.cleaned_data
             handle_deposit(data)
@@ -195,8 +197,8 @@ def manage_users(request):
         form = ManageBalanceForm()
         users = []
         for user in get_orderline_users():
-            users.add(get_or_create_balance(user))
-        form.fields["user_funds"].queryset = get_orderline_users()
+            users.append(get_or_create_balance(user))
+        form.fields["user"].queryset = get_orderline_users()
 
     return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
 
@@ -261,11 +263,29 @@ def get_order_limit():
 #    return user in get_order().used_users()
 
 def check_orderline(request, form, orderline_id=None):
-    order_limit = get_order_limit().order_limit
-    #saldo = form.creator.funds_set.get()
+    orderline_exists = False
+    if orderline_id == None:
+        orderline = OrderLine()
+        orderline.creator = User.objects.get(username=form.creator)
+    else:
+        orderline = get_object_or_404(OrderLine, pk=orderline_id)
+        orderline_exists = True
+    amount = form.price
+    users = [orderline.creator]
+    if orderline_exists:
+        if len(orderline.users.all()) > 0:
+            users.extend(orderline.users.all())
+    for user in users:
+        if not validate_user_funds(user, amount):
+            messages.error(request, 'Unsufficient funds')
+            return False
 
     messages.success(request, 'Order line added')
     return True
+# @ToDo Refactor to a more sensible name
+def validate_user_funds(user, amount):
+    return get_or_create_balance(user).balance >= amount
+
 
 """
     #if not orderline_id:
@@ -304,16 +324,17 @@ def handle_payment(request, data):
         messages.error(request, 'Selected order contains no users')
 
 def handle_deposit(data):
-    user = data['user']
-    deposit = data['deposit']
-    balance = user.balance
-    balance.funds += deposit
+    balance = data['user']
+    amount = data['deposit']
+    balance.deposit(amount)
     balance.save()
 
 def get_or_create_balance(user):
-    if user.balance:
-        return user.balance
-    else:
+    try:
+        user_balance = Balance.objects.get(user=user)
+        if user_balance:
+            return user_balance
+    except:
         balance = Balance()
         balance.user = user
         balance.save()
@@ -335,7 +356,7 @@ def is_admin(request):
     return request.user in User.objects.filter(groups__name=settings.FEEDME_ADMIN_GROUP)
 
 def get_orderline_users():
-   return User.objects.filter(groups__name=settings.FEEDME_GROUP)
+    return User.objects.filter(groups__name=settings.FEEDME_GROUP).order_by('id')
 
 def get_order():
     if Order.objects.all():

@@ -29,6 +29,19 @@ class Order(models.Model):
     def order_users(self):
         return User.objects.filter(groups__name=settings.FEEDME_GROUP)
 
+    def available_users(self):
+        order_users = self.order_users()
+        taken_users = self.taken_users()
+        available_users = order_users.exclude(id__in=taken_users)
+        #print taken_users
+        #for user in order_users:
+        #    print user
+        #    if user.id in taken_users:
+        #        available_users.exclude(user)
+        #        print 'taken!'
+        #available_users = order_users.exclude(self.taken_users())
+        return available_users
+
     def taken_users(self):
         return self.orderline_set.values_list(_('creator'), flat=True)
 
@@ -74,14 +87,33 @@ class OrderLine(models.Model):
         verbose_name_plural = _('Order lines')
 
 class Balance(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
-    funds = models.FloatField(_('funds'), default=0)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL)
+    balance = models.FloatField(_('balance'), default=0)
+
+    def get_balance(self):
+        return "%0.f" % self.balance
+
+    def deposit(self, amount):
+        if amount > 0:
+            self.balance += amount
+            return True
+        else:
+            #print 'tried to deposit negative amount'
+            return False # Error handling?
+
+    def withdraw(self, amount):
+        if amount >= self.balance:
+            self.balance -= amount
+            return True
+        else:
+            #print 'not enough funds'
+            return False
 
     def __unicode__(self):
-        return "%s: %.0f" % (self.user, self.funds)
+        return "%s: %.0f" % (self.user, self.balance)
 
 class ManageBalance(models.Model):
-    user_funds = models.ForeignKey(Balance)
+    user = models.ForeignKey(Balance)#fix name
     deposit = models.FloatField(_('deposit amount'), default=0)
 
 class ManageOrders(models.Model):

@@ -6,11 +6,11 @@ class OrderLineForm(ModelForm):
 
     class Meta:
         model = OrderLine
-        exclude = ('order', 'creator', 'users')
+        exclude = ('order', 'creator', )
 
     def __init__(self, *args, **kwargs):
         super(OrderLineForm, self).__init__(*args, **kwargs)
-        #self.fields['users'].empty_label = None
+        self.fields['users'].empty_label = None
 
 class OrderForm(ModelForm):
     name=u'order'
