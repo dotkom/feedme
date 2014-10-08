@@ -284,8 +284,8 @@ def check_orderline(request, form, orderline_id=None):
     return True
 # @ToDo Refactor to a more sensible name
 def validate_user_funds(user, amount):
-    return get_or_create_balance(user)[0].balance >= amount
-    
+    return get_or_create_balance(user).balance >= amount
+
 
 """
     #if not orderline_id:
@@ -330,13 +330,15 @@ def handle_deposit(data):
     balance.save()
 
 def get_or_create_balance(user):
-    user_balance = Balance.objects.filter(user=user)
-    if user_balance:
-	    return user_balance
-    balance = Balance()
-    balance.user = user
-    balance.save()
-    return balance
+    try:
+        user_balance = Balance.objects.get(user=user)
+        if user_balance:
+            return user_balance
+    except:
+        balance = Balance()
+        balance.user = user
+        balance.save()
+        return balance
 
 def get_next_tuesday():
     today = date.today()
@@ -354,7 +356,7 @@ def is_admin(request):
     return request.user in User.objects.filter(groups__name=settings.FEEDME_ADMIN_GROUP)
 
 def get_orderline_users():
-   return User.objects.filter(groups__name=settings.FEEDME_GROUP)
+    return User.objects.filter(groups__name=settings.FEEDME_GROUP).order_by('id')
 
 def get_order():
     if Order.objects.all():
