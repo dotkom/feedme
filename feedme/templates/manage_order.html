@@ -29,18 +29,28 @@ FeedMe
           {% csrf_token %}
           <div class="content">
             {% admin_tabs form.name  %}
-
-            {% for field in form %}
-              <div class="fieldWrapper clearfix">
-                <label>{{ field.label_tag }}</label>
-                <div class="input">{{ field }}</div>
-                <div class="error">{{ field.errors }}</div>
-              </div>
-            {% endfor %}
-          {% if not post_data %}
-          <input class="btn btn-primary" type="submit" value="Load" />
+            {% if form %}
+                {% for field in form %}
+                  <div class="fieldWrapper clearfix">
+                    <label>{{ field.label_tag }}</label>
+                    <div class="input">{{ field }}</div>
+                    <div class="error">{{ field.errors }}</div>
+                  </div>
+                {% endfor %}
+            {% endif %}
+            {% if orderlines %}
+                <ul>
+                    {% for orderline in orderlines %}
+                    <li>{{ orderline.creator.balance }} - {{ orderline.price }} {% if orderline.paid_for %}PAID{% else %}NOT PAID{% endif %}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+          {% if not orderlines %}
+            <input name="act" hidden value="load">
+            <input class="btn btn-primary" type="submit" value="Load" />
           {% else %}
-          <input class="btn btn-primary" type="submit" value="Save" />
+            <input name="act" hidden value="pay">
+            <input class="btn btn-primary" type="submit" value="Pay" />
           {% endif %}
           </div>
         </form>
