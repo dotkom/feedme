@@ -34,7 +34,7 @@ FeedMe
             </tr>
             {% for order_line in order.orderline_set.all %}
               <tr>
-                <td>{{ order_line.menu_item }}</td>
+                <td>{{ order_line.menu_item }} <span class="pull-right">{{ order_line.price }}</span></td>
                 <td>{{ order_line.soda }}</td>
                 <td>{{ order_line.creator.username }}</td>
                 <td>{{ order_line.extras }}</td>
