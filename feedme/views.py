@@ -128,7 +128,8 @@ def join_orderline(request, orderline_id):
     #    messages.error(request, 'No saldo connected to the user')
     #elif request.user.saldo_set.get().saldo < get_order_limit().order_limit:
     #    messages.error(request, 'You have insufficent funds. Current limit : ' + str(get_order_limit().order_limit))
-    # Check balance
+    elif not validate_user_funds(request.user, (orderline.price / (orderline.users.count() + 2))):
+        messages.error(request, 'You need cashes')
     else:
         orderline.users.add(request.user)
         #orderline.need_buddy = False
