@@ -110,7 +110,8 @@ class Balance(models.Model):
             return False # Error handling?
 
     def withdraw(self, amount):
-        if amount >= self.balance:
+        print self.balance
+        if amount <= self.balance:
             self.balance -= amount
             return True
         else:
