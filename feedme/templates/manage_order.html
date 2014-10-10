@@ -41,6 +41,11 @@ FeedMe
             {% if orderlines %}
                 <ul>
                     {% for orderline in orderlines %}
+                    {% if orderline.users %}
+                        ({% for user in orderline.users.all %}
+                            {{ user.balance }}
+                        {% endfor %})
+                    {% endif %}
                     <li>{{ orderline.creator.balance }} - {{ orderline.price }} {% if orderline.paid_for %}PAID{% else %}NOT PAID{% endif %}</li>
                     {% endfor %}
                 </ul>
