@@ -41,11 +41,12 @@ FeedMe
             {% if orderlines %}
                 <ul>
                     {% for orderline in orderlines %}
-                    <li>{{ orderline.creator.balance }} - {{ orderline.price }} {% if orderline.paid_for %}PAID{% else %}NOT PAID{% endif %}</li>
+                    <li>{{ orderline.menu_item }} - {{ orderline.price }} {% if orderline.paid_for %}PAID{% else %}NOT PAID{% endif %}</li>
                         {% if orderline.users %}
                             <li><ul>
+                                <li>{{ orderline.creator.balance }} -{{ orderline.each }}</li>
                             {% for user in orderline.users.all %}
-                                <li class="">{{ user.balance }}</li>
+                                <li class="">{{ user.balance }}: -{{ orderline.each }}</li>
                             {% endfor %}
                             </ul></li>
                         {% endif %}
