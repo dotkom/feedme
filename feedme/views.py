@@ -322,7 +322,6 @@ def validate_user_funds(user, amount):
 
 def handle_payment(request, order):
     orderlines = order.orderline_set.all()
-    print orderlines
 
     paid = []
     already_paid = []
@@ -331,13 +330,14 @@ def handle_payment(request, order):
     for orderline in orderlines:
         if not orderline.paid_for:
             if orderline.users.count() > 0:
-                print orderline.users
-                # Do some splitting
+                amount = (orderline.get_total_price())/(orderline.users.count() + 1)
+                pay(orderline.creator, amount)
+                for user in orderline.users.all():
+                    pay(user, amount)
+                orderline.paid_for = True
+                orderline.save()
             else:
-                print "balance pre %s" % orderline.creator.balance
-                orderline.creator.balance.withdraw(orderline.get_total_price())
-                print "balance post %s" % orderline.creator.balance
-                orderline.creator.balance.save()
+                pay(orderline.creator(orderline.get_total_price()))
                 orderline.paid_for = True
                 orderline.save()
                 paid.append(orderline.creator)
@@ -352,20 +352,9 @@ def handle_payment(request, order):
     if len(negatives) > 0:
         messages.error(request, 'These users now have negative balances: %s' % ', '.join(negatives))
 
-
-    """
-    total_sum = data['total_sum']
-    #users = order_line.used_users()
-    if users:
-        divided_sum = (total_sum / len(users)) * -1
-        handle_saldo(users, divided_sum)
-        order_line.total_sum = total_sum
-        order_line.save()
-        messages.success(request, 'Paid orderlines for all users')
-    else:
-        messages.error(request, 'Selected order contains no users')
-
-    """
+def pay(user, amount):
+    user.balance.withdraw(amount)
+    user.balance.save()
 
 def handle_deposit(data):
     balance = data['user']
