@@ -29,7 +29,8 @@ def orderlineview(request, orderline_id=None):
             new_orderline = form.save(commit=False)
             new_orderline.creator = request.user
             new_orderline.order = get_order()
-            if check_orderline(request, new_orderline, orderline_id):
+            users = manually_parse_users(form)
+            if check_orderline(request, new_orderline, orderline_id, users):
                 new_orderline.save()
                 form.save_m2m() # Manually save the m2m relations when using commit=False
                 return redirect(index)
@@ -127,6 +128,7 @@ def join_orderline(request, orderline_id):
     #    messages.error(request, 'No saldo connected to the user')
     #elif request.user.saldo_set.get().saldo < get_order_limit().order_limit:
     #    messages.error(request, 'You have insufficent funds. Current limit : ' + str(get_order_limit().order_limit))
+    # Check balance
     else:
         orderline.users.add(request.user)
         #orderline.need_buddy = False
@@ -212,11 +214,12 @@ def manage_order(request):
             orderlines = order.orderline_set.all()
             total_price = 0
             for orderline in orderlines:
+                orderline.each = orderline.price / (orderline.users.count() + 1)
                 total_price += orderline.price
             #handle_payment(request, data)
             #return redirect(manage_order)
             if request.POST['act'] == 'load':
-                return render(request, 'manage_order.html', {'form' : form, 'is_admin' : is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price})
+                return render(request, 'manage_order.html', {'form' : form, 'is_admin' : is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price, 'orderlines_money': orderlines_money})
             elif request.POST['act'] == 'pay':
                 handle_payment(request, order)
                 return redirect(manage_order)
@@ -272,7 +275,7 @@ def get_order_limit():
 #def user_is_taken(user):
 #    return user in get_order().used_users()
 
-def check_orderline(request, form, orderline_id=None):
+def check_orderline(request, form, orderline_id=None, buddies=None):
     orderline_exists = False
     if orderline_id == None:
         orderline = OrderLine()
@@ -285,7 +288,11 @@ def check_orderline(request, form, orderline_id=None):
     if orderline_exists:
         if len(orderline.users.all()) > 0:
             users.extend(orderline.users.all())
+    else:
+        users.extend(buddies)
+    amount = amount / len(users)
     for user in users:
+        #print "validating %s (%s) for %s -> %s" % (user, user.balance, amount, validate_user_funds(user, amount))
         if not validate_user_funds(user, amount):
             messages.error(request, 'Unsufficient funds')
             return False
@@ -352,6 +359,12 @@ def handle_payment(request, order):
     if len(negatives) > 0:
         messages.error(request, 'These users now have negative balances: %s' % ', '.join(negatives))
 
+def split_bill(amount, users):
+    if len(users > 0):
+        return amount / len(users)
+    else:
+        return amount
+
 def pay(user, amount):
     user.balance.withdraw(amount)
     user.balance.save()
@@ -407,6 +420,18 @@ def is_in_current_order(order_type, order_id):
         return order in order.order_set.all()
     else:
         return False
+
+def manually_parse_users(form):
+    li = str(form).split('<select')
+    potential_users = li[1].split('<option')
+    usernames = []
+    for user in potential_users:
+        if 'selected' in user:
+            usernames.append(user.split('>')[1].split('<')[0])
+    users = []
+    for username in usernames:
+        users.append(User.objects.get(username=username))
+    return users
 
 def in_other_orderline(user):
     order = get_order()
