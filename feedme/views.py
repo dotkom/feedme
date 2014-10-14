@@ -406,8 +406,12 @@ def get_orderline_users():
     return User.objects.filter(groups__name=settings.FEEDME_GROUP).order_by('id')
 
 def get_order():
+    # More useful pls.
     if Order.objects.all():
-        return Order.objects.all().latest()
+        orders = Order.objects.all().order_by('-id')
+        for order in orders: 
+            if order.active:
+                return order
     else:
         return False
 
