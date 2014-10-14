@@ -23,6 +23,7 @@ class Order(models.Model):
     date = models.DateField(_('date'))
     restaurant = models.ForeignKey(Restaurant)
     extra_costs = models.FloatField(_('extra costs'), default=0)
+    active = models.BooleanField(_('Order currently active'), default=True)
 
     def get_total_sum(self):
         return self.orderline_set.aggregate(models.Sum(_('price')))
