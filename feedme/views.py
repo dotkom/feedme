@@ -220,7 +220,7 @@ def manage_order(request):
             #handle_payment(request, data)
             #return redirect(manage_order)
             if request.POST['act'] == 'load':
-                return render(request, 'manage_order.html', {'form' : form, 'is_admin' : is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price, 'orderlines_money': orderlines_money})
+                return render(request, 'manage_order.html', {'form' : form, 'is_admin' : is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price})
             elif request.POST['act'] == 'pay':
                 handle_payment(request, order)
                 return redirect(manage_order)
