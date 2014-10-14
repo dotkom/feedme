@@ -50,6 +50,7 @@ FeedMe
                   {% endif %}
                 </td>
                 <td>
+                {% if user.is_authenticated %}
                   {% if user == order_line.creator %}
                     <a href="{% url "edit_orderline" order_line.id %}"><button class="btn btn-primary">edit</button></a>
                     <a href="{% url "delete_orderline" order_line.id %}"><button class="btn btn-danger">delete</button></a>
@@ -58,6 +59,7 @@ FeedMe
                   {% elif user in order_line.users.all and order.restaurant.buddy_system %}
                     <a href={% url "leave_orderline" order_line.id %}><button class="btn btn-danger">leave</button></a>
                   {% endif %}
+                {% endif %}
                 </td>
               </tr>
             {% endfor %}
@@ -83,11 +85,14 @@ FeedMe
               {% endfor %}
             </table>
           {% endif %}
-          {% if can_join %}
+          {% if can_join and user.is_authenticated %}
               <a href="{% url "new_orderline" %}"><button class="btn btn-primary">New order line</button></a>
           {% endif %}
         {% else %}
           <div class="page-header"><h1>No orders available.</h1></div>
+        {% endif %}
+        {% if not user.authenticated %}
+        <h3 style="color: deeppink;">You are <span style="color: red; font-size: 100px;">not</span> logged in. Head over <a href="/admin/">here</a> to log in.</h3>
         {% endif %}
       </div>
     </div>

@@ -12,7 +12,7 @@ from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitFo
 
 User = get_user_model()
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
+#@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def index(request):
     order = get_order()
     return render(request, 'index.html', {'order' : order, 'is_admin' : is_admin(request), 'can_join': not in_other_orderline(request.user)})
