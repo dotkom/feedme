@@ -91,7 +91,7 @@ FeedMe
         {% else %}
           <div class="page-header"><h1>No orders available.</h1></div>
         {% endif %}
-        {% if not user.authenticated %}
+        {% if not user.is_authenticated %}
         <h3 style="color: deeppink;">You are <span style="color: red; font-size: 100px;">not</span> logged in. Head over <a href="/admin/">here</a> to log in.</h3>
         {% endif %}
       </div>
