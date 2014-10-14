@@ -29,7 +29,8 @@ def orderlineview(request, orderline_id=None):
             new_orderline = form.save(commit=False)
             new_orderline.creator = request.user
             new_orderline.order = get_order()
-            if check_orderline(request, new_orderline, orderline_id):
+            users = manually_parse_users(form)
+            if check_orderline(request, new_orderline, orderline_id, users):
                 new_orderline.save()
                 form.save_m2m() # Manually save the m2m relations when using commit=False
                 return redirect(index)
@@ -127,6 +128,8 @@ def join_orderline(request, orderline_id):
     #    messages.error(request, 'No saldo connected to the user')
     #elif request.user.saldo_set.get().saldo < get_order_limit().order_limit:
     #    messages.error(request, 'You have insufficent funds. Current limit : ' + str(get_order_limit().order_limit))
+    elif not validate_user_funds(request.user, (orderline.price / (orderline.users.count() + 2))):
+        messages.error(request, 'You need cashes')
     else:
         orderline.users.add(request.user)
         #orderline.need_buddy = False
@@ -200,7 +203,7 @@ def manage_users(request, balance=None):
             users.append(get_or_create_balance(user))
         form.fields["user"].queryset = get_orderline_users()
 
-    return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
+    return render(request, 'admin.html', {'form' : form, 'users': users, 'is_admin' : is_admin(request) })
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def manage_order(request):
@@ -208,8 +211,19 @@ def manage_order(request):
         form = ManageOrderForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
+            order = get_object_or_404(Order, pk=data['orders'].id)
+            orderlines = order.orderline_set.all()
+            total_price = 0
+            for orderline in orderlines:
+                orderline.each = orderline.price / (orderline.users.count() + 1)
+                total_price += orderline.price
             #handle_payment(request, data)
-            return redirect(manage_order)
+            #return redirect(manage_order)
+            if request.POST['act'] == 'load':
+                return render(request, 'manage_order.html', {'form' : form, 'is_admin' : is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price, 'orderlines_money': orderlines_money})
+            elif request.POST['act'] == 'pay':
+                handle_payment(request, order)
+                return redirect(manage_order)
         else:
             form = ManageOrderForm(request.POST)
     else:
@@ -221,7 +235,7 @@ def manage_order(request):
         orders_price[order] = order.get_total_sum()
     #print orders_price
     form.fields["orders"].queryset = orders
-    return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request), 'orders' : orders})
+    return render(request, 'manage_order.html', {'form' : form, 'is_admin' : is_admin(request), 'orders' : orders})
 
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def new_restaurant(request, restaurant_id=None):
@@ -262,7 +276,7 @@ def get_order_limit():
 #def user_is_taken(user):
 #    return user in get_order().used_users()
 
-def check_orderline(request, form, orderline_id=None):
+def check_orderline(request, form, orderline_id=None, buddies=None):
     orderline_exists = False
     if orderline_id == None:
         orderline = OrderLine()
@@ -275,7 +289,11 @@ def check_orderline(request, form, orderline_id=None):
     if orderline_exists:
         if len(orderline.users.all()) > 0:
             users.extend(orderline.users.all())
+    else:
+        users.extend(buddies)
+    amount = amount / len(users)
     for user in users:
+        #print "validating %s (%s) for %s -> %s" % (user, user.balance, amount, validate_user_funds(user, amount))
         if not validate_user_funds(user, amount):
             messages.error(request, 'Unsufficient funds')
             return False
@@ -310,18 +328,47 @@ def validate_user_funds(user, amount):
             return False"""
 
 
-def handle_payment(request, data):
-    order_line = data['order_lines']
-    total_sum = data['total_sum']
-    users = order_line.used_users()
-    if users:
-        divided_sum = (total_sum / len(users)) * -1
-        handle_saldo(users, divided_sum)
-        order_line.total_sum = total_sum
-        order_line.save()
-        messages.success(request, 'Payment handeled')
+def handle_payment(request, order):
+    orderlines = order.orderline_set.all()
+
+    paid = []
+    already_paid = []
+    negatives = []
+
+    for orderline in orderlines:
+        if not orderline.paid_for:
+            if orderline.users.count() > 0:
+                amount = (orderline.get_total_price())/(orderline.users.count() + 1)
+                pay(orderline.creator, amount)
+                for user in orderline.users.all():
+                    pay(user, amount)
+                orderline.paid_for = True
+                orderline.save()
+            else:
+                pay(orderline.creator(orderline.get_total_price()))
+                orderline.paid_for = True
+                orderline.save()
+                paid.append(orderline.creator)
+                if orderline.creator.balance < 0:
+                    negatives.append(orderline.creator)
+        else:
+            already_paid.append(orderline.creator)
+    if len(paid) > 0:
+        messages.success(request, 'Paid orderlines for %s.' % ', '.join(paid))
+    if len(already_paid) > 0:
+        messages.error(request, 'Already paid orderlines for %s.' % ', '.join(already_paid))
+    if len(negatives) > 0:
+        messages.error(request, 'These users now have negative balances: %s' % ', '.join(negatives))
+
+def split_bill(amount, users):
+    if len(users > 0):
+        return amount / len(users)
     else:
-        messages.error(request, 'Selected order contains no users')
+        return amount
+
+def pay(user, amount):
+    user.balance.withdraw(amount)
+    user.balance.save()
 
 def handle_deposit(data):
     balance = data['user']
@@ -374,6 +421,18 @@ def is_in_current_order(order_type, order_id):
         return order in order.order_set.all()
     else:
         return False
+
+def manually_parse_users(form):
+    li = str(form).split('<select')
+    potential_users = li[1].split('<option')
+    usernames = []
+    for user in potential_users:
+        if 'selected' in user:
+            usernames.append(user.split('>')[1].split('<')[0])
+    users = []
+    for username in usernames:
+        users.append(User.objects.get(username=username))
+    return users
 
 def in_other_orderline(user):
     order = get_order()

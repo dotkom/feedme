@@ -22,6 +22,7 @@ class Restaurant(models.Model):
 class Order(models.Model):
     date = models.DateField(_('date'))
     restaurant = models.ForeignKey(Restaurant)
+    extra_costs = models.FloatField(_('extra costs'), default=0)
 
     def get_total_sum(self):
         return self.orderline_set.aggregate(models.Sum(_('price')))
@@ -65,6 +66,7 @@ class OrderLine(models.Model):
     soda = models.CharField(_('soda'), blank=True, null=True, max_length=25)
     extras = models.CharField(_('extras/comments'), blank=True, null=True, max_length=50)
     price = models.IntegerField(_('price'), max_length=4, default=100)
+    paid_for = models.BooleanField(_('paid for'), default=False)
 
     def get_order(self):
         return self.order
@@ -75,8 +77,14 @@ class OrderLine(models.Model):
     def get_num_users(self):
         return len(self.users)
 
+    def get_total_price(self):
+        return self.order.extra_costs + self.price
+
     def __unicode__(self):
-        return self.creator.username
+        if self.creator.username != "":
+            return self.creator.username
+        else:
+            return self.creator.nickname
 
     @models.permalink
     def get_absolute_url(self):
@@ -102,7 +110,8 @@ class Balance(models.Model):
             return False # Error handling?
 
     def withdraw(self, amount):
-        if amount >= self.balance:
+        print self.balance
+        if amount <= self.balance:
             self.balance -= amount
             return True
         else:
