@@ -3,7 +3,7 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
-from feedme.migrations.i_hate_migrations import user_orm_label, user_model_label
+from feedme.i_hate_migrations import user_orm_label, user_model_label
 
 class Migration(SchemaMigration):
 
