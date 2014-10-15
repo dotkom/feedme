@@ -44,7 +44,7 @@ class Migration(SchemaMigration):
         db.create_table(m2m_table_name, (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('orderline', models.ForeignKey(orm[u'feedme.orderline'], null=False)),
-            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
+            ('user', models.ForeignKey(orm[user_orm_label], null=False))
         ))
         db.create_unique(m2m_table_name, ['orderline_id', 'user_id'])
 
@@ -82,7 +82,7 @@ class Migration(SchemaMigration):
         db.create_table(m2m_table_name, (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('manageusers', models.ForeignKey(orm[u'feedme.manageusers'], null=False)),
-            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
+            ('user', models.ForeignKey(orm[user_orm_label], null=False))
         ))
         db.create_unique(m2m_table_name, ['manageusers_id', 'user_id'])
 
