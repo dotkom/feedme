@@ -3,7 +3,7 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
-
+from feedme.migrations.i_hate_migrations import user_orm_label, user_model_label
 
 class Migration(SchemaMigration):
 
@@ -60,7 +60,7 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Balance'},
             'balance': ('django.db.models.fields.FloatField', [], {'default': '0'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['auth.User']", 'unique': 'True'})
+            'user': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm[user_orm_label]", 'unique': 'True'})
         },
         u'feedme.managebalance': {
             'Meta': {'object_name': 'ManageBalance'},
@@ -81,7 +81,7 @@ class Migration(SchemaMigration):
         u'feedme.manageusers': {
             'Meta': {'object_name': 'ManageUsers'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'users': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "u'Users'", 'symmetrical': 'False', 'to': u"orm['auth.User']"})
+            'users': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "u'Users'", 'symmetrical': 'False', 'to': u"orm[user_orm_label]"})
         },
         u'feedme.order': {
             'Meta': {'object_name': 'Order'},
@@ -92,14 +92,14 @@ class Migration(SchemaMigration):
         },
         u'feedme.orderline': {
             'Meta': {'object_name': 'OrderLine'},
-            'creator': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'owner'", 'to': u"orm['auth.User']"}),
+            'creator': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'owner'", 'to': u"orm[user_orm_label]"}),
             'extras': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'menu_item': ('django.db.models.fields.IntegerField', [], {'max_length': '2'}),
             'order': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['feedme.Order']"}),
             'price': ('django.db.models.fields.IntegerField', [], {'default': '100', 'max_length': '4'}),
             'soda': ('django.db.models.fields.CharField', [], {'max_length': '25', 'null': 'True', 'blank': 'True'}),
-            'users': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "u'buddies'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm['auth.User']"})
+            'users': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "u'buddies'", 'null': 'True', 'symmetrical': 'False', 'to': u"orm[user_orm_label]"})
         },
         u'feedme.restaurant': {
             'Meta': {'object_name': 'Restaurant'},
