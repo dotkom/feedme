@@ -165,7 +165,7 @@ def manage_users(request, balance=None):
             users.append(get_or_create_balance(user))
         form.fields["user"].queryset = get_orderline_users()
 
-    return render(request, 'admin.html', {'form' : form, 'users': users, 'is_admin' : is_admin(request) })
+    return render(request, 'manage_users.html', {'form' : form, 'users': users, 'is_admin' : is_admin(request) })
 
 # Manage order (payment handling)
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
