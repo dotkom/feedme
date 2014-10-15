@@ -42,9 +42,13 @@ FeedMe
                   {% if order_line.users %}
                     {% for user in order_line.users.all %}
                       {% if user.nickname %}
-                        {{ user.nickname }}
+                        {% if not user.nickname == orderline.creator %}
+                            {{ user.nickname }}
+                        {% endif %}
                       {% else %}
-                        {{ user.username }}
+                        {% if not user == order_line.creator %}
+                            {{ user.username }}
+                        {% endif %}
                       {% endif %}
                     {% endfor %}
                   {% endif %}
