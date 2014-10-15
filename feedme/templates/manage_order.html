@@ -39,19 +39,26 @@ FeedMe
                 {% endfor %}
             {% endif %}
             {% if orderlines %}
-                <ul>
+                <h2>{{ order }}: {{ total_price }} kr</h2>
+                <table class="table">
+                    <tr><th>Orderline</th><th>Menu item</th><th>Comments</th><th>User</th><th>To pay</th><th>Paid for</th><th></th></tr>
                     {% for orderline in orderlines %}
-                    <li>{{ orderline.menu_item }} - {{ orderline.price }} {% if orderline.paid_for %}PAID{% else %}NOT PAID{% endif %}</li>
                         {% if orderline.users %}
-                            <li><ul>
-                                <li>{{ orderline.creator.balance }} -{{ orderline.each }}</li>
                             {% for user in orderline.users.all %}
-                                <li class="">{{ user.balance }}: -{{ orderline.each }}</li>
+                                <tr>
+                                    <td>{{ orderline.id }}</td>
+                                    <td>{{ orderline.menu_item }}</td>
+                                    <td>{{ orderline.comments }}</td>
+                                    <td>{{ user }}</td>
+                                    <td>{{ orderline.each }}</td>
+                                    <td><span class="glyphicon glyphicon-{% if orderline.paid_for %}ok{% else %}remove{% endif %}"></td>
+                                </tr>
                             {% endfor %}
-                            </ul></li>
                         {% endif %}
                     {% endfor %}
-                </ul>
+                </table>
+            {% else %}
+                <h3>This order has no order lines yet.</h3>
             {% endif %}
           {% if not orderlines %}
             <input name="act" hidden value="load">
