@@ -90,7 +90,7 @@ class Balance(models.Model):
     balance = models.FloatField(_('balance'), default=0)
 
     def get_balance(self):
-        return "%0.f" % self.balance
+        return "%0.f kr" % self.balance
 
     def deposit(self, amount):
         if amount > 0:
@@ -108,7 +108,7 @@ class Balance(models.Model):
             return False
 
     def __unicode__(self):
-        return "%s: %.0f" % (self.user, self.balance)
+        return "%s: %s" % (self.user, self.get_balance())
 
 class ManageBalance(models.Model):
     user = models.ForeignKey(Balance)
