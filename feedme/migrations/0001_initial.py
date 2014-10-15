@@ -3,7 +3,7 @@ from south.utils import datetime_utils as datetime
 from south.db import db
 from south.v2 import SchemaMigration
 from django.db import models
-from feedme.migrations.i_hate_migrations import user_orm_label, user_model_label
+from feedme.migrations import user_name, user_table, user_orm_label, user_model_label
 
 class Migration(SchemaMigration):
 
@@ -44,7 +44,7 @@ class Migration(SchemaMigration):
         db.create_table(m2m_table_name, (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('orderline', models.ForeignKey(orm[u'feedme.orderline'], null=False)),
-            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
+            ('user', models.ForeignKey(orm[user_orm_label], null=False))
         ))
         db.create_unique(m2m_table_name, ['orderline_id', 'user_id'])
 
@@ -82,7 +82,7 @@ class Migration(SchemaMigration):
         db.create_table(m2m_table_name, (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('manageusers', models.ForeignKey(orm[u'feedme.manageusers'], null=False)),
-            ('user', models.ForeignKey(orm[u'auth.user'], null=False))
+            ('user', models.ForeignKey(orm[user_orm_label], null=False))
         ))
         db.create_unique(m2m_table_name, ['manageusers_id', 'user_id'])
 
@@ -140,8 +140,8 @@ class Migration(SchemaMigration):
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '50'})
         },
-        u'auth.user': {
-            'Meta': {'object_name': 'User'},
+        user_model_label: {
+            'Meta': {'object_name': user_name, 'db_table': "'%s'" % user_table},
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
             'first_name': ('django.db.models.fields.CharField', [], {'max_length': '30', 'blank': 'True'}),
