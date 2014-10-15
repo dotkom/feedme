@@ -27,6 +27,18 @@ class Order(models.Model):
     def get_total_sum(self):
         return self.orderline_set.aggregate(models.Sum(_('price')))
 
+    def get_extra_costs(self):
+        orderlines = self.orderline_set.all()
+        users = 0
+        for orderline in orderlines:
+            print "pre", users
+            if orderline.users:
+                users += orderline.users.count()
+            else:
+                users += 1
+            print "post", users
+        return self.extra_costs / users
+
     def order_users(self):
         return User.objects.filter(groups__name=settings.FEEDME_GROUP)
 
@@ -44,7 +56,7 @@ class Order(models.Model):
             return Order.objects.all().latest()
 
     def __unicode__(self):
-        return self.date.strftime("%d-%m-%Y")
+        return "%s @ %s" % (self.date.strftime("%d-%m-%Y"), self.restaurant)
 
     class Meta:
         get_latest_by = 'date'
@@ -69,7 +81,7 @@ class OrderLine(models.Model):
         return len(self.users)
 
     def get_total_price(self):
-        return self.order.extra_costs + self.price
+        return (self.order.get_extra_costs() * self.users.count()) + self.price
 
     def __unicode__(self):
         if self.creator.username != "":

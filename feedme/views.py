@@ -176,9 +176,13 @@ def manage_order(request):
             data = form.cleaned_data
             order = get_object_or_404(Order, pk=data['orders'].id)
             orderlines = order.orderline_set.all()
-            total_price = 0
+            total_price = order.extra_costs
+            users = 0
             for orderline in orderlines:
-                orderline.each = orderline.price / (orderline.users.count() + 1)
+                orderline.users.add(orderline.creator)
+                users += 1
+                orderline.each = orderline.get_total_price() / (orderline.users.count())
+                users += orderline.users.count()
                 total_price += orderline.price
             #handle_payment(request, data)
             #return redirect(manage_order)
@@ -196,7 +200,6 @@ def manage_order(request):
     orders_price = {}
     for order in orders:
         orders_price[order] = order.get_total_sum()
-    #print orders_price
     form.fields["orders"].queryset = orders
     return render(request, 'manage_order.html', {'form' : form, 'is_admin' : is_admin(request), 'orders' : orders})
 
