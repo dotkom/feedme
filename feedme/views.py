@@ -332,6 +332,9 @@ def handle_payment(request, order):
     if len(negatives) > 0:
         messages.error(request, 'These users now have negative balances: %s' % ', '.join(negatives))
 
+    order.active = False
+    order.save()
+
 # The actual function for payment
 def pay(user, amount):
     user.balance.withdraw(amount) # This returns True/False whether or not the payment was possible.
