@@ -285,8 +285,6 @@ def check_orderline(request, form, orderline_id=None, buddies=None):
         if not validate_user_funds(user, amount):
             messages.error(request, 'Unsufficient funds caught for %s' % user.get_nickname())
             return False
-
-    messages.success(request, 'Order line added')
     return True
 
 # Check that the user has enough funds
