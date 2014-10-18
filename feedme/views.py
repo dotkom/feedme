@@ -6,17 +6,9 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Sum
-from django.contrib.messages import constants as message_constants
 
 from models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance
 from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
-
-MESSAGE_TAGS = {
-    message_constants.INFO: 'primary',
-    message_constants.SUCCESS: 'success',
-    message_constants.WARNING: 'warning',
-    message_constants.ERROR: 'danger',
-}
 
 User = get_user_model()
 
