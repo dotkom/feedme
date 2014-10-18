@@ -31,12 +31,10 @@ class Order(models.Model):
         orderlines = self.orderline_set.all()
         users = 0
         for orderline in orderlines:
-            print "pre", users
             if orderline.users:
                 users += orderline.users.count()
             else:
                 users += 1
-            print "post", users
         return self.extra_costs / users
 
     def order_users(self):
