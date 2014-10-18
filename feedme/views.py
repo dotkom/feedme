@@ -44,10 +44,12 @@ def orderview(request, order_id=None):
 
 # New / edit order line
 def orderlineview(request, orderline_id=None):
+    new_or_existing_orderline = 'new'
     if orderline_id == None:
         orderline = OrderLine()
     else:
         orderline = get_object_or_404(OrderLine, pk=orderline_id)
+        new_or_existing_orderline = 'existing'
 
     if request.method == 'POST':
         form = OrderLineForm(request.POST, instance=orderline)
@@ -59,14 +61,16 @@ def orderlineview(request, orderline_id=None):
             if check_orderline(request, new_orderline, orderline_id, users):
                 new_orderline.save()
                 form.save_m2m() # Manually save the m2m relations when using commit=False
-                messages.success(request, "Orderline added")
+                if new_or_existing_orderline == 'new':
+                    messages.success(request, "Orderline added")
+                else:
+                    messages.success(request, "Orderline edited")
                 return redirect(index)
             else:
                 messages.error(request, "Orderline validation failed, please verify your data and try again.") # @ToDo More useful errors
                 new_orderline = OrderLineForm(request.POST, auto_id=True)
         else:
             new_orderline = OrderLineForm(request.POST, auto_id=True)
-            messages.success(request, "Orderline edited")
     else:
         if orderline_id:
             form = OrderLineForm(instance=orderline)
