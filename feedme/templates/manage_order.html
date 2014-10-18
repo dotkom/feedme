@@ -39,7 +39,7 @@ FeedMe
                 {% endfor %}
             {% endif %}
             {% if orderlines %}
-                <h2>{{ order }}: {{ total_price }} kr <span class="pull-right">Active: <span class="glyphicons glyphicon-{% if order.active %}remove{% else %}ok{% endif %}"></span></span></h2>
+                <h2>{{ order }}: {{ total_price }} kr <span class="pull-right">Active: <span class="glyphicon glyphicon-{% if order.active %}remove{% else %}ok{% endif %}"></span></span></h2>
                 <table class="table">
                     <tr><th>Orderline</th><th>Menu item</th><th>Comments</th><th>User</th><th>To pay</th><th>Paid for</th><th></th></tr>
                     {% for orderline in orderlines %}
