@@ -33,7 +33,7 @@ def orderview(request, order_id=None):
             form.creator = request.user
             form.order_line = get_order()
             form.save()
-            messages.success(request, 'Order added')
+            messages.success(request, 'Orderline added')
             return redirect(index)
 
         form = OrderForm(request.POST)
@@ -59,8 +59,10 @@ def orderlineview(request, orderline_id=None):
             if check_orderline(request, new_orderline, orderline_id, users):
                 new_orderline.save()
                 form.save_m2m() # Manually save the m2m relations when using commit=False
+                messages.success("Orderline edited")
                 return redirect(index)
             else:
+                messages.error("Orderline validation failed, please verify your data and try again.") # @ToDo More useful errors
                 new_orderline = OrderLineForm(request.POST, auto_id=True)
         else:
             new_orderline = OrderLineForm(request.POST, auto_id=True)
@@ -87,10 +89,10 @@ def edit_orderline(request, orderline_id):
 def delete_orderline(request, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     if not is_in_current_order('orderline', orderline_id):
-        messages.error(request, 'you can not delete orderlines from old orders')
+        messages.error(request, 'You can not delete orderlines from old orders')
     elif orderline.creator == request.user:
         orderline.delete()
-        messages.success(request,'Order line deleted')
+        messages.success(request,'Orderline deleted')
     else:
         messages.error(request, 'You need to be the creator or the buddy')
     return redirect(index)
@@ -104,7 +106,7 @@ def join_orderline(request, orderline_id):
         messages.error(request, 'You can not join orderlines from old orders')
     elif in_other_orderline(request.user):
         messages.error(request, 'You cannot be in multiple orderlines')
-    elif not validate_user_funds(request.user, (orderline.price / (orderline.users.count() + 2))):
+    elif not validate_user_funds(request.user, (orderline.price / (orderline.users.count() + 1))): # Adds us to the test aswell
         messages.error(request, 'You need cashes')
     else:
         orderline.users.add(request.user)
@@ -136,7 +138,7 @@ def new_order(request):
         if form.is_valid():
             form.save()
             messages.success(request,'New order added')
-            return redirect(new_order)
+            return redirect(index)
     else:
         form = NewOrderForm()
         form.fields["date"].initial = get_next_tuesday()
@@ -216,8 +218,8 @@ def new_restaurant(request, restaurant_id=None):
         if form.is_valid():
             data = form.cleaned_data
             form.save()
-            messages.success(request, "Success - restaurant added")
-            return redirect(new_restaurant)
+            messages.success(request, "Restaurant added")
+            return redirect(new_order)
         else:
             form = NewRestaurantForm(request.POST)
     else:
@@ -281,7 +283,7 @@ def check_orderline(request, form, orderline_id=None, buddies=None):
     amount = amount / len(users)
     for user in users:
         if not validate_user_funds(user, amount):
-            messages.error(request, 'Unsufficient funds')
+            messages.error(request, 'Unsufficient funds caught for %s' % user.get_nickname())
             return False
 
     messages.success(request, 'Order line added')
@@ -306,17 +308,20 @@ def handle_payment(request, order):
                 pay(orderline.creator, amount)
                 for user in orderline.users.all():
                     pay(user, amount)
+                    paid.append(user.get_username())
+                    if user.balance < 0:
+                        negatives.append(user.get_username())
                 orderline.paid_for = True
                 orderline.save()
             else:
                 pay(orderline.creator(orderline.get_total_price()))
                 orderline.paid_for = True
                 orderline.save()
-                paid.append(orderline.creator)
+                paid.append(orderline.creator.get_username())
                 if orderline.creator.balance < 0:
-                    negatives.append(orderline.creator)
+                    negatives.append(orderline.creator.get_username())
         else:
-            already_paid.append(orderline.creator)
+            already_paid.append(orderline.creator.get_username())
     if len(paid) > 0:
         messages.success(request, 'Paid orderlines for %s.' % ', '.join(paid))
     if len(already_paid) > 0:
@@ -326,7 +331,7 @@ def handle_payment(request, order):
 
 # The actual function for payment
 def pay(user, amount):
-    user.balance.withdraw(amount)
+    user.balance.withdraw(amount) # This returns True/False whether or not the payment was possible.
     user.balance.save()
 
 # Deposit of funds
