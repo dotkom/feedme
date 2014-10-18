@@ -29,7 +29,7 @@ FeedMe
           {% csrf_token %}
           <div class="content">
             {% admin_tabs form.name  %}
-            {% if form and not orderlines %}
+            {% if form %}
                 {% for field in form %}
                   <div class="fieldWrapper clearfix">
                     <label>{{ field.label_tag }}</label>
