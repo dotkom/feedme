@@ -183,10 +183,11 @@ def manage_order(request):
             data = form.cleaned_data
             order = get_object_or_404(Order, pk=data['orders'].id)
             if request.POST['act'] == 'set_active_order':
-                should_be_active = request.post['set_active'] == "True"
+                should_be_active = request.POST['set_active'] == "True"
+                print "setting order %s [got %s]" % (should_be_active, request.POST['set_active'])
                 order.active = should_be_active
                 order.save()
-                redirect(manage_order)
+                return redirect(manage_order)
             orderlines = order.orderline_set.all()
             total_price = order.extra_costs
             users = 0
