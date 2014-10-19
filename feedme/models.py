@@ -55,8 +55,8 @@ class Order(models.Model):
                 for order in orders:
                     if order.active:
                         return order
-            else:
-                return None
+        else:
+            return None
 
     def __init__(self):
         prev_active = self.get_latest()
