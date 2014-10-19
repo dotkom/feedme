@@ -182,9 +182,8 @@ def manage_order(request):
         if form.is_valid():
             data = form.cleaned_data
             order = get_object_or_404(Order, pk=data['orders'].id)
-            if request.POST['act'] == 'set_active_order':
+            if request.POST['act'] == 'set_active_order' or 'active_order' in request.POST:
                 should_be_active = request.POST['set_active'] == "True"
-                print "setting order %s [got %s]" % (should_be_active, request.POST['set_active'])
                 order.active = should_be_active
                 order.save()
                 return redirect(manage_order)

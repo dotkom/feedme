@@ -51,7 +51,18 @@ class Order(models.Model):
 
     def get_latest(self):
         if Order.objects.all():
-            return Order.objects.all().latest()
+                orders = Order.objects.all().order_by('-id')
+                for order in orders:
+                    if order.active:
+                        return order
+            else:
+                return None
+
+    def __init__(self):
+        prev_active = self.get_latest()
+        if prev_active != None:
+            prev_active.active = False
+            prev_active.save()
 
     def __unicode__(self):
         return "%s @ %s" % (self.date.strftime("%d-%m-%Y"), self.restaurant)
