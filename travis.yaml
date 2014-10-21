@@ -1,8 +1,8 @@
 language: python
-install
+install:
   - pip install tox
 script:
   - tox
-env: 
+env:
   - TOXENV=django16
   - TOXENV=coverage
