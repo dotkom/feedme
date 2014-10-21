@@ -7,8 +7,8 @@ from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Sum
 
-from models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance
-from forms import OrderLineForm, OrderForm,  ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
+from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance
+from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
 
 User = get_user_model()
 
@@ -97,7 +97,7 @@ def delete_orderline(request, orderline_id):
         messages.error(request, 'You can not delete orderlines from old orders')
     elif orderline.creator == request.user:
         orderline.delete()
-        messages.success(request,'Orderline deleted')
+        messages.success(request, 'Orderline deleted')
     else:
         messages.error(request, 'You need to be the creator or the buddy')
     return redirect(index)
@@ -142,13 +142,13 @@ def new_order(request):
         form = NewOrderForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request,'New order added')
+            messages.success(request, 'New order added')
             return redirect(index)
     else:
         form = NewOrderForm()
         form.fields["date"].initial = get_next_tuesday()
 
-    return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
+    return render(request, 'admin.html', {'form' : form, 'is_admin': is_admin(request) })
 
 # Manage users (deposit, withdraw, overview)
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)

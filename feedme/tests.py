@@ -126,7 +126,7 @@ class ViewPermissionsTestCase(TestCase):
         feedme_user = User.objects.get(username='FeedmeUser1')
         admin_user = User.objects.get(username='AdminUser1')
 
-        self.assertEqual(1,1)
+        self.assertEqual(1, 1)
         # @ToDo
 
 class ViewMoneyLogicTestCase(TestCase):
