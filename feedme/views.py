@@ -278,7 +278,7 @@ def check_orderline(request, form, orderline_id=None, buddies=None):
     orderline_exists = False
     if orderline_id == None:
         orderline = OrderLine()
-        orderline.creator = User.objects.get(username=form.creator)
+        orderline.creator = User.objects.get(username=form.creator.username)
     else:
         orderline = get_object_or_404(OrderLine, pk=orderline_id)
         orderline_exists = True
@@ -322,7 +322,7 @@ def handle_payment(request, order):
                 orderline.paid_for = True
                 orderline.save()
             else:
-                pay(orderline.creator(orderline.get_total_price()))
+                pay(orderline.creator, orderline.get_total_price())
                 orderline.paid_for = True
                 orderline.save()
                 paid.append(orderline.creator.get_username())
