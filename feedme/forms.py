@@ -13,39 +13,39 @@ class OrderLineForm(ModelForm):
         self.fields['users'].empty_label = None
 
 class OrderForm(ModelForm):
-    name= u'order'
+    name = u'order'
 
     class Meta:
         model = Order
         fields = ('date', )
 
 class ManageOrderForm(ModelForm):
-    name= u'orders'
+    name = u'orders'
 
     class Meta:
         model = ManageOrders
 
 class ManageBalanceForm(ModelForm):
-    name= u'users'
+    name = u'users'
 
     class Meta:
         model = ManageBalance
 
 class ManageOrderLimitForm(ModelForm):
-    name= u'order limit'
+    name = u'order limit'
 
     class Meta:
         model = ManageOrderLimit
 
 class NewOrderForm(ModelForm):
-    name= u'new order'
+    name = u'new order'
 
     class Meta:
         model = Order
         #fields = ('date',)
 
 class NewRestaurantForm(ModelForm):
-    name= u'new restaurant'
+    name = u'new restaurant'
 
     class Meta:
         model = Restaurant

@@ -96,13 +96,13 @@ class OrderTestCase(TestCase):
     def test_get_extra_costs(self):
         order = G(Order, extra_costs=50)
         user = G(User)
-        orderline_1 = G(OrderLine, order=order, creator=user, users=[user,])
-        orderline_2 = G(OrderLine, order=order, creator=user, users=[user,])
+        G(OrderLine, order=order, creator=user, users=[user,])
+        G(OrderLine, order=order, creator=user, users=[user,])
         self.assertEqual(order.get_extra_costs(), 25)
 
     def test_get_latest(self):
         order = G(Order, date=date.today() - timedelta(days=1))
-        order_inactive = G(Order, date=date.today(), active=False)
+        G(Order, date=date.today(), active=False)
         self.assertEqual(order.get_latest(), order)
         order.active = False
         order.save()
@@ -121,6 +121,7 @@ class ViewPermissionsTestCase(TestCase):
         Group.objects.get(name='dotKom').user_set.add(User.objects.get(username='AdminUser1'))
         Group.objects.get(name='feedmeadmin').user_set.add(User.objects.get(username='AdminUser1'))
 
+"""
     def user_able_to_see_index(self):
         regular_user = User.objects.get(username='TestUser1')
         feedme_user = User.objects.get(username='FeedmeUser1')
@@ -128,26 +129,30 @@ class ViewPermissionsTestCase(TestCase):
 
         self.assertEqual(1, 1)
         # @ToDo
+"""
 
 class ViewMoneyLogicTestCase(TestCase):
     def test_validate_user_funds(self):
         feedme_user = G(User)
-        feedme_user_balance = get_or_create_balance(feedme_user)
+        get_or_create_balance(feedme_user)
 
         feedme_user.balance.deposit(100)
         feedme_user.balance.save()
 
-        self.assertTrue(validate_user_funds(feedme_user, 99), 'Expected %s, but got %s\nShould evaluate to True when user.balance >= funds.' % (True, validate_user_funds(feedme_user, 99)))
-        self.assertTrue(validate_user_funds(feedme_user, 100), 'Should evaluate to True when user.balance >= funds.')
-        self.assertFalse(validate_user_funds(feedme_user, 101), 'User does not have enough funds')
+        self.assertTrue(validate_user_funds(feedme_user, 99), \
+            'Should evaluate to True when user.balance >= funds.')
+        self.assertTrue(validate_user_funds(feedme_user, 100), \
+            'Should evaluate to True when user.balance >= funds.')
+        self.assertFalse(validate_user_funds(feedme_user, 101), \
+            'User does not have enough funds')
 
 class ViewLogicTestCase(TestCase):
     def set_up(self):
         self.user_1 = G(User)
         self.user_2 = G(User)
 
-        get_or_create_balance(user_1)
-        get_or_create_balance(user_2)
+        get_or_create_balance(self.user_1)
+        get_or_create_balance(self.user_2)
 
         self.dotkom_grp = G(Group, name='dotKom')
         self.admin_grp = G(Group, name='feedmeadmin')
@@ -169,8 +174,8 @@ class ViewLogicTestCase(TestCase):
         user_2 = G(User)
 
         order = G(Order)
-        orderline_1 = G(OrderLine, order=order, creator=user_1)
-        orderline_2 = G(OrderLine, order=order)
+        G(OrderLine, order=order, creator=user_1)
+        G(OrderLine, order=order)
 
         self.assertTrue(in_other_orderline(user_1), 'User should be in another orderline')
         self.assertFalse(in_other_orderline(user_2), 'User should not be in another orderline')
@@ -180,8 +185,8 @@ class ViewLogicTestCase(TestCase):
         user_2 = G(User)
 
         order = G(Order)
-        orderline_1 = G(OrderLine, order=order, users=[user_1])
-        orderline_2 = G(OrderLine, order=order)
+        G(OrderLine, order=order, users=[user_1])
+        G(OrderLine, order=order)
 
         self.assertTrue(in_other_orderline(user_1), 'User should be in another orderline')
         self.assertFalse(in_other_orderline(user_2), 'User should not be in another orderline')

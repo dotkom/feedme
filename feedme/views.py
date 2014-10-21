@@ -5,7 +5,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
-from django.db.models import Sum
 
 from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance
 from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
@@ -148,7 +147,7 @@ def new_order(request):
         form = NewOrderForm()
         form.fields["date"].initial = get_next_tuesday()
 
-    return render(request, 'admin.html', {'form' : form, 'is_admin': is_admin(request) })
+    return render(request, 'admin.html', {'form' : form, 'is_admin': is_admin(request)})
 
 # Manage users (deposit, withdraw, overview)
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
@@ -172,7 +171,7 @@ def manage_users(request, balance=None):
             users.append(get_or_create_balance(user))
         form.fields["user"].queryset = get_orderline_users()
 
-    return render(request, 'manage_users.html', {'form' : form, 'users': users, 'is_admin' : is_admin(request) })
+    return render(request, 'manage_users.html', {'form' : form, 'users': users, 'is_admin' : is_admin(request)})
 
 # Manage order (payment handling)
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
@@ -188,12 +187,9 @@ def manage_order(request):
                 return redirect(manage_order)
             orderlines = order.orderline_set.all()
             total_price = order.extra_costs
-            users = 0
             for orderline in orderlines:
                 orderline.users.add(orderline.creator)
-                users += 1
                 orderline.each = orderline.get_total_price() / (orderline.users.count())
-                users += orderline.users.count()
                 total_price += orderline.price
             #handle_payment(request, data)
             #return redirect(manage_order)
@@ -225,7 +221,6 @@ def new_restaurant(request, restaurant_id=None):
     if request.method == 'POST':
         form = NewRestaurantForm(request.POST, instance=restaurant)
         if form.is_valid():
-            data = form.cleaned_data
             form.save()
             messages.success(request, "Restaurant added")
             return redirect(new_order)
@@ -238,9 +233,9 @@ def new_restaurant(request, restaurant_id=None):
 
 # Edit restaurant
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
-def edit_restaurant(request, restaurant_id):
-    order = get_object_or_404(Restaurant, pk=restaurant_id)
-    return new_restaurant(request)
+def edit_restaurant(request, restaurant_id=None):
+    restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
+    return new_restaurant(request, restaurant)
 
 # Remove references to this
 def get_order_limit():
@@ -261,12 +256,12 @@ def set_order_limit(request):
             data = form.cleaned_data
             limit.order_limit = data['order_limit']
             limit.save()
-            messages.success(request,'Order limit changed')
+            messages.success(request, 'Order limit changed')
             return redirect(set_order_limit)
     else:
         form = ManageOrderLimitForm(instance=limit)
 
-    return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request) })
+    return render(request, 'admin.html', {'form' : form, 'is_admin' : is_admin(request)})
 
 # @TODO Move logics to models
 

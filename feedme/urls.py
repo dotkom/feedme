@@ -1,10 +1,11 @@
 from django.conf.urls import patterns, include, url
 
-urlpatterns = patterns('feedme.views',
+urlpatterns = patterns(
+    'feedme.views',
     url(r'^$', 'index', name='index'),
     url(r'^neworder/$', 'orderlineview', name='new_orderline'),
-    url(r'^edit/(?P<orderline_id>\d+)/$','edit_orderline', name='edit_orderline'),
-    url(r'^delete/(?P<orderline_id>\d+)/$','delete_orderline', name='delete_orderline'),
+    url(r'^edit/(?P<orderline_id>\d+)/$', 'edit_orderline', name='edit_orderline'),
+    url(r'^delete/(?P<orderline_id>\d+)/$', 'delete_orderline', name='delete_orderline'),
     url(r'^order/$', 'orderview', name='new_order'),
     #url(r'^order/(?P<order_id>\d+)/$', 'edit_order', name='edit_order'),
     #url(r'^delete/order/(?P<order_id>\d+)/$','delete_order', name='delete_order'),
