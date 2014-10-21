@@ -1,3 +1,4 @@
+include README.md
 recursive-include feedme/static *
 recursive-include feedme/templates *
 recursive-include feedme/templatetags *
