@@ -6,4 +6,4 @@ env:
 install:
   - pip install -q Django==$DJANGO_VERSION
   - pip install -q -r feedme/requirements.txt
-script: python manage.py test
+script: python runtests.py
