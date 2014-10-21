@@ -1,4 +1,6 @@
-from datetime import date
+# coding=utf-8
+
+from datetime import date, timedelta
 
 from django.test import TestCase
 
@@ -58,6 +60,54 @@ class ModelTestCase(TestCase):
         self.assertEqual(feedme_user.withdraw(50), False, 'Should return False, but still allow dotKommers to overload their balance')
         self.assertEqual(feedme_user.balance, -25, 'Someone overloaded their account')
 
+class RestaurantTestCase(TestCase):
+    def set_up(self):
+        self.restaurant = G(Restaurant)
+
+    def test_unicode_restaurant_name(self):
+        restaurant = G(Restaurant, restaurant_name=u'ø')
+        self.assertEqual(restaurant.restaurant_name, unicode(restaurant), 'The unicode name of the restaurant should be the same as the input value')
+
+class OrderTestCase(TestCase):
+    def set_up(self):
+        self.restaurant = G(Restaurant)
+        self.order = G(Order)
+        self.orderline = G(OrderLine)
+
+    def test_unicode_order_name(self):
+        order = G(Order)
+        self.assertEqual(order.__unicode__(), "%s @ %s" % (order.date.strftime("%d-%m-%Y"), order.restaurant.restaurant_name))
+
+    def test_get_total_sum(self):
+        order_1 = G(Order)
+        order_2 = G(Order, extra_costs=50)
+        orderline_1 = G(OrderLine, order=order_1)
+        orderline_2 = G(OrderLine, order=order_1)
+        orderline_3 = G(OrderLine, order=order_2)
+        orderline_4 = G(OrderLine, order=order_2)
+
+        s = orderline_1.price + orderline_2.price + order_1.extra_costs
+        r = order_1.get_total_sum()
+        self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
+        s = orderline_3.price + orderline_4.price + order_2.extra_costs
+        r = order_2.get_total_sum()
+        self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
+
+    def test_get_extra_costs(self):
+        order = G(Order, extra_costs=50)
+        user = G(User)
+        G(OrderLine, order=order, creator=user, users=[user,])
+        G(OrderLine, order=order, creator=user, users=[user,])
+        self.assertEqual(order.get_extra_costs(), 25)
+
+    def test_get_latest(self):
+        order = G(Order, date=date.today() - timedelta(days=1))
+        G(Order, date=date.today(), active=False)
+        self.assertEqual(order.get_latest(), order)
+        order.active = False
+        order.save()
+        self.assertFalse(order.get_latest())
+
 class ViewPermissionsTestCase(TestCase):
     def set_up(self):
         User.objects.create(username='TestUser1')
@@ -71,33 +121,38 @@ class ViewPermissionsTestCase(TestCase):
         Group.objects.get(name='dotKom').user_set.add(User.objects.get(username='AdminUser1'))
         Group.objects.get(name='feedmeadmin').user_set.add(User.objects.get(username='AdminUser1'))
 
+"""
     def user_able_to_see_index(self):
         regular_user = User.objects.get(username='TestUser1')
         feedme_user = User.objects.get(username='FeedmeUser1')
         admin_user = User.objects.get(username='AdminUser1')
 
-        self.assertEqual(1,1)
+        self.assertEqual(1, 1)
         # @ToDo
+"""
 
 class ViewMoneyLogicTestCase(TestCase):
     def test_validate_user_funds(self):
         feedme_user = G(User)
-        feedme_user_balance = get_or_create_balance(feedme_user)
+        get_or_create_balance(feedme_user)
 
         feedme_user.balance.deposit(100)
         feedme_user.balance.save()
 
-        self.assertTrue(validate_user_funds(feedme_user, 99), 'Expected %s, but got %s\nShould evaluate to True when user.balance >= funds.' % (True, validate_user_funds(feedme_user, 99)))
-        self.assertTrue(validate_user_funds(feedme_user, 100), 'Should evaluate to True when user.balance >= funds.')
-        self.assertFalse(validate_user_funds(feedme_user, 101), 'User does not have enough funds')
+        self.assertTrue(validate_user_funds(feedme_user, 99), \
+            'Should evaluate to True when user.balance >= funds.')
+        self.assertTrue(validate_user_funds(feedme_user, 100), \
+            'Should evaluate to True when user.balance >= funds.')
+        self.assertFalse(validate_user_funds(feedme_user, 101), \
+            'User does not have enough funds')
 
 class ViewLogicTestCase(TestCase):
     def set_up(self):
         self.user_1 = G(User)
         self.user_2 = G(User)
 
-        get_or_create_balance(user_1)
-        get_or_create_balance(user_2)
+        get_or_create_balance(self.user_1)
+        get_or_create_balance(self.user_2)
 
         self.dotkom_grp = G(Group, name='dotKom')
         self.admin_grp = G(Group, name='feedmeadmin')
@@ -119,8 +174,8 @@ class ViewLogicTestCase(TestCase):
         user_2 = G(User)
 
         order = G(Order)
-        orderline_1 = G(OrderLine, order=order, creator=user_1)
-        orderline_2 = G(OrderLine, order=order)
+        G(OrderLine, order=order, creator=user_1)
+        G(OrderLine, order=order)
 
         self.assertTrue(in_other_orderline(user_1), 'User should be in another orderline')
         self.assertFalse(in_other_orderline(user_2), 'User should not be in another orderline')
@@ -130,8 +185,8 @@ class ViewLogicTestCase(TestCase):
         user_2 = G(User)
 
         order = G(Order)
-        orderline_1 = G(OrderLine, order=order, users=[user_1])
-        orderline_2 = G(OrderLine, order=order)
+        G(OrderLine, order=order, users=[user_1])
+        G(OrderLine, order=order)
 
         self.assertTrue(in_other_orderline(user_1), 'User should be in another orderline')
         self.assertFalse(in_other_orderline(user_2), 'User should not be in another orderline')
