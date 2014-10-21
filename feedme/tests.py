@@ -1,4 +1,6 @@
-from datetime import date
+# coding=utf-8
+
+from datetime import date, timedelta
 
 from django.test import TestCase
 
@@ -57,6 +59,54 @@ class ModelTestCase(TestCase):
         self.assertEqual(feedme_user.balance, 25, 'Balance should be 25 after withdrawing 25')
         self.assertEqual(feedme_user.withdraw(50), False, 'Should return False, but still allow dotKommers to overload their balance')
         self.assertEqual(feedme_user.balance, -25, 'Someone overloaded their account')
+
+class RestaurantTestCase(TestCase):
+    def set_up(self):
+        self.restaurant = G(Restaurant)
+
+    def test_unicode_restaurant_name(self):
+        restaurant = G(Restaurant, restaurant_name=u'ø')
+        self.assertEqual(restaurant.restaurant_name, unicode(restaurant), 'The unicode name of the restaurant should be the same as the input value')
+
+class OrderTestCase(TestCase):
+    def set_up(self):
+        self.restaurant = G(Restaurant)
+        self.order = G(Order)
+        self.orderline = G(OrderLine)
+
+    def test_unicode_order_name(self):
+        order = G(Order)
+        self.assertEqual(order.__unicode__(), "%s @ %s" % (order.date.strftime("%d-%m-%Y"), order.restaurant.restaurant_name))
+
+    def test_get_total_sum(self):
+        order_1 = G(Order)
+        order_2 = G(Order, extra_costs=50)
+        orderline_1 = G(OrderLine, order=order_1)
+        orderline_2 = G(OrderLine, order=order_1)
+        orderline_3 = G(OrderLine, order=order_2)
+        orderline_4 = G(OrderLine, order=order_2)
+
+        s = orderline_1.price + orderline_2.price + order_1.extra_costs
+        r = order_1.get_total_sum()
+        self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
+        s = orderline_3.price + orderline_4.price + order_2.extra_costs
+        r = order_2.get_total_sum()
+        self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
+
+    def test_get_extra_costs(self):
+        order = G(Order, extra_costs=50)
+        user = G(User)
+        orderline_1 = G(OrderLine, order=order, creator=user, users=[user,])
+        orderline_2 = G(OrderLine, order=order, creator=user, users=[user,])
+        self.assertEqual(order.get_extra_costs(), 25)
+
+    def test_get_latest(self):
+        order = G(Order, date=date.today() - timedelta(days=1))
+        order_inactive = G(Order, date=date.today(), active=False)
+        self.assertEqual(order.get_latest(), order)
+        order.active = False
+        order.save()
+        self.assertFalse(order.get_latest())
 
 class ViewPermissionsTestCase(TestCase):
     def set_up(self):
