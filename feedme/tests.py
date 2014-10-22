@@ -65,7 +65,7 @@ class RestaurantTestCase(TestCase):
         self.restaurant = G(Restaurant)
 
     def test_unicode_restaurant_name(self):
-        restaurant = G(Restaurant, restaurant_name=u'ø')
+        restaurant = G(Restaurant)
         self.assertEqual(restaurant.restaurant_name, unicode(restaurant), 'The unicode name of the restaurant should be the same as the input value')
 
 class OrderTestCase(TestCase):
