@@ -5,3 +5,4 @@ django-dynamic-fixture==1.8.0
 
 # Testing
 django-nose==1.2
+coveralls==0.4.4

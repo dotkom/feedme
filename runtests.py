@@ -38,7 +38,7 @@ except ImportError:
 
 def run_tests(*test_args):
     if not test_args:
-        test_args = ['feedme']
+        test_args = ['feedme', '--with-coverage','--cover-package=feedme']
 
     # Run tests
     test_runner = NoseTestSuiteRunner(verbosity=1)
