@@ -25,7 +25,10 @@ class Order(models.Model):
     active = models.BooleanField(_('Order currently active'), default=True)
 
     def get_total_sum(self):
-        return self.orderline_set.aggregate(models.Sum('price'))['price__sum'] + self.extra_costs
+        s = self.orderline_set.aggregate(models.Sum('price'))['price__sum']
+        if s == None:
+            s = 0
+        return s + self.extra_costs
 
     def get_extra_costs(self):
         orderlines = self.orderline_set.all()
@@ -100,35 +103,43 @@ class OrderLine(models.Model):
         verbose_name = _('Order line')
         verbose_name_plural = _('Order lines')
 
+class Transaction(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    amount = models.FloatField(_('amount'), default=0)
+    date = models.DateTimeField(_('transaction date'), auto_now_add=True)
+
+    def __unicode__(self):
+        return self.user.get_username()
+
 class Balance(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
-    balance = models.FloatField(_('balance'), default=0)
 
     def get_balance(self):
-        return "%0.f kr" % self.balance
+        if self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum'] == None:
+            self.add_transaction(0)
+        return self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum']
+
+    def add_transaction(self, amount):
+        transaction = Transaction()
+        transaction.user = self.user
+        transaction.amount = amount
+        transaction.save()
+        return True
 
     def deposit(self, amount):
-        if amount > 0:
-            self.balance += amount
-            return True
-        else:
-            return False # Error handling?
+        return self.add_transaction(amount)
+        #print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
 
     def withdraw(self, amount):
-        # This is done on purpose
-        if amount <= self.balance:
-            self.balance -= amount
-            return True
-        else:
-            self.balance -= amount
-            return False
+        return self.add_transaction(amount * -1)
+        #print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
 
     def __unicode__(self):
         return "%s: %s" % (self.user, self.get_balance())
 
 class ManageBalance(models.Model):
     user = models.ForeignKey(Balance)
-    deposit = models.FloatField(_('deposit amount'), default=0)
+    amount = models.FloatField(_('amount'), default=0)
 
 class ManageOrders(models.Model):
     orders = models.OneToOneField(Order, related_name=_('Orders'))

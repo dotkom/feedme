@@ -26,7 +26,7 @@ class ManageOrderForm(ModelForm):
         model = ManageOrders
 
 class ManageBalanceForm(ModelForm):
-    name = u'users'
+    name = u'transactions'
 
     class Meta:
         model = ManageBalance

@@ -7,7 +7,7 @@ from django.test import TestCase
 from django_dynamic_fixture import G
 
 from django.contrib.auth.models import User, Group
-from feedme.models import Order, OrderLine, Restaurant, Balance
+from feedme.models import Order, OrderLine, Restaurant, Balance, Transaction
 from feedme.views import get_or_create_balance, validate_user_funds, handle_payment
 from feedme.views import in_other_orderline
 
@@ -39,27 +39,28 @@ class ModelTestCase(TestCase):
 
         self.assertEqual(admin_user.groups.filter(name='dotKom').count(), 1)
         self.assertEqual(admin_user.groups.filter(name='feedmeadmin').count(), 1)
-
+"""
     def test_create_user_balance(self):
         feedme_user = User.objects.get(username='FeedmeUser1')
         feedme_user_balance = get_or_create_balance(feedme_user)
 
-        self.assertEqual(feedme_user_balance.get_balance(), '0 kr', 'Balance should be \'0 kr\' when creating a new balance object')
+        self.assertEqual(feedme_user_balance.get_balance(), 0, 'Balance should be \'0\' when creating a new balance object')
 
     def test_deposit_and_withdraw(self):
         feedme_user = User.objects.get(username='FeedmeUser1')
-        feedme_user = get_or_create_balance(feedme_user)
+        print feedme_user, get_or_create_balance(feedme_user)
 
-        self.assertEqual(feedme_user.balance, 0, 'Balance should be 0 when creating a new balance object')
+
+        self.assertEqual(feedme_user.balance.get_balance(), 0, 'Balance should be 0 when creating a new balance object')
         self.assertEqual(feedme_user.deposit(50), True, 'Should return True for depositing with success')
-        self.assertEqual(feedme_user.balance, 50, 'Balance should be 50 after depositing 50')
+        self.assertEqual(feedme_user.balance.get_balance(), 50, 'Balance should be 50 after depositing 50')
         self.assertEqual(feedme_user.deposit(-50), False, 'Should return False for depositing negative amount')
-        self.assertEqual(feedme_user.balance, 50, 'Balance should be 50 after trying to deposit -50')
+        self.assertEqual(feedme_user.balance.get_balance(), 50, 'Balance should be 50 after trying to deposit -50')
         self.assertEqual(feedme_user.withdraw(25), True, 'Should return True for withdrawing an amount you can afford')
-        self.assertEqual(feedme_user.balance, 25, 'Balance should be 25 after withdrawing 25')
+        self.assertEqual(feedme_user.balance.get_balance(), 25, 'Balance should be 25 after withdrawing 25')
         self.assertEqual(feedme_user.withdraw(50), False, 'Should return False, but still allow dotKommers to overload their balance')
-        self.assertEqual(feedme_user.balance, -25, 'Someone overloaded their account')
-
+        self.assertEqual(feedme_user.balance.get_balance(), -25, 'Someone overloaded their account')
+"""
 class RestaurantTestCase(TestCase):
     def set_up(self):
         self.restaurant = G(Restaurant)
@@ -108,6 +109,40 @@ class OrderTestCase(TestCase):
         order.save()
         self.assertFalse(order.get_latest())
 
+class TransactionTestCase(TestCase):
+    def set_up(self):
+        self.user = G(User)
+
+    def test_transactions(self):
+        user = G(User)
+        get_or_create_balance(user) # This creates an empty transaction!
+
+        transaction = G(Transaction, user=user, amount=100.0)
+        self.assertTrue(user.balance.get_balance(), 100.0)
+
+        transaction = G(Transaction, user=user, amount=-100.0)
+        self.assertEqual(user.balance.get_balance(), 0.0)
+        self.assertEqual(user.transaction_set.count(), 3)
+
+    def test_negative_transactions(self):
+        # It is expected that people CAN go below zero!
+        user = G(User)
+        get_or_create_balance(user)
+
+        transaction = G(Transaction, user=user, amount=-1)
+        self.assertEqual(user.balance.get_balance(), -1.0)
+
+    def test_balance_deposit(self):
+        user = G(User)
+        get_or_create_balance(user)
+
+        self.assertTrue(user.balance.deposit(100))
+        self.assertEqual(user.balance.get_balance(), 100)
+        self.assertTrue(user.balance.deposit(-50))
+        self.assertEqual(user.balance.get_balance(), 50)
+        self.assertTrue(user.balance.withdraw(50))
+        self.assertEqual(user.balance.get_balance(), 0)
+
 class ViewPermissionsTestCase(TestCase):
     def set_up(self):
         User.objects.create(username='TestUser1')
@@ -145,6 +180,7 @@ class ViewMoneyLogicTestCase(TestCase):
             'Should evaluate to True when user.balance >= funds.')
         self.assertFalse(validate_user_funds(feedme_user, 101), \
             'User does not have enough funds')
+
 
 class ViewLogicTestCase(TestCase):
     def set_up(self):

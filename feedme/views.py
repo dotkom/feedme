@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 
-from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance
+from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction
 from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
 
 User = get_user_model()
@@ -158,7 +158,8 @@ def manage_users(request, balance=None):
         else:
             balance = get_object_or_404(Balance, balance)
         form = ManageBalanceForm(request.POST)
-        form.user_funds = balance
+        #form.sent_by = balance
+        print form
         if form.is_valid():
             data = form.cleaned_data
             handle_deposit(data)
@@ -166,10 +167,11 @@ def manage_users(request, balance=None):
             return redirect(manage_users)
     else:
         form = ManageBalanceForm()
-        users = []
-        for user in get_orderline_users():
-            users.append(get_or_create_balance(user))
-        form.fields["user"].queryset = get_orderline_users()
+    users = []
+    for user in get_orderline_users():
+        get_or_create_balance(user)
+        users.append(user)
+    form.fields["user"].queryset = get_orderline_users()
 
     return render(request, 'manage_users.html', {'form' : form, 'users': users, 'is_admin' : is_admin(request)})
 
@@ -287,13 +289,14 @@ def check_orderline(request, form, orderline_id=None, buddies=None):
     amount = amount / len(users)
     for user in users:
         if not validate_user_funds(user, amount):
-            messages.error(request, 'Unsufficient funds caught for %s' % user.get_nickname())
+            messages.error(request, 'Unsufficient funds caught for %s' % user.get_username())
             return False
     return True
 
 # Check that the user has enough funds
 def validate_user_funds(user, amount):
-    return get_or_create_balance(user).balance >= amount
+    get_or_create_balance(user)
+    return user.balance.get_balance() >= amount
 
 # Handle payment
 def handle_payment(request, order):
@@ -312,7 +315,7 @@ def handle_payment(request, order):
                 for user in orderline.users.all():
                     pay(user, amount)
                     paid.append(user.get_username())
-                    if user.balance < 0:
+                    if user.balance.get_balance() < 0:
                         negatives.append(user.get_username())
                 orderline.paid_for = True
                 orderline.save()
@@ -321,7 +324,7 @@ def handle_payment(request, order):
                 orderline.paid_for = True
                 orderline.save()
                 paid.append(orderline.creator.get_username())
-                if orderline.creator.balance < 0:
+                if orderline.creator.balance.get_balance() < 0:
                     negatives.append(orderline.creator.get_username())
         else:
             already_paid.append(orderline.creator.get_username())
@@ -348,22 +351,38 @@ def pay(user, amount):
 
 # Deposit of funds
 def handle_deposit(data):
-    balance = data['user']
-    amount = data['deposit']
-    balance.deposit(amount)
-    balance.save()
+    user = data['user']
+    get_or_create_balance(user)
+    amount = data['amount']
+    print user, amount
+    if amount >= 0:
+        user.user.balance.deposit(amount)
+    else:
+        user.user.balance.withdraw(amount)
+
+    #user = User.objects.get(id=data['user'].user.id)
+    #print user
+    #print data
+
+    #print data['amount']
+    #user.balance.deposit(data['amount'])
+    #balance = data['user']
+    #amount = data['amount']
+    #print balance
+    #balance.user.balance.deposit(amount)
+    #balance.save()
 
 # Get or create balance for a user
 def get_or_create_balance(user):
     try:
         user_balance = Balance.objects.get(user=user)
         if user_balance:
-            return user_balance
+            return user_balance.get_balance()
     except:
         balance = Balance()
         balance.user = user
         balance.save()
-        return balance
+        return user.balance.get_balance()
 
 # yes
 def get_next_tuesday():

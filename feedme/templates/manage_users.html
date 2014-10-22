@@ -35,13 +35,13 @@ FeedMe
         </form>
         {% if users %}
             <table class="table">
-                <tr><th>User</th><th>Balance</th><th>Deposit amount</th><th></th></tr>
+                <tr><th>User</th><th>Balance</th><th>Amount</th><th></th></tr>
                 {% for user in users %}
                 <form action="" method="POST">{% csrf_token %}<tr>
                     <input type="text" name="act" value="deposit-table" hidden>
-                    <td><input type="text" name="user" value="{{ user.user.id }}" hidden required> {{ user.user.username }}</td>
-                    <td>{{ user.get_balance }}
-                    <td>{{ form.deposit }}</td>
+                    <td><input type="text" name="user" value="{{ user.id }}" hidden required> {{ user }}</td>
+                    <td>{{ user.balance.get_balance }}
+                    <td>{{ form.amount }}</td>
                     <td><input type="submit" name="submit" value="Deposit" class="btn btn-primary"></td>
                 </tr></form>
                 {% endfor %}
