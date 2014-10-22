@@ -8,7 +8,7 @@ os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
     name='feedme',
-    version='1.2.2',
+    version='1.3.0',
     author='dotkom',
     author_email='dotkom@online.ntnu.no',
     packages=['feedme'],
