@@ -30,9 +30,10 @@ try:
     else:
         setup()
 
-    from django.test.simple import DjangoTestSuiteRunner
+    #from django.test.simple import DjangoTestSuiteRunner
+    from django_nose import NoseTestSuiteRunner
 except ImportError:
-    raise ImportError(":OOO")
+    raise ImportError("Missing NoseTestSuiteRunner -- install nosetests")
 
 
 def run_tests(*test_args):
@@ -40,7 +41,7 @@ def run_tests(*test_args):
         test_args = ['feedme']
 
     # Run tests
-    test_runner = DjangoTestSuiteRunner(verbosity=1)
+    test_runner = NoseTestSuiteRunner(verbosity=1)
 
     failures = test_runner.run_tests(test_args)
 
