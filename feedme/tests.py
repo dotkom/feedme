@@ -66,7 +66,7 @@ class RestaurantTestCase(TestCase):
         self.restaurant = G(Restaurant)
 
     def test_unicode_restaurant_name(self):
-        restaurant = G(Restaurant, restaurant_name=u'ø')
+        restaurant = G(Restaurant)
         self.assertEqual(restaurant.restaurant_name, unicode(restaurant), 'The unicode name of the restaurant should be the same as the input value')
 
 class OrderTestCase(TestCase):
@@ -92,7 +92,7 @@ class OrderTestCase(TestCase):
         self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
         s = orderline_3.price + orderline_4.price + order_2.extra_costs
         r = order_2.get_total_sum()
-        self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
+        self.assertEqual(r, s, 'Got %s, expected %s' % (r, s)) 
 
     def test_get_extra_costs(self):
         order = G(Order, extra_costs=50)
