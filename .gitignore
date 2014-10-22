@@ -9,6 +9,8 @@
 .idea*
 .ropeproject
 .coverage
+build/
+feedme-*.tar.gz
 
 collected_static
 sqlite/
