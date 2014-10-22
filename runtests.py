@@ -38,6 +38,8 @@ except ImportError:
 
 def run_tests(*test_args):
     if not test_args:
+        # Jenkins can create pretty stats with this
+        #test_args = ['feedme', '--with-xunit', '--with-xcoverage', '--cover-package=feedme']
         test_args = ['feedme', '--with-coverage','--cover-package=feedme']
 
     # Run tests
