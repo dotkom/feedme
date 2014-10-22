@@ -2,8 +2,9 @@
 
 from datetime import date, timedelta
 
+import django
+django.setup()
 from django.test import TestCase
-
 from django_dynamic_fixture import G
 
 from django.contrib.auth.models import User, Group
