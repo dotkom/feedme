@@ -12,7 +12,8 @@ try:
     from django.contrib.auth import AUTH_USER_MODEL
     User = get_user_model()
 except ImportError:
-    from django.contrib.auth.models import User
+    from django.contrib.auth.models import get_user_model
+    User = get_user_model()
 
 # Index
 #@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
