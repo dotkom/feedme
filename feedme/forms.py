@@ -12,6 +12,7 @@ class OrderLineForm(ModelForm):
         super(OrderLineForm, self).__init__(*args, **kwargs)
         self.fields['users'].empty_label = None
 
+
 class OrderForm(ModelForm):
     name = u'order'
 
@@ -19,11 +20,13 @@ class OrderForm(ModelForm):
         model = Order
         fields = ('date', )
 
+
 class ManageOrderForm(ModelForm):
     name = u'orders'
 
     class Meta:
         model = ManageOrders
+
 
 class ManageBalanceForm(ModelForm):
     name = u'transactions'
@@ -31,11 +34,13 @@ class ManageBalanceForm(ModelForm):
     class Meta:
         model = ManageBalance
 
+
 class ManageOrderLimitForm(ModelForm):
     name = u'order limit'
 
     class Meta:
         model = ManageOrderLimit
+
 
 class NewOrderForm(ModelForm):
     name = u'new order'
@@ -43,6 +48,7 @@ class NewOrderForm(ModelForm):
     class Meta:
         model = Order
         #fields = ('date',)
+
 
 class NewRestaurantForm(ModelForm):
     name = u'new restaurant'

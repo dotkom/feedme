@@ -61,6 +61,8 @@ class ModelTestCase(TestCase):
         self.assertEqual(feedme_user.withdraw(50), False, 'Should return False, but still allow dotKommers to overload their balance')
         self.assertEqual(feedme_user.balance.get_balance(), -25, 'Someone overloaded their account')
 """
+
+
 class RestaurantTestCase(TestCase):
     def set_up(self):
         self.restaurant = G(Restaurant)
@@ -68,6 +70,7 @@ class RestaurantTestCase(TestCase):
     def test_unicode_restaurant_name(self):
         restaurant = G(Restaurant)
         self.assertEqual(restaurant.restaurant_name, unicode(restaurant), 'The unicode name of the restaurant should be the same as the input value')
+
 
 class OrderTestCase(TestCase):
     def set_up(self):
@@ -97,8 +100,8 @@ class OrderTestCase(TestCase):
     def test_get_extra_costs(self):
         order = G(Order, extra_costs=50)
         user = G(User)
-        G(OrderLine, order=order, creator=user, users=[user,])
-        G(OrderLine, order=order, creator=user, users=[user,])
+        G(OrderLine, order=order, creator=user, users=[user, ])
+        G(OrderLine, order=order, creator=user, users=[user, ])
         self.assertEqual(order.get_extra_costs(), 25)
 
     def test_get_latest(self):
@@ -109,18 +112,19 @@ class OrderTestCase(TestCase):
         order.save()
         self.assertFalse(order.get_latest())
 
+
 class TransactionTestCase(TestCase):
     def set_up(self):
         self.user = G(User)
 
     def test_transactions(self):
         user = G(User)
-        get_or_create_balance(user) # This creates an empty transaction!
+        get_or_create_balance(user)  # This creates an empty transaction!
 
-        transaction = G(Transaction, user=user, amount=100.0)
+        G(Transaction, user=user, amount=100.0)
         self.assertTrue(user.balance.get_balance(), 100.0)
 
-        transaction = G(Transaction, user=user, amount=-100.0)
+        G(Transaction, user=user, amount=-100.0)
         self.assertEqual(user.balance.get_balance(), 0.0)
         self.assertEqual(user.transaction_set.count(), 3)
 
@@ -129,7 +133,7 @@ class TransactionTestCase(TestCase):
         user = G(User)
         get_or_create_balance(user)
 
-        transaction = G(Transaction, user=user, amount=-1)
+        G(Transaction, user=user, amount=-1)
         self.assertEqual(user.balance.get_balance(), -1.0)
 
     def test_balance_deposit(self):
@@ -142,6 +146,7 @@ class TransactionTestCase(TestCase):
         self.assertEqual(user.balance.get_balance(), 50)
         self.assertTrue(user.balance.withdraw(50))
         self.assertEqual(user.balance.get_balance(), 0)
+
 
 class ViewPermissionsTestCase(TestCase):
     def set_up(self):
@@ -166,6 +171,7 @@ class ViewPermissionsTestCase(TestCase):
         # @ToDo
 """
 
+
 class ViewMoneyLogicTestCase(TestCase):
     def test_validate_user_funds(self):
         feedme_user = G(User)
@@ -174,11 +180,11 @@ class ViewMoneyLogicTestCase(TestCase):
         feedme_user.balance.deposit(100)
         feedme_user.balance.save()
 
-        self.assertTrue(validate_user_funds(feedme_user, 99), \
+        self.assertTrue(validate_user_funds(feedme_user, 99),
             'Should evaluate to True when user.balance >= funds.')
-        self.assertTrue(validate_user_funds(feedme_user, 100), \
+        self.assertTrue(validate_user_funds(feedme_user, 100),
             'Should evaluate to True when user.balance >= funds.')
-        self.assertFalse(validate_user_funds(feedme_user, 101), \
+        self.assertFalse(validate_user_funds(feedme_user, 101),
             'User does not have enough funds')
 
 
