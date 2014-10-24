@@ -159,7 +159,7 @@ def manage_users(request, balance=None):
             balance = get_object_or_404(Balance, balance)
         form = ManageBalanceForm(request.POST)
         #form.sent_by = balance
-        print form
+        print(form)
         if form.is_valid():
             data = form.cleaned_data
             handle_deposit(data)
@@ -331,7 +331,7 @@ def handle_payment(request, order):
             if orderline.users.all().count() > 0:
                 for user in orderline.users.all():
                     if user.get_username() == orderline.creator.get_username():
-                        print 'user both in users and creator'
+                        print('user both in users and creator')
                     else:
                         already_paid.append(user.get_username())
     if len(paid) > 0:
@@ -354,7 +354,7 @@ def handle_deposit(data):
     user = data['user']
     get_or_create_balance(user)
     amount = data['amount']
-    print user, amount
+    print(user, amount)
     if amount >= 0:
         user.user.balance.deposit(amount)
     else:
