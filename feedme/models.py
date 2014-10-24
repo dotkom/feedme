@@ -4,13 +4,20 @@ from django.db import models
 from django.contrib.auth.models import Group
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
+from django.core.exceptions import AppRegistryNotReady
 
 try:
+    # Django 1.7 way for importing custom user
     from django.contrib.auth import AUTH_USER_MODEL
     User = get_user_model()
 except ImportError:
-    from django.contrib.auth import get_user_model
-    User = get_user_model()
+    try:
+        # Django 1.6 way for importing custom user, will crash in Django 1.7
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+    except AppRegistryNotReady:
+        # If all else fails, import default user model -- please report this bug
+        from django.contrib.auth.models import User
 
 class Restaurant(models.Model):
     restaurant_name = models.CharField(_('name'), max_length=50)
