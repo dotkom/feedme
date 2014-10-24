@@ -12,7 +12,7 @@ try:
     from django.contrib.auth import AUTH_USER_MODEL
     User = get_user_model()
 except ImportError:
-    from django.contrib.auth.models import get_user_model
+    from django.contrib.auth import get_user_model
     User = get_user_model()
 
 # Index
