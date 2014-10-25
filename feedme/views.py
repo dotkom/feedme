@@ -2,18 +2,13 @@ from datetime import date, timedelta
 
 from django.contrib import messages
 from django.conf import settings
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 
 from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction
 from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
 
-#try:
-#    from django.contrib.auth import AUTH_USER_MODEL
-#    User = get_user_model()
-#except ImportError:
-#    from django.contrib.auth import get_user_model
-#    User = get_user_model()
 try:
     # Django 1.7 way for importing custom user
     from django.contrib.auth import AUTH_USER_MODEL
@@ -32,8 +27,23 @@ except ImportError:
 # @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def index(request):
     order = get_order()
-    return render(request, 'index.html', {'order': order, 'is_admin': is_admin(request), 'can_join': not in_other_orderline(request.user)})
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
+                return redirect(index)
+            else:
+                pass # tell user it failed
+        else:
+            pass # failed passwordsd
+    return render(request, 'index.html', {'order' : order, 'is_admin' : is_admin(request), 'can_join': not in_other_orderline(request.user)})
 
+
+def log_in(request):
+    return redirect(index)
 
 # View order
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
@@ -182,7 +192,7 @@ def manage_users(request, balance=None):
         else:
             balance = get_object_or_404(Balance, balance)
         form = ManageBalanceForm(request.POST)
-        print form
+        # print(form)
         if form.is_valid():
             data = form.cleaned_data
             handle_deposit(data)
@@ -355,7 +365,7 @@ def handle_payment(request, order):
             if orderline.users.all().count() > 0:
                 for user in orderline.users.all():
                     if user.get_username() == orderline.creator.get_username():
-                        print 'user both in users and creator'
+                        print('user both in users and creator')
                     else:
                         already_paid.append(user.get_username())
     if len(paid) > 0:
@@ -380,7 +390,7 @@ def handle_deposit(data):
     user = data['user']
     get_or_create_balance(user)
     amount = data['amount']
-    print user, amount
+    print(user, amount)
     if amount >= 0:
         user.user.balance.deposit(amount)
     else:

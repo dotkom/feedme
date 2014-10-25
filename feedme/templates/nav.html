@@ -10,10 +10,11 @@
               <li><a href="#">Saldo: {{ user.balance.get_balance }}</a></li>
               {% if not user.is_authenticated %}
               <li class="pull-right">
-                  <form method="" action="POST">
+                  <form method="post" action="">
                       {% csrf_token %}
                       <input type="text" name="username" placeholder="Username">
                       <input type="password" name="password" placeholder="********">
+                      <input type="submit" name="log_in" value="Log in">
                   </form>
               </li>
               {% endif %}

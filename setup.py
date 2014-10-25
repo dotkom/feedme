@@ -13,7 +13,7 @@ setup(
     author_email='dotkom@online.ntnu.no',
     packages=['feedme'],
     license='BSD License',  # example license
-    description='Food ordering management for onlineweb4',
+    description='Food ordering management for django',
     long_description=README,
     url='http://online.ntnu.no/feedme',
     classifiers=[
@@ -25,6 +25,8 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
         'Topic :: Internet :: WWW/HTTP',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
     ],
