@@ -38,7 +38,13 @@ except ImportError:
 
 def run_tests(*test_args):
     if not test_args:
-        test_args = ['feedme', '--with-coverage','--cover-package=feedme']
+        try:
+            # This runs on Online/dotKom Jenkins to create statistics
+            import nosexcover
+            test_args = ['feedme', '--with-xunit', '--with-xcoverage', '--cover-package=feedme']
+        except:
+            test_args = ['feedme', '--with-coverage','--cover-package=feedme']
+
 
     # Run tests
     test_runner = NoseTestSuiteRunner(verbosity=1)

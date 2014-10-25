@@ -8,6 +8,15 @@
               {% endif %}
               <li><a href="#">Bruker: {{ user.username }}</a></li>
               <li><a href="#">Saldo: {{ user.balance.get_balance }}</a></li>
+              {% if not user.is_authenticated %}
+              <li class="pull-right">
+                  <form method="" action="POST">
+                      {% csrf_token %}
+                      <input type="text" name="username" placeholder="Username">
+                      <input type="password" name="password" placeholder="********">
+                  </form>
+              </li>
+              {% endif %}
             </ul>
         </div>
     </div>
