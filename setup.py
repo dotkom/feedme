@@ -1,8 +1,6 @@
 import os
 from setuptools import setup
 
-README = open(os.path.join(os.path.dirname(__file__), 'README.md')).read()
-
 # allow setup.py to be run from any path
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
@@ -14,7 +12,9 @@ setup(
     packages=['feedme'],
     license='BSD License',  # example license
     description='Food ordering management for django',
-    long_description=README,
+    long_description='A food ordering management system for Django.\n
+    This project was started to help \'dotKom\' with ordering food for their work nights.\n
+    Check out the github repo for installation instructions.',
     url='http://online.ntnu.no/feedme',
     classifiers=[
         'Environment :: Web Environment',
