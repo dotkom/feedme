@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class Restaurant(models.Model):
     restaurant_name = models.CharField(_('name'), max_length=50)
     menu_url = models.URLField(_('menu url'), max_length=250)
@@ -21,6 +22,7 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.__unicode__()
 
+
 class Order(models.Model):
     date = models.DateField(_('date'))
     restaurant = models.ForeignKey(Restaurant)
@@ -29,7 +31,7 @@ class Order(models.Model):
 
     def get_total_sum(self):
         s = self.orderline_set.aggregate(models.Sum('price'))['price__sum']
-        if s == None:
+        if s is None:
             s = 0
         return s + self.extra_costs
 
@@ -73,6 +75,7 @@ class Order(models.Model):
     class Meta:
         get_latest_by = 'date'
 
+
 class OrderLine(models.Model):
     order = models.ForeignKey(Order)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('owner'))
@@ -106,11 +109,12 @@ class OrderLine(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('edit', (), {'orderline_id' : self.id})
+        return ('edit', (), {'orderline_id': self.id})
 
     class Meta:
         verbose_name = _('Order line')
         verbose_name_plural = _('Order lines')
+
 
 class Transaction(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
@@ -123,11 +127,12 @@ class Transaction(models.Model):
     def __str__(self):
         return self.__unicode__()
 
+
 class Balance(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
 
     def get_balance(self):
-        if self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum'] == None:
+        if self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum'] is None:
             self.add_transaction(0)
         return self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum']
 
@@ -140,11 +145,11 @@ class Balance(models.Model):
 
     def deposit(self, amount):
         return self.add_transaction(amount)
-        #print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
+        # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
 
     def withdraw(self, amount):
         return self.add_transaction(amount * -1)
-        #print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
+        # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
 
     def __unicode__(self):
         return "%s: %s" % (self.user, self.get_balance())
@@ -152,15 +157,19 @@ class Balance(models.Model):
     def __str__(self):
         return self.__unicode__()
 
+
 class ManageBalance(models.Model):
     user = models.ForeignKey(Balance)
     amount = models.FloatField(_('amount'), default=0)
 
+
 class ManageOrders(models.Model):
     orders = models.OneToOneField(Order, related_name=_('Orders'))
 
+
 class ManageUsers(models.Model):
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name=_('Users'))
+
 
 class ManageOrderLimit(models.Model):
     order_limit = models.IntegerField(_('Order limit'), default=100)
