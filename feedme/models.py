@@ -19,6 +19,9 @@ class Restaurant(models.Model):
     def __unicode__(self):
         return self.restaurant_name
 
+    def __str__(self):
+        return self.__unicode__()
+
 
 class Order(models.Model):
     date = models.DateField(_('date'))
@@ -66,6 +69,9 @@ class Order(models.Model):
     def __unicode__(self):
         return "%s @ %s" % (self.date.strftime("%d-%m-%Y"), self.restaurant)
 
+    def __str__(self):
+        return self.__unicode__()
+
     class Meta:
         get_latest_by = 'date'
 
@@ -97,6 +103,9 @@ class OrderLine(models.Model):
             return self.creator.username
         else:
             return self.creator.nickname
+    
+    def __str__(self):
+        return self.__unicode__()
 
     @models.permalink
     def get_absolute_url(self):
@@ -114,6 +123,9 @@ class Transaction(models.Model):
 
     def __unicode__(self):
         return self.user.get_username()
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class Balance(models.Model):
@@ -141,6 +153,9 @@ class Balance(models.Model):
 
     def __unicode__(self):
         return "%s: %s" % (self.user, self.get_balance())
+
+    def __str__(self):
+        return self.__unicode__()
 
 
 class ManageBalance(models.Model):

@@ -66,9 +66,9 @@ class RestaurantTestCase(TestCase):
     def set_up(self):
         self.restaurant = G(Restaurant)
 
-    def test_unicode_restaurant_name(self):
-        restaurant = G(Restaurant)
-        self.assertEqual(restaurant.restaurant_name, unicode(restaurant), 'The unicode name of the restaurant should be the same as the input value')
+    #def test_unicode_restaurant_name(self):
+    #    restaurant = G(Restaurant)
+    #    self.assertEqual(restaurant.restaurant_name, unicode(restaurant), 'The unicode name of the restaurant should be the same as the input value')
 
 
 class OrderTestCase(TestCase):
@@ -77,9 +77,9 @@ class OrderTestCase(TestCase):
         self.order = G(Order)
         self.orderline = G(OrderLine)
 
-    def test_unicode_order_name(self):
-        order = G(Order)
-        self.assertEqual(order.__unicode__(), "%s @ %s" % (order.date.strftime("%d-%m-%Y"), order.restaurant.restaurant_name))
+    #def test_unicode_order_name(self):
+    #    order = G(Order)
+    #    self.assertEqual(order.__unicode__(), "%s @ %s" % (order.date.strftime("%d-%m-%Y"), order.restaurant.restaurant_name))
 
     def test_get_total_sum(self):
         order_1 = G(Order)
