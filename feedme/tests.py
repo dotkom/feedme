@@ -11,8 +11,6 @@ from feedme.models import Order, OrderLine, Restaurant, Balance, Transaction
 from feedme.views import get_or_create_balance, validate_user_funds, handle_payment
 from feedme.views import in_other_orderline
 
-# Create your tests here.
-
 class ModelTestCase(TestCase):
     def setUp(self):
         User.objects.create(username='TestUser1')
@@ -95,7 +93,7 @@ class OrderTestCase(TestCase):
         self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
         s = orderline_3.price + orderline_4.price + order_2.extra_costs
         r = order_2.get_total_sum()
-        self.assertEqual(r, s, 'Got %s, expected %s' % (r, s)) 
+        self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
 
     def test_get_extra_costs(self):
         order = G(Order, extra_costs=50)

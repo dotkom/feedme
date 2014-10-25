@@ -1,6 +1,7 @@
 from django.forms import ModelForm
 from feedme.models import Order, OrderLine, ManageOrderLimit, ManageOrders, Restaurant, ManageBalance
 
+
 class OrderLineForm(ModelForm):
     name = 'orderline'
 
@@ -47,7 +48,6 @@ class NewOrderForm(ModelForm):
 
     class Meta:
         model = Order
-        #fields = ('date',)
 
 
 class NewRestaurantForm(ModelForm):

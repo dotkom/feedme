@@ -28,7 +28,7 @@ class Order(models.Model):
 
     def get_total_sum(self):
         s = self.orderline_set.aggregate(models.Sum('price'))['price__sum']
-        if s == None:
+        if s is None:
             s = 0
         return s + self.extra_costs
 
@@ -120,7 +120,7 @@ class Balance(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
 
     def get_balance(self):
-        if self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum'] == None:
+        if self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum'] is None:
             self.add_transaction(0)
         return self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum']
 
@@ -133,11 +133,11 @@ class Balance(models.Model):
 
     def deposit(self, amount):
         return self.add_transaction(amount)
-        #print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
+        # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
 
     def withdraw(self, amount):
         return self.add_transaction(amount * -1)
-        #print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
+        # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
 
     def __unicode__(self):
         return "%s: %s" % (self.user, self.get_balance())
