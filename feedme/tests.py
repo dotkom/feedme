@@ -11,6 +11,7 @@ from feedme.models import Order, OrderLine, Restaurant, Balance, Transaction
 from feedme.views import get_or_create_balance, validate_user_funds, handle_payment
 from feedme.views import in_other_orderline
 
+
 class ModelTestCase(TestCase):
     def setUp(self):
         User.objects.create(username='TestUser1')

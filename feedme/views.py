@@ -110,12 +110,12 @@ def delete_orderline(request, orderline_id):
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def join_orderline(request, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
-    #@TODO if not buddy system enabled, disable join
+    # @TODO if not buddy system enabled, disable join
     if not is_in_current_order('orderline', orderline_id):
         messages.error(request, 'You can not join orderlines from old orders')
     elif in_other_orderline(request.user):
         messages.error(request, 'You cannot be in multiple orderlines')
-    elif not validate_user_funds(request.user, (orderline.price / (orderline.users.count() + 1))): # Adds us to the test aswell
+    elif not validate_user_funds(request.user, (orderline.price / (orderline.users.count() + 1))):  # Adds us to the test aswell
         messages.error(request, 'You need cashes')
     else:
         orderline.users.add(request.user)
@@ -156,6 +156,7 @@ def new_order(request):
 
     return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
 
+
 # Manage users (deposit, withdraw, overview)
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def manage_users(request, balance=None):
@@ -165,7 +166,7 @@ def manage_users(request, balance=None):
         else:
             balance = get_object_or_404(Balance, balance)
         form = ManageBalanceForm(request.POST)
-        #form.sent_by = balance
+        # form.sent_by = balance
         print form
         if form.is_valid():
             data = form.cleaned_data
@@ -201,8 +202,8 @@ def manage_order(request):
                 orderline.users.add(orderline.creator)
                 orderline.each = orderline.get_total_price() / (orderline.users.count())
                 total_price += orderline.price
-            #handle_payment(request, data)
-            #return redirect(manage_order)
+            # handle_payment(request, data)
+            # return redirect(manage_order)
             if request.POST['act'] == 'load':
                 return render(request, 'manage_order.html', {'form': form, 'is_admin': is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price})
             elif request.POST['act'] == 'pay':
@@ -277,6 +278,7 @@ def set_order_limit(request):
 
     return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
 
+
 # Validation of orderline
 def check_orderline(request, form, orderline_id=None, buddies=None):
     orderline_exists = False
@@ -318,9 +320,9 @@ def handle_payment(request, order):
     for orderline in orderlines:
         if not orderline.paid_for:
             if orderline.users.count() > 0:
-                amount = (orderline.get_total_price())/(orderline.users.count() + 1)
+                amount = (orderline.get_total_price()) / (orderline.users.count() + 1)
                 if orderline.creator not in orderline.users.all():
-                    pay(orderline.creator, amount) # Shouldn't need this anymore since user gets automatically added in view
+                    pay(orderline.creator, amount)  # Shouldn't need this anymore since user gets automatically added in view
                 for user in orderline.users.all():
                     pay(user, amount)
                     paid.append(user.get_username())
@@ -356,7 +358,7 @@ def handle_payment(request, order):
 
 # The actual function for payment
 def pay(user, amount):
-    user.balance.withdraw(amount) # This returns True/False whether or not the payment was possible.
+    user.balance.withdraw(amount)  # This returns True/False whether or not the payment was possible.
     user.balance.save()
 
 
