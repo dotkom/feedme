@@ -2,14 +2,25 @@ from datetime import date, timedelta
 
 from django.contrib import messages
 from django.conf import settings
-from django.contrib.auth import authenticate, login, get_user_model
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 
 from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction
 from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
 
-User = get_user_model()
+try:
+    # Django 1.7 way for importing custom user
+    from django.contrib.auth import AUTH_USER_MODEL
+    User = get_user_model()
+except ImportError:
+    try:
+        # Django 1.6 way for importing custom user, will crash in Django 1.7
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+    except AppRegistryNotReady:
+        # If all else fails, import default user model -- please report this bug
+        from django.contrib.auth.models import User
 
 
 # Index

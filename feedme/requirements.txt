@@ -1,5 +1,5 @@
 # Django
-Django==1.6.1
+Django==1.7.1
 django-dynamic-fixture==1.8.0
 
 # Testing
