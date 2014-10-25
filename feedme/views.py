@@ -166,7 +166,6 @@ def manage_users(request, balance=None):
         else:
             balance = get_object_or_404(Balance, balance)
         form = ManageBalanceForm(request.POST)
-        # form.sent_by = balance
         print form
         if form.is_valid():
             data = form.cleaned_data
@@ -202,8 +201,6 @@ def manage_order(request):
                 orderline.users.add(orderline.creator)
                 orderline.each = orderline.get_total_price() / (orderline.users.count())
                 total_price += orderline.price
-            # handle_payment(request, data)
-            # return redirect(manage_order)
             if request.POST['act'] == 'load':
                 return render(request, 'manage_order.html', {'form': form, 'is_admin': is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price})
             elif request.POST['act'] == 'pay':
