@@ -1,12 +1,12 @@
 FeedMe
 ===========  
 
-A food ordering management system for Django.
+A food ordering management system for Django. 
 
-This project was started to help 'dotKom' with ordering food for their work nights.
+This project was started to help 'dotKom' with ordering food for their work nights. 
 
 ### Install via pip
-`pip install git+https://github.com/dotKom/feedme.git`
+`pip install feedme`
 
 ### Manual install:
 
