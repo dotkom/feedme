@@ -11,6 +11,7 @@ from django.contrib.auth.models import User, Group
 from feedme.models import Order, OrderLine, Restaurant, Balance, Transaction, Poll, Answer
 from feedme.views import get_or_create_balance, validate_user_funds, handle_payment
 from feedme.views import in_other_orderline
+from feedme.views import get_poll
 
 
 class ModelTestCase(TestCase):
@@ -235,6 +236,16 @@ class ViewLogicTestCase(TestCase):
 
 
 class PollTestCase(TestCase):
+    def test_get_polls(self):
+        self.assertEqual(get_poll(), None, 'Should get None if no polls')
+        poll_1 = G(Poll)
+        self.assertEqual(poll_1, get_poll(), 'Got %s, expected %s' % (get_poll(), poll_1))
+        poll_2 = G(Poll)
+        self.assertEqual(poll_2, get_poll(), 'Got %s, expected %s' % (get_poll, poll_2))
+        poll_2.deactivate()
+        self.assertEqual(poll_1, get_poll(), 'Got %s, expected %s after deactivating %s' % \
+                         (get_poll(), poll_1, poll_2))
+
     def test_voting(self):
         user = G(User)
         poll = G(Poll)
