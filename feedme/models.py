@@ -186,6 +186,14 @@ class Poll(models.Model):
             self.save()
         # Throw some exception if fails?
 
+    def get_result(self):
+        answers = Answer.objects.filter(poll=self)
+        r = dict()
+        for answer in answers:
+            if answer.answer not in r:
+                r[answer.answer] = 0
+            r[answer.answer] += 1
+        return r
 
     def __unicode__(self):
         return self.question
