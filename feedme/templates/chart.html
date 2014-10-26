@@ -6,15 +6,17 @@
     function drawChart() {
         var data = google.visualization.arrayToDataTable([
             ['Restaurant', 'Votes'],
-            ['Lol1213', 2],
             {% for answer, result in results.items %}
-                ['{{ answer }}', '{{ result }}'],
+                ['{{ answer }}', {{ result }}],
             {% endfor %}
         ]);
 
+        var maxValue = data.getColumnRange(1)['max'];
+
         var options = {
             title: 'Poll results',
-            hAxis: {title: 'Restaurant', titleTextStyle: {color: 'red'}}
+            hAxis: {title: 'Restaurant', titleTextStyle: {color: 'blue'}},
+            vAxis: {minValue: 4, maxValue: maxValue, format: '#'}
         };
 
         var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
