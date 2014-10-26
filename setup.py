@@ -15,7 +15,7 @@ setup(
     long_description='A food ordering management system for Django.\n\n\
     This initially started to help \'dotKom\' with organizing the ordering of food for their work nights.\n\n\
     Check out the github repo for installation instructions.',
-    url='http://online.ntnu.no/feedme',
+    url='https://github.com/dotKom/feedme',
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',
