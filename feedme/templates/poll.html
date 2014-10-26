@@ -3,7 +3,7 @@
     {% if poll.result %}
         {% include 'chart.html' %}
     {% endif %}
-    {% if answer %}
+    {% if user.is_authenticated and answer %}
         <form action="" method="POST">
             {% csrf_token %}
             <input type="text" name="act" value="vote" hidden>
