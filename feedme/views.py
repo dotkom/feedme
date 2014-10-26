@@ -46,18 +46,18 @@ def index(request):
                 answer.save()
                 messages.success(request, 'Voted for %s' % answer.answer)
                 return redirect(index)
-            elif request.POST['act'] == 'log_in':
-                username = request.POST['username']
-                password = request.POST['password']
-                user = authenticate(username=username, password=password)
-                if user is not None:
-                    if user.is_active:
-                        login(request, user)
-                        return redirect(index)
-                    else:
-                        pass # tell user it failed
+        elif request.POST['act'] == 'log_in':
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect(index)
                 else:
-                    pass # failed passwordsd
+                    pass # tell user it failed
+            else:
+                pass # failed passwordsd
     r = dict(
         order = order,
         is_admin = is_admin(request),
