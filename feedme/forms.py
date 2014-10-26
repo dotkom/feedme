@@ -1,5 +1,5 @@
 from django.forms import ModelForm
-from feedme.models import Order, OrderLine, ManageOrderLimit, ManageOrders, Restaurant, ManageBalance
+from feedme.models import Order, OrderLine, ManageOrderLimit, ManageOrders, Restaurant, ManageBalance, Poll, Answer
 
 
 class OrderLineForm(ModelForm):
@@ -55,3 +55,18 @@ class NewRestaurantForm(ModelForm):
 
     class Meta:
         model = Restaurant
+
+
+class NewPollForm(ModelForm):
+    name = 'new poll'
+
+    class Meta:
+        model = Poll
+
+
+class PollAnswerForm(ModelForm):
+    name = 'answer'
+
+    class Meta:
+        model = Answer
+        exclude = ('user', 'poll')

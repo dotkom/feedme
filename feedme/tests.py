@@ -8,9 +8,10 @@ from django.test import TestCase
 from django_dynamic_fixture import G
 
 from django.contrib.auth.models import User, Group
-from feedme.models import Order, OrderLine, Restaurant, Balance, Transaction
+from feedme.models import Order, OrderLine, Restaurant, Balance, Transaction, Poll, Answer
 from feedme.views import get_or_create_balance, validate_user_funds, handle_payment
 from feedme.views import in_other_orderline
+from feedme.views import get_poll
 
 
 class ModelTestCase(TestCase):
@@ -232,3 +233,27 @@ class ViewLogicTestCase(TestCase):
 
         self.assertTrue(in_other_orderline(user_1), 'User should be in another orderline')
         self.assertFalse(in_other_orderline(user_2), 'User should not be in another orderline')
+
+
+class PollTestCase(TestCase):
+    def test_get_polls(self):
+        self.assertEqual(get_poll(), None, 'Should get None if no polls')
+        poll_1 = G(Poll)
+        self.assertEqual(poll_1, get_poll(), 'Got %s, expected %s' % (get_poll(), poll_1))
+        poll_2 = G(Poll)
+        self.assertEqual(poll_2, get_poll(), 'Got %s, expected %s' % (get_poll, poll_2))
+        poll_2.deactivate()
+        self.assertEqual(poll_1, get_poll(), 'Got %s, expected %s after deactivating %s' % \
+                         (get_poll(), poll_1, poll_2))
+
+    def test_voting(self):
+        user = G(User)
+        poll = G(Poll)
+        answer_1 = G(Answer, poll=poll, user=user)
+        self.assertEqual(Answer.objects.filter(poll=poll, user=user).count(), 1, 'Got %s, expected %s. We have only added one vote for this user for this poll' % (Answer.objects.filter(poll=poll, user=user).count(), 1))
+        self.assertEqual(Answer.objects.get(poll=poll, user=user), answer_1, 'This should be the registered vote')
+
+        # answer_2 = G(Answer, poll=poll, user=user)
+
+        # self.assertEqual(Answer.objects.filter(poll=poll, user=user).count(), 1, 'Got %s, expected %s. When voting multiple times, there should only be one counting vote' % (Answer.objects.filter(poll=poll, user=user).count(), 1))
+        # self.assertEqual(Answer.objects.get(poll=poll, user=user), answer_2, 'When voting multiple times, the last vote should be the one counted')

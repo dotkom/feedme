@@ -6,8 +6,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 
-from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction
-from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
+from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction, Poll, Answer
+from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm
 
 try:
     # Django 1.7 way for importing custom user
@@ -27,19 +27,50 @@ except ImportError:
 # @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def index(request):
     order = get_order()
+    poll = get_poll()
+    if Answer.objects.filter(poll=poll, user=request.user).count() == 1:
+        a_id = Answer.objects.get(poll=poll, user=request.user)
+    else:
+        a_id = None
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-                return redirect(index)
+        if request.POST['act'] == 'vote':
+            if a_id is not None:
+                form = PollAnswerForm(request.POST, instance=a_id)
             else:
-                pass # tell user it failed
+                form = PollAnswerForm(request.POST)
+            if form.is_valid():
+                answer = form.save(commit=False)
+                answer.user = request.user
+                answer.poll = poll
+                print('answer: %s' % form)
+                answer.save()
+                messages.success(request, 'Voted for %s' % answer.answer)
+                return redirect(index)
+            elif request.POST['act'] == 'log_in':
+                username = request.POST['username']
+                password = request.POST['password']
+                user = authenticate(username=username, password=password)
+                if user is not None:
+                    if user.is_active:
+                        login(request, user)
+                        return redirect(index)
+                    else:
+                        pass # tell user it failed
+                else:
+                    pass # failed passwordsd
+    r = dict(
+        order = order,
+        is_admin = is_admin(request),
+        can_join = not in_other_orderline(request.user),
+    )
+    if poll is not None:
+        r['poll'] = poll
+        if a_id is None:
+            r['answer'] = PollAnswerForm()
         else:
-            pass # failed passwordsd
-    return render(request, 'index.html', {'order' : order, 'is_admin' : is_admin(request), 'can_join': not in_other_orderline(request.user)})
+            r['answer'] = PollAnswerForm(instance=a_id)
+        r['results'] = poll.get_result()
+    return render(request, 'index.html', r)
 
 
 def log_in(request):
@@ -178,6 +209,9 @@ def new_order(request):
             return redirect(index)
     else:
         form = NewOrderForm()
+        poll = get_poll()
+        if poll is not None:
+            form.fields['restaurant'].initial = poll.get_result()
         form.fields["date"].initial = get_next_tuesday()
 
     return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
@@ -272,6 +306,23 @@ def new_restaurant(request, restaurant_id=None):
 def edit_restaurant(request, restaurant_id=None):
     restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
     return new_restaurant(request, restaurant)
+
+
+
+def new_poll(request):
+    if request.method == 'POST':
+        form = NewPollForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'New poll added')
+            return redirect(index)
+        else:
+            messages.error(request, 'Form not validated')
+    else:
+        form = NewPollForm()
+        form.fields['question'].initial = "Hvor skal dotKom spise?"
+
+    return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
 
 
 # Remove references to this
@@ -442,6 +493,15 @@ def get_order():
                 return order
     else:
         return False
+
+
+# Gets latest active poll
+def get_poll():
+    if Poll.objects.all():
+        if Poll.objects.filter(active=True).count() >= 1:
+            return Poll.objects.filter(active=True).order_by('-id')[0]
+        else:
+            return None
 
 
 # Checks if user is in current order line

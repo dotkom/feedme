@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import Group
 from django.utils.translation import ugettext_lazy as _
@@ -114,7 +115,7 @@ class OrderLine(models.Model):
             return self.creator.username
         else:
             return self.creator.nickname
-    
+
     def __str__(self):
         return self.__unicode__()
 
@@ -164,6 +165,50 @@ class Balance(models.Model):
 
     def __unicode__(self):
         return "%s: %s" % (self.user, self.get_balance())
+
+    def __str__(self):
+        return self.__unicode__()
+
+
+
+class Poll(models.Model):
+    question = models.CharField(_('question'), max_length=250)
+    active = models.BooleanField(_('active'), default=True)
+    due_date = models.DateTimeField(_('due date'))
+
+    def deactivate(self):
+        self.active = False
+        self.save()
+
+    def activate(self):
+        if datetime.now() < self.due_date:
+            self.active = True
+            self.save()
+        # Throw some exception if fails?
+
+    def get_result(self):
+        answers = Answer.objects.filter(poll=self)
+        r = dict()
+        for answer in answers:
+            if answer.answer not in r:
+                r[answer.answer] = 0
+            r[answer.answer] += 1
+        return r
+
+    def __unicode__(self):
+        return self.question
+
+    def __str__(self):
+        return self.__unicode__()
+
+
+class Answer(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('user'))
+    poll = models.ForeignKey(Poll, related_name=_('poll'))
+    answer = models.ForeignKey(Restaurant, related_name=_('answer'))
+
+    def __unicode__(self):
+        return "%s: %s (%s)" % (self.user, self.answer, self.poll)
 
     def __str__(self):
         return self.__unicode__()
