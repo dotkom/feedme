@@ -198,7 +198,7 @@ class Answer(models.Model):
     answer = models.ForeignKey(Restaurant, related_name=_('answer'))
 
     def __unicode__(self):
-        return "%s: %s (%s)" % (self.user, self.poll, self.poll)
+        return "%s: %s (%s)" % (self.user, self.answer, self.poll)
 
     def __str__(self):
         return self.__unicode__()
