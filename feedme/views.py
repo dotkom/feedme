@@ -495,7 +495,10 @@ def get_order():
 # Gets latest active poll
 def get_poll():
     if Poll.objects.all():
-        return Poll.objects.filter(active=True).order_by('-id')[0]
+        if Poll.objects.filter(active=True).count() >= 1:
+            return Poll.objects.filter(active=True).order_by('-id')[0]
+        else:
+            return None
 
 
 def create_poll_results(poll):
