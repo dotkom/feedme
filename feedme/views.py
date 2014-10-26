@@ -28,10 +28,10 @@ except ImportError:
 def index(request):
     order = get_order()
     poll = get_poll()
-    if Answer.objects.filter(poll=poll, user=request.user).count() == 1:
-        a_id = Answer.objects.get(poll=poll, user=request.user)
-    else:
-        a_id = None
+    a_id = None
+    if str(request.user) != 'AnonymousUser':
+        if Answer.objects.filter(poll=poll, user=request.user).count() == 1:
+            a_id = Answer.objects.get(poll=poll, user=request.user)
     if request.method == 'POST':
         if request.POST['act'] == 'vote':
             if a_id is not None:
