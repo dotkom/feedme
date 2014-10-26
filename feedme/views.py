@@ -28,11 +28,17 @@ except ImportError:
 def index(request):
     order = get_order()
     poll = get_poll()
+    if Answer.objects.filter(poll=poll, user=request.user).count() == 1:
+        a_id = Answer.objects.get(poll=poll, user=request.user)
+    else:
+        a_id = None
     if request.method == 'POST':
         if request.POST['act'] == 'vote':
-            form = PollAnswerForm(request.POST)
+            if a_id is not None:
+                form = PollAnswerForm(request.POST, instance=a_id)
+            else:
+                form = PollAnswerForm(request.POST)
             if form.is_valid():
-                # form = form.cleaned_data
                 answer = form.save(commit=False)
                 answer.user = request.user
                 answer.poll = poll
@@ -59,7 +65,10 @@ def index(request):
     )
     if poll is not None:
         r['poll'] = poll
-        r['answer'] = PollAnswerForm
+        if a_id is None:
+            r['answer'] = PollAnswerForm()
+        else:
+            r['answer'] = PollAnswerForm(instance=a_id)
         r['results'] = create_poll_results(poll)
         print(r['results'])
     return render(request, 'index.html', r)
