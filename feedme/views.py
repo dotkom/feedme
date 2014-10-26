@@ -509,7 +509,6 @@ def create_poll_results(poll):
     return r
 
 
-
 # Checks if user is in current order line
 def is_in_current_order(order_type, order_id):
     order = get_order()
