@@ -178,10 +178,12 @@ class Poll(models.Model):
 
     def deactivate(self):
         self.active = False
+        self.save()
 
     def activate(self):
         if datetime.now() < self.due_date:
             self.active = True
+            self.save()
         # Throw some exception if fails?
 
 
