@@ -17,4 +17,5 @@ urlpatterns = patterns(
     url(r'^admin/users/$', 'manage_users', name='manage_users'),
     url(r'^admin/orderlimit/$', 'set_order_limit', name='set_order_limit'),
     url(r'^admin/newrestaurant/$', 'new_restaurant', name='new_restaurant'),
+    url(r'^admin/newpoll/$', 'new_poll', name='new_poll'),
 )

@@ -1,0 +1,14 @@
+<section name="poll">
+    <h2>{{ poll.question }}</h2>
+    {% include 'chart.html' %}
+    {% if answer %}
+        <form action="" method="POST">
+            {% csrf_token %}
+            <input type="text" name="act" value="vote" hidden>
+            {% for field in answer %}
+                {{ field }}
+            {% endfor %}
+            <input type="submit" value="Stem" class="btn btn-primary">
+        </form>
+    {% endif %}
+</section>
