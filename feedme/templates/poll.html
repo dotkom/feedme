@@ -1,6 +1,6 @@
 <section name="poll">
     <h2>{{ poll.question }}</h2>
-    {% if poll.result %}
+    {% if results %}
         {% include 'chart.html' %}
     {% endif %}
     {% if user.is_authenticated and answer %}
