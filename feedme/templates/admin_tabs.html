@@ -10,5 +10,6 @@
     <li{% if active == 'users' %} class="active"{% endif %}><a href="{% url "manage_users" %}">Manage users</a></li>
     <li{% if active == 'order limit' %} class="active"{% endif %}><a href="{% url "set_order_limit" %}">Order limit</a></li>
     <li{% if active == 'new restaurant' %} class="active"{% endif %}><a href="{% url "new_restaurant" %}">New restaurant</a></li>
+    <li>{% if active == 'new_poll' %} class="active"{% endif %}><a href="{% url "new_poll" %}">New poll</a></li>
 </ul>
 </div></div></nav>

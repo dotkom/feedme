@@ -6,8 +6,8 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 
-from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction
-from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm
+from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction, Poll, Answer
+from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm
 
 try:
     # Django 1.7 way for importing custom user
@@ -27,19 +27,42 @@ except ImportError:
 # @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def index(request):
     order = get_order()
+    poll = get_poll()
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
+        if request.POST['act'] == 'vote':
+            form = PollAnswerForm(request.POST)
+            if form.is_valid():
+                # form = form.cleaned_data
+                answer = form.save(commit=False)
+                answer.user = request.user
+                answer.poll = poll
+                print('answer: %s' % form)
+                answer.save()
+                messages.success(request, 'Voted for %s' % answer.answer)
                 return redirect(index)
-            else:
-                pass # tell user it failed
-        else:
-            pass # failed passwordsd
-    return render(request, 'index.html', {'order' : order, 'is_admin' : is_admin(request), 'can_join': not in_other_orderline(request.user)})
+            elif request.POST['act'] == 'log_in':
+                username = request.POST['username']
+                password = request.POST['password']
+                user = authenticate(username=username, password=password)
+                if user is not None:
+                    if user.is_active:
+                        login(request, user)
+                        return redirect(index)
+                    else:
+                        pass # tell user it failed
+                else:
+                    pass # failed passwordsd
+    r = dict(
+        order = order,
+        is_admin = is_admin(request),
+        can_join = not in_other_orderline(request.user),
+    )
+    if poll is not None:
+        r['poll'] = poll
+        r['answer'] = PollAnswerForm
+        r['results'] = create_poll_results(poll)
+        print(r['results'])
+    return render(request, 'index.html', r)
 
 
 def log_in(request):
@@ -274,6 +297,22 @@ def edit_restaurant(request, restaurant_id=None):
     return new_restaurant(request, restaurant)
 
 
+
+def new_poll(request):
+    if request.method == 'POST':
+        form = NewPollForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'New poll added')
+            return redirect(index)
+        else:
+            messages.error(request, 'Form not validated')
+    else:
+        form = NewPollForm()
+
+    return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
+
+
 # Remove references to this
 def get_order_limit():
     order_limit = ManageOrderLimit.objects.all()
@@ -442,6 +481,24 @@ def get_order():
                 return order
     else:
         return False
+
+
+# Gets latest active poll
+def get_poll():
+    if Poll.objects.all():
+        return Poll.objects.filter(active=True).order_by('-id')[0]
+
+
+def create_poll_results(poll):
+    # Want format (restaurant, votes)
+    answers = Answer.objects.filter(poll=poll)
+    r = dict()
+    for answer in answers:
+        if answer.answer not in r:
+            r[answer.answer] = 0
+        r[answer.answer] += 1
+    return r
+
 
 
 # Checks if user is in current order line

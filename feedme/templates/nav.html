@@ -12,6 +12,7 @@
               <li class="pull-right">
                   <form method="post" action="">
                       {% csrf_token %}
+                      <input type="text" name="act" value="log_in" hidden>
                       <input type="text" name="username" placeholder="Username">
                       <input type="password" name="password" placeholder="********">
                       <input type="submit" name="log_in" value="Log in">
