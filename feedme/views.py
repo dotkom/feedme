@@ -69,8 +69,7 @@ def index(request):
             r['answer'] = PollAnswerForm()
         else:
             r['answer'] = PollAnswerForm(instance=a_id)
-        r['results'] = create_poll_results(poll)
-        print(r['results'])
+        r['results'] = poll.get_result()
     return render(request, 'index.html', r)
 
 
@@ -210,6 +209,9 @@ def new_order(request):
             return redirect(index)
     else:
         form = NewOrderForm()
+        poll = get_poll()
+        if poll is not None:
+            form.fields['restaurant'].initial = poll.get_result()
         form.fields["date"].initial = get_next_tuesday()
 
     return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
@@ -318,6 +320,7 @@ def new_poll(request):
             messages.error(request, 'Form not validated')
     else:
         form = NewPollForm()
+        form.fields['question'].initial = "Hvor skal dotKom spise?"
 
     return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
 
@@ -499,17 +502,6 @@ def get_poll():
             return Poll.objects.filter(active=True).order_by('-id')[0]
         else:
             return None
-
-
-def create_poll_results(poll):
-    # Want format (restaurant, votes)
-    answers = Answer.objects.filter(poll=poll)
-    r = dict()
-    for answer in answers:
-        if answer.answer not in r:
-            r[answer.answer] = 0
-        r[answer.answer] += 1
-    return r
 
 
 # Checks if user is in current order line

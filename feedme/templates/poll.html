@@ -1,6 +1,8 @@
 <section name="poll">
     <h2>{{ poll.question }}</h2>
-    {% include 'chart.html' %}
+    {% if poll.result %}
+        {% include 'chart.html' %}
+    {% endif %}
     {% if answer %}
         <form action="" method="POST">
             {% csrf_token %}
