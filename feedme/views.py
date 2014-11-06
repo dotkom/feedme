@@ -28,13 +28,10 @@ except ImportError:
 def index(request):
     order = get_order()
     poll = get_poll()
-    if Answer.objects.all():
+    a_id = None
+    if str(request.user) != 'AnonymousUser':
         if Answer.objects.filter(poll=poll, user=request.user).count() == 1:
             a_id = Answer.objects.get(poll=poll, user=request.user)
-        else:
-            a_id = None
-    else:
-        a_id = None
     if request.method == 'POST':
         if request.POST['act'] == 'vote':
             if a_id is not None:
@@ -49,18 +46,18 @@ def index(request):
                 answer.save()
                 messages.success(request, 'Voted for %s' % answer.answer)
                 return redirect(index)
-            elif request.POST['act'] == 'log_in':
-                username = request.POST['username']
-                password = request.POST['password']
-                user = authenticate(username=username, password=password)
-                if user is not None:
-                    if user.is_active:
-                        login(request, user)
-                        return redirect(index)
-                    else:
-                        pass # tell user it failed
+        elif request.POST['act'] == 'log_in':
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return redirect(index)
                 else:
-                    pass # failed passwordsd
+                    pass # tell user it failed
+            else:
+                pass # failed passwordsd
     r = dict(
         order = order,
         restaurants = Restaurant.objects.all(),
