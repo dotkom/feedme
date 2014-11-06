@@ -14,11 +14,11 @@
             {% if restaurants %}
                 <h3>Restaurants</h3>
                 {% for restaurant in restaurants %}
-                    <p>{{ restaurant }} <a href="{{ restaurant.url }}" target="_blank">menu <span class="glyphicon glyphicon-new-window"></span></a></p>
+                    <p>{{ restaurant }} <a href="{{ restaurant.menu_url }}" target="_blank">menu <span class="glyphicon glyphicon-new-window"></span></a></p>
                 {% endfor %}
             {% endif %}
             <hr>
-            {% if answer %}
+            {% if answer and user.is_authenticated %}
                 <form action="" method="POST">
                     {% csrf_token %}
                     <input type="text" name="act" value="vote" hidden>
