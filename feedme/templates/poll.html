@@ -2,18 +2,6 @@
     <div class="col-md-12">
         <h1 class="page-header">{{ poll.question }}</h1>
     </div>
-    <div class="col-md-12">
-    {% if answer %}
-        <form action="" method="POST">
-            {% csrf_token %}
-            <input type="text" name="act" value="vote" hidden>
-            {% for field in answer %}
-                {{ field }}
-            {% endfor %}
-            <input type="submit" value="Vote" class="btn btn-primary btn-sm">
-        </form>
-    {% endif %}
-    </div>
     <div class="row">
         <div class="col-md-9">
             <h3>Results</h3>
@@ -22,12 +10,25 @@
             {% endif %}
         </div>
         <div class="col-md-3">
-            <h3>Restaurants</h3>
+            <div class="row">
             {% if restaurants %}
+                <h3>Restaurants</h3>
                 {% for restaurant in restaurants %}
-                    <p>{{ restaurant }} <a href="{{ restaurant.url }}">(menu)</a></p>
+                    <p>{{ restaurant }} <a href="{{ restaurant.url }}" target="_blank">menu <span class="glyphicon glyphicon-new-window"></span></a></p>
                 {% endfor %}
             {% endif %}
+            <hr>
+            {% if answer %}
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <input type="text" name="act" value="vote" hidden>
+                    {% for field in answer %}
+                        {{ field }}
+                    {% endfor %}
+                    <input type="submit" value="Vote" class="btn btn-primary btn-sm">
+                </form>
+            {% endif %}
+            </div>
         </div>
     </div>
 </section>
