@@ -113,12 +113,16 @@ def orderlineview(request, orderline_id=None):
     else:
         orderline = get_object_or_404(OrderLine, pk=orderline_id)
         new_or_existing_orderline = 'existing'
+        creator = orderline.creator
 
     if request.method == 'POST':
         form = OrderLineForm(request.POST, instance=orderline)
         if form.is_valid():
             new_orderline = form.save(commit=False)
-            new_orderline.creator = request.user
+            if creator:
+                new_orderline.creator = creator
+            else:
+                new_orderline.creator = request.user
             new_orderline.order = get_order()
             users = manually_parse_users(form)
             if check_orderline(request, new_orderline, orderline_id, users):
@@ -147,9 +151,10 @@ def orderlineview(request, orderline_id=None):
 # Edit order line
 def edit_orderline(request, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
+    print(orderline.users.all(), request.user == orderline.creator, request.user in orderline.users.all())
     if not is_in_current_order('orderline', orderline_id):
         messages.error(request, 'you can not edit orderlines from old orders')
-    elif orderline.creator != request.user:  # @ToDo and orderline.buddy != request.user:
+    elif request.user is not orderline.creator and request.user not in orderline.users.all():
         messages.error(request, 'You need to be the creator')
         return redirect(index)
     return orderlineview(request, orderline_id)
