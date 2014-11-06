@@ -15,9 +15,18 @@
     {% endif %}
     </div>
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-9">
+            <h3>Results</h3>
             {% if poll.get_result %}
                 {% include 'chart.html' %}
+            {% endif %}
+        </div>
+        <div class="col-md-3">
+            <h3>Restaurants</h3>
+            {% if restaurants %}
+                {% for restaurant in restaurants %}
+                    <p>{{ restaurant }} <a href="{{ restaurant.url }}">(menu)</a></p>
+                {% endfor %}
             {% endif %}
         </div>
     </div>

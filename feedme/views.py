@@ -63,6 +63,7 @@ def index(request):
                     pass # failed passwordsd
     r = dict(
         order = order,
+        restaurants = Restaurant.objects.all(),
         is_admin = is_admin(request),
         can_join = not in_other_orderline(request.user),
     )
