@@ -1,8 +1,8 @@
 <section name="poll">
-    <h2>{{ poll.question }}</h2>
-    {% if poll.result %}
-        {% include 'chart.html' %}
-    {% endif %}
+    <div class="col-md-12">
+        <h1 class="page-header">{{ poll.question }}</h1>
+    </div>
+    <div class="col-md-12">
     {% if answer %}
         <form action="" method="POST">
             {% csrf_token %}
@@ -10,7 +10,15 @@
             {% for field in answer %}
                 {{ field }}
             {% endfor %}
-            <input type="submit" value="Stem" class="btn btn-primary">
+            <input type="submit" value="Vote" class="btn btn-primary btn-sm">
         </form>
     {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {% if poll.get_result %}
+                {% include 'chart.html' %}
+            {% endif %}
+        </div>
+    </div>
 </section>

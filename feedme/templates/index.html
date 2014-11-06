@@ -92,13 +92,9 @@ FeedMe
               <a href="{% url "new_orderline" %}"><button class="btn btn-primary">New order line</button></a>
           {% endif %}
         {% else %}
-          <div class="page-header"><h1>No orders available.</h1></div>
           {% if poll %}
             {% include 'poll.html' %}
           {% endif %}
-        {% endif %}
-        {% if not user.is_authenticated %}
-        <h3 style="color: deeppink;">You are <span style="color: red; font-size: 100px;">not</span> logged in. Head over <a href="/admin/">here</a> to log in.</h3>
         {% endif %}
       </div>
     </div>
