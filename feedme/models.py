@@ -95,7 +95,7 @@ class OrderLine(models.Model):
     menu_item = models.IntegerField(_('menu item'), max_length=2)
     soda = models.CharField(_('soda'), blank=True, null=True, max_length=25)
     extras = models.CharField(_('extras/comments'), blank=True, null=True, max_length=50)
-    price = models.IntegerField(_('price'), max_length=4, default=100)
+    price = models.IntegerField(_('price'), max_length=4)
     paid_for = models.BooleanField(_('paid for'), default=False)
 
     def get_order(self):

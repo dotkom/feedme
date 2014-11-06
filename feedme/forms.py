@@ -1,9 +1,11 @@
+from django import forms
 from django.forms import ModelForm
 from feedme.models import Order, OrderLine, ManageOrderLimit, ManageOrders, Restaurant, ManageBalance, Poll, Answer
 
 
 class OrderLineForm(ModelForm):
     name = 'orderline'
+    price = forms.IntegerField(label='Total price', widget=forms.TextInput(attrs={'placeholder': '9001'}))
 
     class Meta:
         model = OrderLine
