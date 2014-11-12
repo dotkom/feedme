@@ -62,13 +62,13 @@ FeedMe
                                     <td>
                                         {{ orderline.id }}
                                         <span class="pull-right">
-                                            kr <input type="number" name="edit_orderline_price" id="{{ orderline.id}}" value="{{ orderline.price }}" min="0" max="999">
+                                            <input type="number" id="{{ orderline.id }}" name="edit_orderline_price-{{ orderline.id }}" id="{{ orderline.id}}" value="{{ orderline.price }}" min="0" max="999">
                                     </td>
                                     <td>{{ orderline.menu_item }}</td>
                                     <td>{{ orderline.comments }}</td>
                                     <td>{{ user }}</td>
                                     <td>{{ orderline.each }}</td>
-                                    <td><span class="glyphicon glyphicon-{% if orderline.paid_for %}ok{% else %}remove{% endif %}"></td>
+                                    <td><span class="glyphicon glyphicon-{% if orderline.paid_for %}ok{% else %}remove{% endif %}"></span></td>
                                 </tr>
                             {% endfor %}
                         {% endif %}
@@ -80,6 +80,7 @@ FeedMe
           {% if not orderlines %}
             <input name="act" class="btn btn-primary" type="submit" value="Load" />
           {% else %}
+            <input name="act" class="btn btn-danger" type="submit" value="Edit" />
             <input name="act" class="btn btn-primary" type="submit" value="Pay" />
           {% endif %}
           </div>

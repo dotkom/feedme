@@ -270,6 +270,17 @@ def manage_order(request):
                 total_price += orderline.price
             if request.POST['act'] == 'Load':
                 return render(request, 'manage_order.html', {'form': form, 'is_admin': is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price})
+            elif request.POST['act'] == 'Edit':
+                for rq in request.POST:
+                    if 'edit_orderline_price' in rq:
+                        i = rq.split('-')[1]
+                        ol = orderlines.get(id=i)
+                        change = int(request.POST[rq])
+                        if ol.price != change:
+                            ol.price = change
+                            ol.save()
+                            messages.success(request, 'Changed price for %(ol)s to %(price)s' % {'ol': ol, 'price': ol.price})
+                return redirect(manage_order)
             elif request.POST['act'] == 'Pay':
                 handle_payment(request, order)
                 return redirect(manage_order)
