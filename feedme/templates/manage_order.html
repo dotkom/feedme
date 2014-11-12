@@ -59,7 +59,11 @@ FeedMe
                         {% if orderline.users %}
                             {% for user in orderline.users.all %}
                                 <tr>
-                                    <td>{{ orderline.id }}</td>
+                                    <td>
+                                        {{ orderline.id }}
+                                        <span class="pull-right">
+                                            kr <input type="number" name="edit_orderline_price" id="{{ orderline.id}}" value="{{ orderline.price }}" min="0" max="999">
+                                    </td>
                                     <td>{{ orderline.menu_item }}</td>
                                     <td>{{ orderline.comments }}</td>
                                     <td>{{ user }}</td>
