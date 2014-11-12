@@ -148,6 +148,14 @@ class TransactionTestCase(TestCase):
         self.assertTrue(user.balance.withdraw(50))
         self.assertEqual(user.balance.get_balance(), 0)
 
+    def test_transaction_validation_on_validation_disabled(self):
+        user = G(User)
+        order = G(Order)
+        get_or_create_balance(user)
+
+        self.assertEqual(user.balance.get_balance(), 0)
+        self.assertTrue(user, 100)
+
 
 class ViewPermissionsTestCase(TestCase):
     def set_up(self):

@@ -40,6 +40,7 @@ class Order(models.Model):
     restaurant = models.ForeignKey(Restaurant)
     extra_costs = models.FloatField(_('extra costs'), default=0)
     active = models.BooleanField(_('Order currently active'), default=True)
+    use_validation = models.BooleanField(_('Enable funds validation'), default=True)
 
     def get_total_sum(self):
         s = self.orderline_set.aggregate(models.Sum('price'))['price__sum']

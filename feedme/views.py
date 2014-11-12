@@ -388,10 +388,11 @@ def check_orderline(request, form, orderline_id=None, buddies=None):
     else:
         users.extend(buddies)
     amount = amount / len(users)
-    for user in users:
-        if not validate_user_funds(user, amount):
-            messages.error(request, 'Unsufficient funds caught for %s' % user.get_username())
-            return False
+    if orderline.order.use_validation:
+        for user in users:
+            if not validate_user_funds(user, amount):
+                messages.error(request, 'Unsufficient funds caught for %s' % user.get_username())
+                return False
     return True
 
 
