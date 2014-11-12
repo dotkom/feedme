@@ -137,12 +137,8 @@ def orderlineview(request, orderline_id=None):
         else:
             new_orderline = OrderLineForm(request.POST, auto_id=True)
     else:
-        if orderline_id:
-            form = OrderLineForm(instance=orderline)
-            form.fields["users"].queryset = get_order().available_users()
-        else:
-            form = OrderLineForm(instance=orderline)
-            form.fields["users"].queryset = get_order().available_users()
+        form = OrderLineForm(instance=orderline)
+        form.fields["users"].queryset = get_order().available_users().exclude(id=request.user.id)
     return render(request, 'orderview.html', {'form': form, 'is_admin': is_admin(request)})
 
 
@@ -388,7 +384,7 @@ def check_orderline(request, form, orderline_id=None, buddies=None):
     else:
         users.extend(buddies)
     amount = amount / len(users)
-    if orderline.order.use_validation:
+    if get_order().use_validation:
         for user in users:
             if not validate_user_funds(user, amount):
                 messages.error(request, 'Unsufficient funds caught for %s' % user.get_username())
