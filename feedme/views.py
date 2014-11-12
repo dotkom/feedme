@@ -152,7 +152,7 @@ def edit_orderline(request, orderline_id):
     print(orderline.users.all(), request.user == orderline.creator, request.user in orderline.users.all())
     if not is_in_current_order('orderline', orderline_id):
         messages.error(request, 'you can not edit orderlines from old orders')
-    elif request.user is not orderline.creator and request.user not in orderline.users.all():
+    elif request.user != orderline.creator and request.user not in orderline.users.all():
         messages.error(request, 'You need to be the creator')
         return redirect(index)
     return orderlineview(request, orderline_id)
