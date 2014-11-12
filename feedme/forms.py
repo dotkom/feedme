@@ -29,6 +29,7 @@ class ManageOrderForm(ModelForm):
 
     class Meta:
         model = ManageOrders
+        fields = '__all__'
 
 
 class ManageBalanceForm(ModelForm):
@@ -36,6 +37,7 @@ class ManageBalanceForm(ModelForm):
 
     class Meta:
         model = ManageBalance
+        fields = '__all__'
 
 
 class ManageOrderLimitForm(ModelForm):
@@ -43,6 +45,7 @@ class ManageOrderLimitForm(ModelForm):
 
     class Meta:
         model = ManageOrderLimit
+        fields = '__all__'
 
 
 class NewOrderForm(ModelForm):
@@ -50,6 +53,7 @@ class NewOrderForm(ModelForm):
 
     class Meta:
         model = Order
+        fields = '__all__'
 
 
 class NewRestaurantForm(ModelForm):
@@ -57,6 +61,7 @@ class NewRestaurantForm(ModelForm):
 
     class Meta:
         model = Restaurant
+        fields = '__all__'
 
 
 class NewPollForm(ModelForm):
@@ -64,6 +69,7 @@ class NewPollForm(ModelForm):
 
     class Meta:
         model = Poll
+        fields = '__all__'
 
 
 class PollAnswerForm(ModelForm):
