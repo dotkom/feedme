@@ -107,6 +107,7 @@ def orderlineview(request, orderline_id=None):
     new_or_existing_orderline = 'new'
     if orderline_id is None:
         orderline = OrderLine()
+        creator = None
     else:
         orderline = get_object_or_404(OrderLine, pk=orderline_id)
         new_or_existing_orderline = 'existing'
@@ -116,7 +117,7 @@ def orderlineview(request, orderline_id=None):
         form = OrderLineForm(request.POST, instance=orderline)
         if form.is_valid():
             new_orderline = form.save(commit=False)
-            if creator:
+            if creator is not None:
                 new_orderline.creator = creator
             else:
                 new_orderline.creator = request.user
