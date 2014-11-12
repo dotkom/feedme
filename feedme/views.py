@@ -268,9 +268,9 @@ def manage_order(request):
                 orderline.users.add(orderline.creator)
                 orderline.each = orderline.get_total_price() / (orderline.users.count())
                 total_price += orderline.price
-            if request.POST['act'] == 'load':
+            if request.POST['act'] == 'Load':
                 return render(request, 'manage_order.html', {'form': form, 'is_admin': is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price})
-            elif request.POST['act'] == 'pay':
+            elif request.POST['act'] == 'Pay':
                 handle_payment(request, order)
                 return redirect(manage_order)
         else:

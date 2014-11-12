@@ -74,11 +74,9 @@ FeedMe
                 <h3>This order has no order lines yet.</h3>
             {% endif %}
           {% if not orderlines %}
-            <input name="act" hidden value="load">
-            <input class="btn btn-primary" type="submit" value="Load" />
+            <input name="act" class="btn btn-primary" type="submit" value="Load" />
           {% else %}
-            <input name="act" hidden value="pay">
-            <input class="btn btn-primary" type="submit" value="Pay" />
+            <input name="act" class="btn btn-primary" type="submit" value="Pay" />
           {% endif %}
           </div>
         </form>
