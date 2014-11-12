@@ -93,6 +93,8 @@ FeedMe
         {% else %}
           {% if poll %}
             {% include 'poll.html' %}
+          {% else %}
+            <h3>No active poll.</h3>
           {% endif %}
         {% endif %}
       </div>
