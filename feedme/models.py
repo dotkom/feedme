@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.core.exceptions import AppRegistryNotReady
+from django.utils.encoding import python_2_unicode_compatible
 
 try:
     # Django 1.7 way for importing custom user
@@ -21,6 +22,7 @@ except ImportError:
         from django.contrib.auth.models import User
 
 
+@python_2_unicode_compatible
 class Restaurant(models.Model):
     restaurant_name = models.CharField(_('name'), max_length=50)
     menu_url = models.URLField(_('menu url'), max_length=250)
@@ -28,13 +30,11 @@ class Restaurant(models.Model):
     email = models.EmailField(_('email address'), blank=True, null=True)
     buddy_system = models.BooleanField(_('Enable buddy system'), default=False)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.restaurant_name
 
-    def __str__(self):
-        return self.__unicode__()
 
-
+@python_2_unicode_compatible
 class Order(models.Model):
     date = models.DateField(_('date'))
     restaurant = models.ForeignKey(Restaurant)
@@ -79,16 +79,14 @@ class Order(models.Model):
         else:
             return False
 
-    def __unicode__(self):
-        return "%s @ %s" % (self.date.strftime("%d-%m-%Y"), self.restaurant)
-
     def __str__(self):
-        return self.__unicode__()
+        return "%s @ %s" % (self.date.strftime("%d-%m-%Y"), self.restaurant)
 
     class Meta:
         get_latest_by = 'date'
 
 
+@python_2_unicode_compatible
 class OrderLine(models.Model):
     order = models.ForeignKey(Order)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('owner'))
@@ -111,14 +109,8 @@ class OrderLine(models.Model):
     def get_total_price(self):
         return (self.order.get_extra_costs() * self.users.count()) + self.price
 
-    def __unicode__(self):
-        if self.creator.username != "":
-            return self.creator.username
-        else:
-            return self.creator.nickname
-
     def __str__(self):
-        return self.__unicode__()
+        return self.creator.get_username()
 
     @models.permalink
     def get_absolute_url(self):
@@ -129,18 +121,17 @@ class OrderLine(models.Model):
         verbose_name_plural = _('Order lines')
 
 
+@python_2_unicode_compatible
 class Transaction(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     amount = models.FloatField(_('amount'), default=0)
     date = models.DateTimeField(_('transaction date'), auto_now_add=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.user.get_username()
 
-    def __str__(self):
-        return self.__unicode__()
 
-
+@python_2_unicode_compatible
 class Balance(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
 
@@ -164,14 +155,12 @@ class Balance(models.Model):
         return self.add_transaction(amount * -1)
         # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s: %s" % (self.user, self.get_balance())
 
-    def __str__(self):
-        return self.__unicode__()
 
 
-
+@python_2_unicode_compatible
 class Poll(models.Model):
     question = models.CharField(_('question'), max_length=250)
     active = models.BooleanField(_('active'), default=True)
@@ -196,23 +185,18 @@ class Poll(models.Model):
             r[answer.answer] += 1
         return r
 
-    def __unicode__(self):
+    def __str__(self):
         return self.question
 
-    def __str__(self):
-        return self.__unicode__()
 
-
+@python_2_unicode_compatible
 class Answer(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('user'))
     poll = models.ForeignKey(Poll, related_name=_('poll'))
     answer = models.ForeignKey(Restaurant, related_name=_('answer'))
 
-    def __unicode__(self):
-        return "%s: %s (%s)" % (self.user, self.answer, self.poll)
-
     def __str__(self):
-        return self.__unicode__()
+        return "%s: %s (%s)" % (self.user, self.answer, self.poll)
 
 
 class ManageBalance(models.Model):
