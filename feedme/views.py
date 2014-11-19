@@ -42,7 +42,6 @@ def index(request):
                 answer = form.save(commit=False)
                 answer.user = request.user
                 answer.poll = poll
-                print('answer: %s' % form)
                 answer.save()
                 messages.success(request, 'Voted for %s' % answer.answer)
                 return redirect(index)
@@ -145,7 +144,6 @@ def orderlineview(request, orderline_id=None):
 # Edit order line
 def edit_orderline(request, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
-    print(orderline.users.all(), request.user == orderline.creator, request.user in orderline.users.all())
     if not is_in_current_order('orderline', orderline_id):
         messages.error(request, 'you can not edit orderlines from old orders')
     elif request.user != orderline.creator and request.user not in orderline.users.all():
@@ -229,7 +227,6 @@ def manage_users(request, balance=None):
         else:
             balance = get_object_or_404(Balance, balance)
         form = ManageBalanceForm(request.POST)
-        # print(form)
         if form.is_valid():
             data = form.cleaned_data
             handle_deposit(data)
@@ -456,7 +453,6 @@ def handle_deposit(data):
     user = data['user']
     get_or_create_balance(user)
     amount = data['amount']
-    print(user, amount)
     if amount >= 0:
         user.user.balance.deposit(amount)
     else:
