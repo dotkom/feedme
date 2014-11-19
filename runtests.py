@@ -11,6 +11,11 @@ try:
                 "ENGINE": "django.db.backends.sqlite3",
             }
         },
+        MIDDLEWARE_CLASSES=(
+            'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.contrib.messages.middleware.MessageMiddleware',
+            'django.middleware.clickjacking.XFrameOptionsMiddleware',
+            ),
         ROOT_URLCONF="feedme.urls",
         INSTALLED_APPS=[
             "django.contrib.auth",
@@ -19,7 +24,7 @@ try:
             "feedme",
         ],
         SITE_ID=1,
-        #NOSE_ARGS=['-s'],
+        NOSE_ARGS=['-s'],
     )
 
     try:
