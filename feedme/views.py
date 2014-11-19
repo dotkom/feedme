@@ -212,9 +212,9 @@ def new_order(request):
             return redirect(index)
     else:
         form = NewOrderForm()
-        poll = get_poll()
-        if poll is not None:
-            form.fields['restaurant'].initial = poll.get_result()
+        poll = Poll.get_active()
+        if poll:
+            form.fields['restaurant'].initial = poll.get_winner()
         form.fields["date"].initial = get_next_tuesday()
 
     return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})

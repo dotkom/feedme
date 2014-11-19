@@ -187,6 +187,13 @@ class Poll(models.Model):
             self.save()
         # Throw some exception if fails?
 
+    @classmethod
+    def get_active(self):
+        if Poll.objects.latest('id').active:
+            return Poll.objects.latest('id')
+        else:
+            return None
+
     def get_result(self):
         answers = Answer.objects.filter(poll=self)
         r = dict()
@@ -195,6 +202,14 @@ class Poll(models.Model):
                 r[answer.answer] = 0
             r[answer.answer] += 1
         return r
+
+    def get_winner(self):
+        winner = (None,-1)
+        results = self.get_result()
+        for key in results:
+            if results[key] > winner[1]:
+                winner = (key, results[key])
+        return winner[0]
 
     def __unicode__(self):
         return self.question
