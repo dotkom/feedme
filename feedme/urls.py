@@ -19,3 +19,10 @@ urlpatterns = patterns(
     url(r'^admin/newrestaurant/$', 'new_restaurant', name='new_restaurant'),
     url(r'^admin/newpoll/$', 'new_poll', name='new_poll'),
 )
+
+#from feedme.api import OrderLineResource
+#orderline_resource = OrderLineResource()
+
+#urlpatterns += (
+#    url(r'^api/', include('orderline_resource.urls')),
+#)
