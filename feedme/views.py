@@ -207,6 +207,9 @@ def new_order(request):
         form = NewOrderForm(request.POST)
         if form.is_valid():
             form.save()
+            poll = Poll.get_active()
+            if poll:
+                poll.deactivate()
             messages.success(request, 'New order added')
             return redirect(index)
     else:
