@@ -2,7 +2,7 @@ from django.conf.urls import url
 from tastypie.resources import ModelResource
 from tastypie import fields
 from tastypie.utils import trailing_slash
-from feedme.models import Poll, Restaurant, Answer
+from feedme.models import Poll, Restaurant, Answer, Order
 
 class RestaurantResource(ModelResource):
     class Meta:
@@ -37,3 +37,8 @@ class VoteResource(ModelResource):
     class Meta:
         queryset = Answer.objects.all()
         resource_name = 'vote'
+
+class OrderResource(ModelResource):
+    class Meta:
+        queryset = Order.objects.all()
+        resource_name = 'order'
