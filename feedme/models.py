@@ -141,7 +141,7 @@ class Balance(models.Model):
         return self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum']
 
     def get_balance_string(self):
-        return "%s kr" % self.get_balance()
+        return "%.2f kr" % self.get_balance()
 
     def add_transaction(self, amount):
         transaction = Transaction()
