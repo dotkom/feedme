@@ -138,7 +138,7 @@ class Balance(models.Model):
     def get_balance(self):
         if self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum'] is None:
             self.add_transaction(0)
-        return "%.2f" % self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum']
+        return self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum']
 
     def get_balance_string(self):
         return "%s kr" % self.get_balance()
