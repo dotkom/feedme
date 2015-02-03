@@ -2,7 +2,7 @@ from django.conf.urls import patterns, include, url
 
 # API
 from tastypie.api import Api
-from feedme.api import PollResource, RestaurantResource, VoteResource, OrderResource
+from feedme.api import PollResource, RestaurantResource, VoteResource, OrderResource, OrderLineResource
 
 v1_api = Api(api_name='v1')
 v1_api.register(PollResource())
