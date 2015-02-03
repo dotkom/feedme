@@ -9,6 +9,7 @@ v1_api.register(PollResource())
 v1_api.register(RestaurantResource())
 v1_api.register(VoteResource())
 v1_api.register(OrderResource())
+v1_api.register(OrderLineResource())
 
 urlpatterns = patterns(
     'feedme.views',
