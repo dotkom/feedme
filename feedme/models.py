@@ -80,7 +80,7 @@ class Order(models.Model):
             return False
 
     def __str__(self):
-        return "%s @ %s" % (self.date.strftime("%d-%m-%Y"), self.restaurant)
+        return "%s @ %s" % (self.date.strftime("%d. %B"), self.restaurant)
 
     class Meta:
         get_latest_by = 'date'
@@ -139,6 +139,9 @@ class Balance(models.Model):
         if self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum'] is None:
             self.add_transaction(0)
         return self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum']
+
+    def get_balance_string(self):
+        return "%.2f kr" % self.get_balance()
 
     def add_transaction(self, amount):
         transaction = Transaction()
@@ -201,7 +204,7 @@ class Poll(models.Model):
         return winner[0]
 
     def __str__(self):
-        return self.question
+        return "%s due %s" % (self.question, self.due_date.strftime("%x"))
 
 
 @python_2_unicode_compatible

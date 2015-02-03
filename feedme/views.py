@@ -8,6 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction, Poll, Answer
 from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm
+from feedme.settings import *
 
 try:
     # Django 1.7 way for importing custom user
@@ -206,6 +207,9 @@ def new_order(request):
         form = NewOrderForm(request.POST)
         if form.is_valid():
             form.save()
+            poll = Poll.get_active()
+            if poll:
+                poll.deactivate()
             messages.success(request, 'New order added')
             return redirect(index)
     else:

@@ -2,7 +2,7 @@ from django.conf.urls import url
 from tastypie.resources import ModelResource
 from tastypie import fields
 from tastypie.utils import trailing_slash
-from feedme.models import Poll, Restaurant, Answer, Order
+from feedme.models import Poll, Restaurant, Answer, Order, OrderLine
 
 class RestaurantResource(ModelResource):
     class Meta:
