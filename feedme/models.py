@@ -207,7 +207,7 @@ class Poll(models.Model):
 @python_2_unicode_compatible
 class Answer(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('user'))
-    poll = models.ForeignKey(Poll, related_name=_('poll'))
+    poll = models.ForeignKey(Poll, related_name=_('votes'))
     answer = models.ForeignKey(Restaurant, related_name=_('answer'))
 
     def __str__(self):

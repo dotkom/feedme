@@ -9,7 +9,13 @@ class RestaurantResource(ModelResource):
         queryset = Restaurant.objects.all()
         resource_name = 'restaurant'
 
+class VoteResource(ModelResource):
+    class Meta:
+        queryset = Answer.objects.all()
+        resource_name = 'vote'
+
 class PollResource(ModelResource):
+    votes = fields.ToManyField(VoteResource, 'votes', full=True, null=True)
     class Meta:
         queryset = Poll.objects.all()
         resource_name = 'poll'
@@ -31,12 +37,6 @@ class PollResource(ModelResource):
         poll = self.cached_obj_get(bundle=basic_bundle, **self.remove_api_resource_names(kwargs))
 
         return self.create_response(request, poll.get_winner())
-
-class VoteResource(ModelResource):
-    poll = fields.ForeignKey(PollResource, 'poll')
-    class Meta:
-        queryset = Answer.objects.all()
-        resource_name = 'vote'
 
 class OrderResource(ModelResource):
     class Meta:
