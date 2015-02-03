@@ -42,3 +42,12 @@ class OrderResource(ModelResource):
     class Meta:
         queryset = Order.objects.all()
         resource_name = 'order'
+
+class OrderLineResource(ModelResource):
+    order = fields.ForeignKey(OrderResource, 'order')
+    class Meta:
+        queryset = OrderLine.objects.all()
+        resource_name = 'orderline'
+
+# Todo - Need some kind of auth?
+#class BalanceResource(ModelResource):
