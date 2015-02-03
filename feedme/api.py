@@ -10,6 +10,7 @@ class RestaurantResource(ModelResource):
         resource_name = 'restaurant'
 
 class VoteResource(ModelResource):
+    restaurant = fields.ToOneField(RestaurantResource, 'answer', full=True, null=True)
     class Meta:
         queryset = Answer.objects.all()
         resource_name = 'vote'
