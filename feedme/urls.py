@@ -1,5 +1,15 @@
 from django.conf.urls import patterns, include, url
 
+# API
+from tastypie.api import Api
+from feedme.api import PollResource, RestaurantResource, VoteResource, OrderResource
+
+v1_api = Api(api_name='v1')
+v1_api.register(PollResource())
+v1_api.register(RestaurantResource())
+v1_api.register(VoteResource())
+v1_api.register(OrderResource())
+
 urlpatterns = patterns(
     'feedme.views',
     url(r'^$', 'index', name='index'),
@@ -18,4 +28,6 @@ urlpatterns = patterns(
     url(r'^admin/orderlimit/$', 'set_order_limit', name='set_order_limit'),
     url(r'^admin/newrestaurant/$', 'new_restaurant', name='new_restaurant'),
     url(r'^admin/newpoll/$', 'new_poll', name='new_poll'),
+
+    url(r'api/', include(v1_api.urls)),
 )
