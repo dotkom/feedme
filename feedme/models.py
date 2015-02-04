@@ -49,13 +49,7 @@ class Order(models.Model):
         return s + self.extra_costs
 
     def get_extra_costs(self):
-        orderlines = self.orderline_set.all()
-        users = 0
-        for orderline in orderlines:
-            if orderline.users:
-                users += orderline.users.count()
-            else:
-                users += 1
+        users = self.orderline_set.aggregate(models.Sum('users'))['users__sum']
         return self.extra_costs / users
 
     def order_users(self):
@@ -100,14 +94,17 @@ class OrderLine(models.Model):
     def get_order(self):
         return self.order
 
-    def get_buddies(self):
+    def get_users(self):
         return self.users
 
+    def get_buddies(self):
+        return self.get_users()
+
     def get_num_users(self):
-        return len(self.users)
+        return self.get_users().count() + 1  # Creator is not counted in users, as users was intended for buddies only. Should be changed in the future.
 
     def get_total_price(self):
-        return (self.order.get_extra_costs() * self.users.count()) + self.price
+        return (self.order.get_extra_costs() * self.get_num_users()) + self.price
 
     def __str__(self):
         return self.creator.get_username()
