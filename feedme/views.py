@@ -130,6 +130,7 @@ def orderlineview(request, orderline_id=None):
                     messages.success(request, "Orderline added")
                 else:
                     messages.success(request, "Orderline edited")
+                new_orderline.users.add(new_orderline.creator)
                 return redirect(index)
             else:
                 messages.error(request, "Orderline validation failed, please verify your data and try again.")  # @ToDo More useful errors
