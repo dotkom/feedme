@@ -109,10 +109,13 @@ class OrderLine(models.Model):
         return self.get_users()
 
     def get_num_users(self):
-        return self.get_users().count() + 1  # Creator is not counted in users, as users was intended for buddies only. Should be changed in the future.
+        return self.get_users().count()
 
     def get_total_price(self):
         return (self.order.get_extra_costs() * self.get_num_users()) + self.price
+
+    def get_price_to_pay(self):
+        return self.get_total_price() / self.get_num_users()
 
     def __str__(self):
         return self.creator.get_username()
