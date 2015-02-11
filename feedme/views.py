@@ -418,9 +418,10 @@ def handle_payment(request, order):
     for orderline in orderlines:
         if not orderline.paid_for:
             if orderline.users.count() > 0:
-                amount = (orderline.get_total_price()) / (orderline.users.count() + 1)
+                #amount = (orderline.get_total_price()) / (orderline.users.count() + 1)
+                amount = orderline.get_price_to_pay()
                 if orderline.creator not in orderline.users.all():
-                    pay(orderline.creator, amount)  # Shouldn't need this anymore since user gets automatically added in view
+                    pay(orderline.creator, amount)
                 for user in orderline.users.all():
                     pay(user, amount)
                     paid.append(user.get_username())
@@ -429,7 +430,7 @@ def handle_payment(request, order):
                 orderline.paid_for = True
                 orderline.save()
             else:
-                pay(orderline.creator, orderline.get_total_price())
+                pay(orderline.creator, orderline.get_price_to_pay())
                 orderline.paid_for = True
                 orderline.save()
                 paid.append(orderline.creator.get_username())
