@@ -175,7 +175,7 @@ def join_orderline(request, orderline_id):
         messages.error(request, 'You can not join orderlines from old orders')
     elif in_other_orderline(request.user):
         messages.error(request, 'You cannot be in multiple orderlines')
-    elif not validate_user_funds(request.user, (orderline.price / (orderline.users.count() + 1))):  # Adds us to the test aswell
+    elif orderline.order.use_validation and not validate_user_funds(request.user, (orderline.price / (orderline.users.count() + 1))):  # Adds us to the test aswell
         messages.error(request, 'You need cashes')
     else:
         orderline.users.add(request.user)

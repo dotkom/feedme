@@ -69,15 +69,18 @@ FeedMe
                       {% endif %}
                     </td>
                     <td>
-                    {% if user.is_authenticated %}
+                      {% if user.is_authenticated %}
                       {% if user == order_line.creator or user in order_line.users.all %}
                         <a href="{% url "edit_orderline" order_line.id %}"><button class="btn btn-primary">edit</button></a>
-                        <a href="{% url "delete_orderline" order_line.id %}"><button class="btn btn-danger">delete</button></a>
-                      {% elif user not in order_line.users.all and order.restaurant.buddy_system and can_join %}
+                      {% endif %}
+                      {% if user not in order_line.users.all and order.restaurant.buddy_system and can_join %}
                         <a href={% url "join_orderline" order_line.id %}><button class="btn btn-primary">join</button></a>
-                      {% elif user in order_line.users.all and order.restaurant.buddy_system %}
+                        {% elif user in order_line.users.all and user != order_line.creator and order.restaurant.buddy_system %}
                         <a href={% url "leave_orderline" order_line.id %}><button class="btn btn-danger">leave</button></a>
                       {% endif %}
+                        {% if user == order_line.creator %}
+                        <a href="{% url "delete_orderline" order_line.id %}"><button class="btn btn-danger">delete</button></a>
+                        {% endif %}
                     {% endif %}
                     </td>
                   </tr>
