@@ -92,7 +92,9 @@ FeedMe
                 <h4>Menu items</h4>
                 <ul>
                     {% for orderline in order.orderline_set.all %}
-                    <li>{{ orderline.menu_item }}</li>
+                        {% if orderline.menu_item %}
+                        <li>{{ orderline.menu_item }}</li>
+                        {% endif %}
                     {% empty %}
                         No items from this category ordered.
                     {% endfor %}
@@ -100,7 +102,9 @@ FeedMe
                 <h4>Soda</h4>
                     <ul>
                     {% for orderline in order.orderline_set.all %}
+                        {% if orderline.soda %}
                         <li>{{ orderline.soda }}</li>
+                        {% endif %}
                     {% empty %}
                         No items from this category ordered.
                     {% endfor %}
@@ -108,7 +112,9 @@ FeedMe
                 <h4>Comments</h4>
                     <ul>
                     {% for orderline in order.orderline_set.all %}
+                        {% if orderline.extras %}
                         <li>{{ orderline.extras }}</li>
+                        {% endif %}
                     {% empty %}
                         No items from this category ordered.
                     {% endfor %}

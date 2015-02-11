@@ -63,25 +63,11 @@ class ModelTestCase(TestCase):
         self.assertEqual(feedme_user.balance.get_balance(), -25, 'Someone overloaded their account')
 """
 
-
-class RestaurantTestCase(TestCase):
-    def set_up(self):
-        self.restaurant = G(Restaurant)
-
-    #def test_unicode_restaurant_name(self):
-    #    restaurant = G(Restaurant)
-    #    self.assertEqual(restaurant.restaurant_name, unicode(restaurant), 'The unicode name of the restaurant should be the same as the input value')
-
-
 class OrderTestCase(TestCase):
     def set_up(self):
         self.restaurant = G(Restaurant)
         self.order = G(Order)
         self.orderline = G(OrderLine)
-
-    #def test_unicode_order_name(self):
-    #    order = G(Order)
-    #    self.assertEqual(order.__unicode__(), "%s @ %s" % (order.date.strftime("%d-%m-%Y"), order.restaurant.restaurant_name))
 
     def test_get_total_sum(self):
         order_1 = G(Order)
@@ -112,6 +98,33 @@ class OrderTestCase(TestCase):
         order.active = False
         order.save()
         self.assertFalse(order.get_latest())
+
+
+class OrderLineTestCase(TestCase):
+    def test_get_order(self):
+        order = G(Order)
+        orderline = G(OrderLine, order=order)
+
+        self.assertEqual(order.get_latest(), order)
+
+    def test_num_users(self):
+        creator = G(User)
+        buddy = G(User)
+
+        orderline = G(OrderLine, creator=creator)
+        #orderline.users.add(creator)
+        #print(orderline.users.all())
+        self.assertEquals(orderline.get_num_users(), 1)
+
+        orderline.users.add(buddy)
+        self.assertEquals(orderline.get_num_users(), 2)
+
+    def test_get_total_price(self):
+        creator = G(User)
+        orderline = G(OrderLine, price=100)
+        orderline.users.add(creator)
+
+        self.assertEquals(orderline.get_total_price(), 100)
 
 
 class TransactionTestCase(TestCase):
@@ -155,30 +168,6 @@ class TransactionTestCase(TestCase):
 
         self.assertEqual(user.balance.get_balance(), 0)
         self.assertTrue(user, 100)
-
-
-class ViewPermissionsTestCase(TestCase):
-    def set_up(self):
-        User.objects.create(username='TestUser1')
-        User.objects.create(username='FeedmeUser1')
-        User.objects.create(username='AdminUser1')
-
-        Group.objects.create(name='dotKom')
-        Group.objects.create(name='feedmeadmin')
-
-        Group.objects.get(name='dotKom').user_set.add(User.objects.get(username='FeedmeUser1'))
-        Group.objects.get(name='dotKom').user_set.add(User.objects.get(username='AdminUser1'))
-        Group.objects.get(name='feedmeadmin').user_set.add(User.objects.get(username='AdminUser1'))
-
-"""
-    def user_able_to_see_index(self):
-        regular_user = User.objects.get(username='TestUser1')
-        feedme_user = User.objects.get(username='FeedmeUser1')
-        admin_user = User.objects.get(username='AdminUser1')
-
-        self.assertEqual(1, 1)
-        # @ToDo
-"""
 
 
 class ViewMoneyLogicTestCase(TestCase):
