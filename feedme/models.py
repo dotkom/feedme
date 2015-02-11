@@ -73,6 +73,14 @@ class Order(models.Model):
         else:
             return False
 
+    def paid(self):
+        if self.orderline_set.all():
+            for ol in self.orderline_set.all():
+                if not ol.paid_for:
+                    return False
+            return True
+        return False
+
     def __str__(self):
         return "%s @ %s" % (self.date.strftime("%d. %B"), self.restaurant)
 

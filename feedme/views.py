@@ -289,8 +289,19 @@ def manage_order(request):
 
     orders = Order.objects.all()
     orders_price = {}
-    for order in orders:
-        orders_price[order] = order.get_total_sum()
+    active_orders = Order.objects.filter(active=True)
+    inactive_orders = Order.objects.exclude(active=True)
+    #orders = [('Active', active_orders), ('Inactive', inactive_orders)]
+    orders = active_orders | inactive_orders
+    orders = orders.order_by('-active', '-date')
+    print(active_orders)
+    print(inactive_orders)
+    print()
+    print(orders)
+
+    #for order in orders:
+    #    orders_price[order] = order.get_total_sum()
+
     form.fields["orders"].queryset = orders
     return render(request, 'manage_order.html', {'form': form, 'is_admin': is_admin(request), 'orders': orders})
 
