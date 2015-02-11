@@ -112,8 +112,7 @@ class OrderLineTestCase(TestCase):
         buddy = G(User)
 
         orderline = G(OrderLine, creator=creator)
-        #orderline.users.add(creator)
-        #print(orderline.users.all())
+        orderline.users.add(creator)
         self.assertEquals(orderline.get_num_users(), 1)
 
         orderline.users.add(buddy)
@@ -125,6 +124,16 @@ class OrderLineTestCase(TestCase):
         orderline.users.add(creator)
 
         self.assertEquals(orderline.get_total_price(), 100)
+
+    def test_get_price_to_pay(self):
+        creator = G(User)
+        orderline = G(OrderLine, price=100, creator=creator)
+        orderline.users.add(creator)
+        self.assertEquals(orderline.get_price_to_pay(), 100)
+
+        user = G(User)
+        orderline.users.add(user)
+        self.assertEquals(orderline.get_price_to_pay(), 50)
 
 
 class TransactionTestCase(TestCase):

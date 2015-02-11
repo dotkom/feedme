@@ -10,6 +10,7 @@ FeedMe
 {% endblock styles %}
 
 {% load admin_tags %}
+{% load css_stuff %}
 
 {% block submenu %}
 {% include "nav.html" %}
@@ -28,14 +29,14 @@ FeedMe
           <h1>{{ form.name|title }}</h1>
         </div>
         <!--{% include "messages.html" %}-->
-        <form action="" method="post">
+        <form action="" method="post" class="form-horizontal">
         {% csrf_token %}
         <fieldset>
           {% for field in form %}
-            <div class="fieldWrapper">
-              <label>{{ field.label_tag }}</label>
-              <div class="input">{{ field }}</div>
-              <div class="error">{{ field.errors }}</div>
+            <div class="form-group">
+                <div class="col-md-2">{{ field.label_tag }}</div>
+                <div class="col-md-{% if field.errors %}7{% else %}10{% endif %}">{{ field|addcss:"form-control" }}</div>
+                {% if field.errors %}<div class="col-md-3 error">{{ field.errors }}</div>{% endif %}
             </div>
           {% endfor %}
           </fieldset>
