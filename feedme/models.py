@@ -8,19 +8,6 @@ from django.conf import settings
 from django.core.exceptions import AppRegistryNotReady
 from django.utils.encoding import python_2_unicode_compatible
 
-try:
-    # Django 1.7 way for importing custom user
-    from django.contrib.auth import AUTH_USER_MODEL
-    User = get_user_model()
-except ImportError:
-    try:
-        # Django 1.6 way for importing custom user, will crash in Django 1.7
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
-    except AppRegistryNotReady:
-        # If all else fails, import default user model -- please report this bug
-        from django.contrib.auth.models import User
-
 
 @python_2_unicode_compatible
 class Restaurant(models.Model):
@@ -53,6 +40,8 @@ class Order(models.Model):
         return self.extra_costs / users
 
     def order_users(self):
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
         return User.objects.filter(groups__name=settings.FEEDME_GROUP)
 
     def available_users(self):
@@ -189,6 +178,8 @@ class Poll(models.Model):
 
     @classmethod
     def get_active(self):
+        if Poll.objects.count() == 0:
+            return None
         if Poll.objects.latest('id').active:
             return Poll.objects.latest('id')
         else:
