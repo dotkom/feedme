@@ -4,7 +4,7 @@
             <ul class="nav navbar-nav">
 
 <!--<ul class="nav nav-tabs">-->
-    <li{% if active == 'index' %} class="active"{% endif %}><a href="{% url "index" %}">FeedMe</a></li>
+    <li{% if active == 'feedme_index' %} class="active"{% endif %}><a href="{% url "feedme_index" %}">FeedMe</a></li>
     <li{% if active == 'new order' %} class="active"{% endif %}><a href="{% url "new_order" %}">New order</a></li>
     <li{% if active == 'orders' %} class="active"{% endif %}><a href="{% url "manage_order" %}">Manage orders</a></li>
     <li{% if active == 'users' %} class="active"{% endif %}><a href="{% url "manage_users" %}">Manage users</a></li>
