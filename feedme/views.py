@@ -8,7 +8,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction, Poll, Answer
 from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm
-from feedme.settings import *
+from feedme.settings import FEEDME_ADMIN_GROUP, FEEDME_GROUP
 
 try:
     # Django 1.7 way for importing custom user
@@ -25,7 +25,7 @@ except ImportError:
 
 
 # Index
-# @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
+# @user_passes_test(lambda u: u.groups.filter(name=FEEDME_GROUP).count() == 1)
 def index(request):
     order = get_order()
     poll = get_poll()
@@ -78,7 +78,7 @@ def log_in(request):
     return redirect(index)
 
 # View order
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=FEEDME_GROUP).count() == 1)
 def orderview(request, order_id=None):
     if order_id:
         order = get_object_or_404(Order, pk=order_id)
@@ -167,7 +167,7 @@ def delete_orderline(request, orderline_id):
     return redirect(index)
 
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=FEEDME_GROUP).count() == 1)
 def join_orderline(request, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     # @TODO if not buddy system enabled, disable join
@@ -184,7 +184,7 @@ def join_orderline(request, orderline_id):
     return redirect(index)
 
 
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=FEEDME_GROUP).count() == 1)
 def leave_orderline(request, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     if not is_in_current_order('orderline', orderline_id):
@@ -202,7 +202,7 @@ def leave_orderline(request, orderline_id):
 
 
 # New order
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=FEEDME_ADMIN_GROUP).count() == 1)
 def new_order(request):
     if request.method == 'POST':
         form = NewOrderForm(request.POST)
@@ -224,7 +224,7 @@ def new_order(request):
 
 
 # Manage users (deposit, withdraw, overview)
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=FEEDME_ADMIN_GROUP).count() == 1)
 def manage_users(request, balance=None):
     if request.method == 'POST':
         if balance is None:
@@ -249,7 +249,7 @@ def manage_users(request, balance=None):
 
 
 # Manage order (payment handling)
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=FEEDME_ADMIN_GROUP).count() == 1)
 def manage_order(request):
     if request.method == 'POST':
         form = ManageOrderForm(request.POST)
@@ -303,7 +303,7 @@ def manage_order(request):
 
 
 # New restaurant
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=FEEDME_ADMIN_GROUP).count() == 1)
 def new_restaurant(request, restaurant_id=None):
     if restaurant_id is None:
         restaurant = Restaurant()
@@ -325,7 +325,7 @@ def new_restaurant(request, restaurant_id=None):
 
 
 # Edit restaurant
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=FEEDME_ADMIN_GROUP).count() == 1)
 def edit_restaurant(request, restaurant_id=None):
     restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
     return new_restaurant(request, restaurant)
@@ -360,7 +360,7 @@ def get_order_limit():
 
 
 # Remove references to this
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@user_passes_test(lambda u: u.groups.filter(name=FEEDME_ADMIN_GROUP).count() == 1)
 def set_order_limit(request):
     limit = get_order_limit()
     if request.method == 'POST':
@@ -513,12 +513,12 @@ def get_next_wednesday():
 
 
 def is_admin(request):
-    return request.user in User.objects.filter(groups__name=settings.FEEDME_ADMIN_GROUP)
+    return request.user in User.objects.filter(groups__name=FEEDME_ADMIN_GROUP)
 
 
 # Get users who should be able to join orderlines
 def get_orderline_users():
-    return User.objects.filter(groups__name=settings.FEEDME_GROUP).order_by('id')
+    return User.objects.filter(groups__name=FEEDME_GROUP).order_by('id')
 
 
 # Gets latest active order
