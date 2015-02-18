@@ -6,6 +6,9 @@ from feedme.models import Order, OrderLine, ManageOrderLimit, ManageOrders, Rest
 class OrderLineForm(ModelForm):
     name = 'orderline'
     price = forms.IntegerField(label='Total price', widget=forms.TextInput(attrs={'placeholder': '9001'}))
+    extras = forms.CharField(label='Extras/comments', widget=forms.TextInput(
+            attrs={'list': 'extras_tags'},
+    ))
 
     class Meta:
         model = OrderLine

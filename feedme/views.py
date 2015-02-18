@@ -59,10 +59,10 @@ def index(request):
             else:
                 pass # failed passwordsd
     r = dict(
-        order = order,
-        restaurants = Restaurant.objects.all(),
-        is_admin = is_admin(request),
-        can_join = not in_other_orderline(request.user),
+        order=order,
+        restaurants=Restaurant.objects.all(),
+        is_admin=is_admin(request),
+        can_join=not in_other_orderline(request.user),
     )
     if poll is not None:
         r['poll'] = poll
@@ -218,7 +218,7 @@ def new_order(request):
         poll = Poll.get_active()
         if poll:
             form.fields['restaurant'].initial = poll.get_winner()
-        form.fields["date"].initial = get_next_tuesday()
+        form.fields["date"].initial = get_next_wednesday()
 
     return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
 
@@ -344,6 +344,7 @@ def new_poll(request):
     else:
         form = NewPollForm()
         form.fields['question'].initial = "Hvor skal dotKom spise?"
+        form.fields['due_date'].initial = get_next_tuesday()
 
     return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
 
@@ -492,6 +493,18 @@ def get_next_tuesday():
     if day < 1:
         diff = timedelta(days=(1 - day))
     elif day > 1:
+        diff = timedelta(days=(7 - day + 1))
+    else:
+        diff = timedelta(days=0)
+
+    return today + diff
+
+def get_next_wednesday():
+    today = date.today()
+    day = today.weekday()
+    if day < 2:
+        diff = timedelta(days=(1 - day))
+    elif day > 2:
         diff = timedelta(days=(7 - day + 1))
     else:
         diff = timedelta(days=0)
