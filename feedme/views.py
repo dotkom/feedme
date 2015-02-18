@@ -59,10 +59,10 @@ def index(request):
             else:
                 pass # failed passwordsd
     r = dict(
-        order = order,
-        restaurants = Restaurant.objects.all(),
-        is_admin = is_admin(request),
-        can_join = not in_other_orderline(request.user),
+        order=order,
+        restaurants=Restaurant.objects.all(),
+        is_admin=is_admin(request),
+        can_join=not in_other_orderline(request.user),
     )
     if poll is not None:
         r['poll'] = poll
