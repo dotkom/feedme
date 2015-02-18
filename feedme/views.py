@@ -1,7 +1,6 @@
 from datetime import date, timedelta
 
 from django.contrib import messages
-from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
