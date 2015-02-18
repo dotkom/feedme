@@ -39,6 +39,10 @@ FeedMe
                 {% if field.errors %}<div class="col-md-3 error">{{ field.errors }}</div>{% endif %}
             </div>
           {% endfor %}
+          <datalist id="extras_tags">
+              <option value="Hvitløksdressing">
+              <option value="Rømmedressing">
+          </datalist>
           </fieldset>
         <p>Remember to add price of soda/extras to the <em>total</em> price</p>
         <input type="submit" class="btn btn-primary" value="Save" />
