@@ -13,7 +13,7 @@ v1_api.register(OrderLineResource())
 
 urlpatterns = patterns(
     'feedme.views',
-    url(r'^$', 'index', name='index'),
+    url(r'^$', 'index', name='feedme_index'),
     url(r'^neworder/$', 'orderlineview', name='new_orderline'),
     url(r'^edit/(?P<orderline_id>\d+)/$', 'edit_orderline', name='edit_orderline'),
     url(r'^delete/(?P<orderline_id>\d+)/$', 'delete_orderline', name='delete_orderline'),

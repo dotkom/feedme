@@ -2,7 +2,7 @@
   <div class="container">
     <div class="">
       <ul class="nav navbar-nav" id="feedme-menu">
-        <li class="hidden-xs"><a href="{% url "index" %}">FeedMe</a></li>
+        <li class="hidden-xs"><a href="{% url "feedme_index" %}">FeedMe</a></li>
         {% if is_admin %}
           <li><a class="hidden-xs" href="{% url "admin" %}">Admin</a></li>
         {% endif %}
