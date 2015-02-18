@@ -17,9 +17,6 @@ FeedMe
 {% endblock submenu %}
 
 {% block content %}
-<script>
-    var username = "{{ user.username }}";
-</script>
 
 <section id="feedMeAdmin">
   <div class="container">
@@ -50,4 +47,7 @@ FeedMe
     </div>
   </div>
 </section>
+<script>
+    var username = "{{ user.username }}";
+</script>
 {% endblock content %}
