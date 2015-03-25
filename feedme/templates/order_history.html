@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% endblock %}
+
+{% block styles %}
+{{ block.super }}
+{% endblock styles %}
+
+{% block submenu %}
+{% include "nav.html" %}
+{% endblock submenu %}
+
+{% block content %}
+    <h1>Order history</h1>
+    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+    {% for orderline in order_history reversed %}
+      <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="order{{ orderline.id }}">
+          <h4 class="panel-title">
+            <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{ orderline.id }}" aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}" aria-controls="collapse{{ orderline.id }}">
+              {{ orderline.order }} - {{ orderline.get_price_to_pay }}
+                - {% if orderline.paid_for %} Betalt
+                {% else %} Ikke trukket fra felleskonto
+                {% endif %}
+            </a>
+          </h4>
+        </div>
+        <div id="collapse{{ orderline.id }}" class="panel-collapse collapse{% if forloop.first %} in{% else %}{% endif %}" role="tabpanel" aria-labelledby="heading{{ orderline.id }}">
+          <div class="panel-body">
+            <p>
+                <div class="col-md-3"><h4>Ordrenummer: {{ orderline.order.id }}</h4></div>
+                <div class="col-md-3"><h4>Total pris: {{ orderline.get_total_price }}</h4></div>
+              <div class="col-md-6">
+                <table class="table">
+                  <tr>
+                    <th>Bruker</th>
+                    <th>Å betale</th>
+                  </tr>
+                  {% for user in orderline.users.all %}
+                  <tr>
+                    <td>{{ user }}</td><td>{{ orderline.get_price_to_pay }}</td>
+                  </tr>
+                  {% endfor %}
+                </table>
+              </div>
+                {# {% if orderline.users.all|length == 1 %}Betalt av {{ orderline.creator }}{% else %}Delt mellom {{ orderline.users.all|join:', ' }}{% endif %} #}
+            </p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    <div class="panel panel-default">
+    </div>
+{% endblock %}
