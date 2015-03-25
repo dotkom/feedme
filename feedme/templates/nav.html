@@ -1,15 +1,14 @@
-<nav class="subnavbar navbar-default navbar-fixed-top" role="navigation">
+<nav class="subnavbar">
   <div class="container">
-    <div class="">
-      <ul class="nav navbar-nav" id="feedme-menu">
-        <li class="hidden-xs"><a href="{% url "feedme_index" %}">FeedMe</a></li>
+      <ul id="feedme-menu">
+        <li class="top-menu-link"><a href="{% url "feedme_index" %}">FeedMe</a></li>
         {% if is_admin %}
-          <li><a class="hidden-xs" href="{% url "admin" %}">Admin</a></li>
+          <li><a class="top-menu-link" href="{% url "feedme_admin" %}">Admin</a></li>
         {% endif %}
-        <li><a href="#">{{ user.username }}: {{ user.balance.get_balance_string }}</a></li>
+        <li><a class="top-menu-link" href="{% url "feedme_order_history" %}">{{ user.username }}: {{ user.balance.get_balance_string }}</a></li>
         {% if not user.is_authenticated %}
           <li class="pull-right">
-            <form method="post" action="">
+            <form method="post" action="" hidden>
               {% csrf_token %}
               <input type="text" name="act" value="log_in" hidden>
               <input type="text" name="username" placeholder="Username">
@@ -19,6 +18,5 @@
           </li>
         {% endif %}
       </ul>
-    </div>
   </div>
 </nav>

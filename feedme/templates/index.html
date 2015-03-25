@@ -14,20 +14,25 @@ FeedMe
 
 {% block content %}
 
-<section id="feedMe">
+<section id="feedme">
   <div class="container">
-    <div class="row">
-      <div class="col-md-12">
+    <div class="page-header clearfix">
+      <div class="row">
+        <div class="col-md-12">
         {% if order %}
-          <div class="page-header">
-              <h1>
-                  {{ order }}
-                  (<a href="{{ order.restaurant.menu_url }}" target="_blank">Menu</a>) 
-                  {% if user.is_staff %}
-                    <span class="glyphicon glyphicon-phone-alt"></span> {{ order.restaurant.phone_number }}
-                  {% endif %}
-              </h1>
-          </div>
+          <h2>
+              {{ order }}
+              (<a href="{{ order.restaurant.menu_url }}" target="_blank">Menu</a>) 
+              {% if user.is_staff %}
+                <span class="glyphicon glyphicon-phone-alt"></span> {{ order.restaurant.phone_number }}
+              {% endif %}
+          </h2>
+        </div>
+      </div>
+    </div>
+    <div id="feedme-order">
+      <div class="row">
+        <div class="col-md-12">
           <div role="tabpanel">
             <ul class="nav nav-tabs" role="tablist">
               <li role="presentation" class="active">
