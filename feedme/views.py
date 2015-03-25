@@ -3,8 +3,9 @@ from datetime import date, timedelta
 from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import user_passes_test, login_required
 from django.shortcuts import render, get_object_or_404, redirect
+from django.db.models import Q
 
 from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction, Poll, Answer
 from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm
@@ -196,6 +197,11 @@ def leave_orderline(request, orderline_id):
         messages.success(request, 'Left orderline')
     return redirect(index)
 
+
+@login_required
+def order_history(request):
+    user_orders = OrderLine.objects.filter(Q(creator=request.user) | Q(users=request.user))
+    return render(request, 'order_history.html', {'order_history': user_orders})
 
 # ADMIN
 
@@ -558,13 +564,13 @@ def is_in_current_order(order_type, order_id):
 def manually_parse_users(form):
     li = str(form).split('<select')
     potential_users = li[1].split('<option')
-    usernames = []
+    user_ids = []
     for user in potential_users:
         if 'selected' in user:
-            usernames.append(user.split('>')[1].split('<')[0])
+            user_ids.append(user.split('value="')[1].split('"')[0])
     users = []
-    for username in usernames:
-        users.append(User.objects.get(username=username))
+    for i in user_ids:
+        users.append(User.objects.get(pk=i))
     return users
 
 
