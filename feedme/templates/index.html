@@ -57,18 +57,18 @@ FeedMe
                       <tr>
                     <td>{{ order_line.menu_item }} <span class="pull-right">{{ order_line.price }} kr</span></td>
                     <td>{{ order_line.soda }}</td>
-                    <td>{{ order_line.creator.username }}</td>
+                    <td>{{ order_line.creator }}</td>
                     <td>{{ order_line.extras }}</td>
                     <td>
                       {% if order_line.users %}
                         {% for user in order_line.users.all %}
                           {% if user.nickname %}
                             {% if not user.nickname == orderline.creator %}
-                                {{ user.nickname }}
+                                {{ user }}
                             {% endif %}
                           {% else %}
                             {% if not user == order_line.creator %}
-                                {{ user.username }}
+                                {{ user }}
                             {% endif %}
                           {% endif %}
                         {% endfor %}
