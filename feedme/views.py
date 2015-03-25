@@ -403,7 +403,7 @@ def check_orderline(request, form, orderline_id=None, buddies=None):
     if get_order().use_validation:
         for user in users:
             if not validate_user_funds(user, amount):
-                messages.error(request, 'Unsufficient funds caught for %s' % user.get_username())
+                messages.error(request, 'Unsufficient funds caught for %s' % user)
                 return False
     return True
 
