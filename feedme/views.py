@@ -452,11 +452,11 @@ def handle_payment(request, order):
                     else:
                         already_paid.append(user)
     if len(paid) > 0:
-        messages.success(request, 'Paid orderlines for %s.' % ', '.join(paid))
+        messages.success(request, 'Paid orderlines for %s.' % ', '.join(str(paid)))
     if len(already_paid) > 0:
-        messages.error(request, 'Already paid orderlines for %s.' % ', '.join(already_paid))
+        messages.error(request, 'Already paid orderlines for %s.' % ', '.join(str(already_paid)))
     if len(negatives) > 0:
-        messages.error(request, 'These users now have negative balances: %s' % ', '.join(negatives))
+        messages.error(request, 'These users now have negative balances: %s' % ', '.join(str(negatives)))
 
     order.active = False
     order.save()
