@@ -63,7 +63,7 @@ Feedme
                       {% if order_line.users %}
                         {% for user in order_line.users.all %}
                           {% if user.nickname %}
-                            {% if not user.nickname == orderline.creator %}
+                            {% if not user == orderline.creator %}
                                 {{ user }}
                             {% endif %}
                           {% else %}
