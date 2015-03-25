@@ -270,7 +270,7 @@ def manage_order(request):
             total_price = order.extra_costs
             for orderline in orderlines:
                 orderline.users.add(orderline.creator)
-                orderline.each = orderline.get_total_price() / (orderline.users.count())
+                orderline.each = orderline.get_price_to_pay()
                 total_price += orderline.price
             if request.POST['act'] == 'Load':
                 return render(request, 'manage_order.html', {'form': form, 'is_admin': is_admin(request), 'order': order, 'orderlines': orderlines, 'total_price': total_price})
