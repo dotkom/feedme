@@ -447,7 +447,7 @@ def handle_payment(request, order):
             already_paid.append(orderline.creator)
             if orderline.users.all().count() > 0:
                 for user in orderline.users.all():
-                    if user == orderline.creator)
+                    if user == orderline.creator:
                         print('user both in users and creator')
                     else:
                         already_paid.append(user)
