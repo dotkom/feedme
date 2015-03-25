@@ -5,7 +5,7 @@
         {% if is_admin %}
           <li><a class="top-menu-link" href="{% url "feedme_admin" %}">Admin</a></li>
         {% endif %}
-        <li><a class="top-menu-link" href="{% url "feedme_order_history" %}">{{ user.username }}: {{ user.balance.get_balance_string }}</a></li>
+        <li><a class="top-menu-link" href="#{# url "feedme_order_history" #}">{{ user.username }}: {{ user.balance.get_balance_string }}</a></li>
         {% if not user.is_authenticated %}
           <li class="pull-right">
             <form method="post" action="" hidden>
