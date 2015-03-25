@@ -18,22 +18,33 @@ FeedMe
 
 {% block content %}
 
-<section id="feedMeAdmin">
+<section id="feedme-order">
   <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="page-header">
+    <div class="page-header clearfix">
+      <div class="row">
+        <div class="col-md-12">
           <h1>{{ form.name|title }}</h1>
         </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
         <!--{% include "messages.html" %}-->
-        <form action="" method="post" class="form-horizontal">
+        <form action="" method="post" class="form form-horizontal">
         {% csrf_token %}
         <fieldset>
           {% for field in form %}
             <div class="form-group">
-                <div class="col-md-2">{{ field.label_tag }}</div>
-                <div class="col-md-{% if field.errors %}7{% else %}10{% endif %}">{{ field|addcss:"form-control" }}</div>
-                {% if field.errors %}<div class="col-md-3 error">{{ field.errors }}</div>{% endif %}
+                <div class="col-md-2">
+                    {{ field.label_tag }}
+                </div>
+                <div class="col-md-{% if field.errors %}7{% else %}10{% endif %}">
+                    {{ field|addcss:"form-control" }}
+                </div>
+                {% if field.errors %}
+                    <div class="col-md-3 error">
+                        {{ field.errors }}
+                    </div>
+                {% endif %}
             </div>
           {% endfor %}
           <datalist id="extras_tags">

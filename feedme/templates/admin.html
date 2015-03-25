@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-FeedMe
+Feedme
 {% endblock title %}
 
 {% block styles %}
@@ -10,6 +10,7 @@ FeedMe
 {% endblock styles %}
 
 {% load admin_tags %}
+{% load css_stuff %}
 
 {% block submenu %}
 {% include "nav.html" %}
@@ -17,30 +18,38 @@ FeedMe
 
 {% block content %}
 
-<section id="feedMeAdmin">
+<section id="feedme-admin">
   <div class="container">
-    <div class="row">
-      <div class="col-md-12">
-        <div class="page-header">
-          <h1>{{ form.name|title }}</h1>
-        </div>
-        <!--{% include "messages.html" %}-->
-        <form action="" method="post">
-          {% csrf_token %}
-          <div class="content">
-            {% admin_tabs form.name %}
+    <div class="page-header clearfix">
+      <div class="row">
+        <div class="col-md-12">
+          <h2>{{ form.name|title }}</h2>
+          <!--{% include "messages.html" %}-->
+          <form action="" method="post" class="form form-horizontal">
+            {% csrf_token %}
+            <fieldset>
+              {% admin_tabs form.name %}
 
-            {% for field in form %}
-              <div class="fieldWrapper clearfix">
-                <label>{{ field.label_tag }}</label>
-                <div class="input">{{ field }}</div>
-                <div class="error">{{ field.errors }}</div>
+              {% for field in form %}
+              <div class="form-group">
+                <div class="col-md-2">
+                  {{ field.label_tag }}
+                </div>
+                <div class="col-md-{% if field.errors %}7{% else %}10{% endif %}">
+                  {{ field|addcss:"form-control" }}
+                </div>
+                {% if field.errors %}
+                  <div class="col-md-3 error">
+                    {{ field.errors }}
+                  </div>
+                {% endif %}
               </div>
-            {% endfor %}
-
-          <input class="btn btn-primary" type="submit" value="Save" />
-          </div>
-        </form>
+              {% endfor %}
+            </fieldset>
+            <input class="btn btn-primary" type="submit" value="Save" />
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   </div>
