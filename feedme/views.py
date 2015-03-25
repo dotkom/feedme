@@ -431,26 +431,26 @@ def handle_payment(request, order):
                     pay(orderline.creator, amount)
                 for user in orderline.users.all():
                     pay(user, amount)
-                    paid.append(user.get_username())
+                    paid.append(user)
                     if user.balance.get_balance() < 0:
-                        negatives.append(user.get_username())
+                        negatives.append(user)
                 orderline.paid_for = True
                 orderline.save()
             else:
                 pay(orderline.creator, orderline.get_price_to_pay())
                 orderline.paid_for = True
                 orderline.save()
-                paid.append(orderline.creator.get_username())
+                paid.append(orderline.creator)
                 if orderline.creator.balance.get_balance() < 0:
-                    negatives.append(orderline.creator.get_username())
+                    negatives.append(orderline.creator)
         else:
-            already_paid.append(orderline.creator.get_username())
+            already_paid.append(orderline.creator)
             if orderline.users.all().count() > 0:
                 for user in orderline.users.all():
-                    if user.get_username() == orderline.creator.get_username():
+                    if user == orderline.creator)
                         print('user both in users and creator')
                     else:
-                        already_paid.append(user.get_username())
+                        already_paid.append(user)
     if len(paid) > 0:
         messages.success(request, 'Paid orderlines for %s.' % ', '.join(paid))
     if len(already_paid) > 0:
