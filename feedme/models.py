@@ -101,7 +101,7 @@ class OrderLine(models.Model):
         return self.get_users().count()
 
     def get_total_price(self):
-        return (self.order.get_extra_costs() * self.get_num_users()) + self.price
+        return self.order.extra_costs + self.price
 
     def get_price_to_pay(self):
         return self.get_total_price() / self.get_num_users()
