@@ -564,13 +564,13 @@ def is_in_current_order(order_type, order_id):
 def manually_parse_users(form):
     li = str(form).split('<select')
     potential_users = li[1].split('<option')
-    usernames = []
+    user_ids = []
     for user in potential_users:
         if 'selected' in user:
-            usernames.append(user.split('>')[1].split('<')[0])
+            user_ids.append(user.split('value="')[1].split('"')[0])
     users = []
-    for username in usernames:
-        users.append(User.objects.get(username=username))
+    for i in user_ids:
+        users.append(User.objects.get(pk=i))
     return users
 
 
