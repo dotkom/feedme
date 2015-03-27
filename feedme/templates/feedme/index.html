@@ -9,7 +9,7 @@ Feedme
 {% endblock styles %}
 
 {% block submenu %}
-{% include "nav.html" %}
+{% include "feedme/nav.html" %}
 {% endblock submenu %}
 
 {% block content %}
@@ -132,7 +132,7 @@ Feedme
           </div>
         {% else %}
           {% if poll %}
-            {% include 'poll.html' %}
+            {% include 'feedme/poll.html' %}
           {% else %}
             <h3>No active poll.</h3>
           {% endif %}

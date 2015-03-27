@@ -71,7 +71,7 @@ def index(request):
         else:
             r['answer'] = PollAnswerForm(instance=a_id)
         r['results'] = poll.get_result()
-    return render(request, 'index.html', r)
+    return render(request, 'feedme/index.html', r)
 
 
 def log_in(request):
@@ -99,7 +99,7 @@ def orderview(request, order_id=None):
     else:
         form = OrderForm(instance=order)
 
-    return render(request, 'orderview.html', {'form': form, 'is_admin': is_admin(request)})
+    return render(request, 'feedme/orderview.html', {'form': form, 'is_admin': is_admin(request)})
 
 
 # New / edit order line
@@ -140,7 +140,7 @@ def orderlineview(request, orderline_id=None):
     else:
         form = OrderLineForm(instance=orderline)
         form.fields["users"].queryset = get_order().available_users().exclude(id=request.user.id)
-    return render(request, 'orderview.html', {'form': form, 'is_admin': is_admin(request)})
+    return render(request, 'feedme/orderview.html', {'form': form, 'is_admin': is_admin(request)})
 
 
 # Edit order line
@@ -201,7 +201,7 @@ def leave_orderline(request, orderline_id):
 @login_required
 def order_history(request):
     user_orders = OrderLine.objects.filter(Q(creator=request.user) | Q(users=request.user))
-    return render(request, 'order_history.html', {'order_history': user_orders})
+    return render(request, 'feedme/order_history.html', {'order_history': user_orders})
 
 # ADMIN
 
@@ -226,7 +226,7 @@ def new_order(request):
                 form.fields['restaurant'].initial = poll.get_winner()
         form.fields["date"].initial = get_next_wednesday()
 
-    return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
+    return render(request, 'feedme/admin.html', {'form': form, 'is_admin': is_admin(request)})
 
 
 # Manage users (deposit, withdraw, overview)
@@ -251,7 +251,7 @@ def manage_users(request, balance=None):
         users.append(user)
     form.fields["user"].queryset = get_orderline_users()
 
-    return render(request, 'manage_users.html', {'form': form, 'users': users, 'is_admin': is_admin(request)})
+    return render(request, 'feedme/manage_users.html', {'form': form, 'users': users, 'is_admin': is_admin(request)})
 
 
 # Manage order (payment handling)
@@ -305,7 +305,7 @@ def manage_order(request):
     #    orders_price[order] = order.get_total_sum()
 
     form.fields["orders"].queryset = orders
-    return render(request, 'manage_order.html', {'form': form, 'is_admin': is_admin(request), 'orders': orders})
+    return render(request, 'feedme/manage_order.html', {'form': form, 'is_admin': is_admin(request), 'orders': orders})
 
 
 # New restaurant
@@ -327,7 +327,7 @@ def new_restaurant(request, restaurant_id=None):
     else:
         form = NewRestaurantForm(instance=restaurant)
 
-    return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
+    return render(request, 'feedme/admin.html', {'form': form, 'is_admin': is_admin(request)})
 
 
 # Edit restaurant
@@ -352,7 +352,7 @@ def new_poll(request):
         form.fields['question'].initial = "Hvor skal dotKom spise?"
         form.fields['due_date'].initial = get_next_tuesday()
 
-    return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
+    return render(request, 'feedme/admin.html', {'form': form, 'is_admin': is_admin(request)})
 
 
 # Remove references to this
@@ -380,7 +380,7 @@ def set_order_limit(request):
     else:
         form = ManageOrderLimitForm(instance=limit)
 
-    return render(request, 'admin.html', {'form': form, 'is_admin': is_admin(request)})
+    return render(request, 'feedme/admin.html', {'form': form, 'is_admin': is_admin(request)})
 
 
 # Validation of orderline
