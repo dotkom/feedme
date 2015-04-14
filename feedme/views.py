@@ -42,9 +42,9 @@ def index(request):
 @login_required()
 def index_new(request, group=None):
     groups = get_feedme_groups()
-    group = Group.objects.get(name=group)
-    order = get_order(group)
-    poll = get_poll(group)
+    group = Group.objects.get(name=group) if request.user in Group.objects.get(name=group).user_set.all() else None
+    order = get_order(group) if group else None
+    poll = get_poll(group) if group else None
     r = dict()
     r['group'] = group
     r['order'] = order
