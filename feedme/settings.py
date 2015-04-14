@@ -1,2 +1,2 @@
-FEEDME_GROUPS = [1, ]
+FEEDME_GROUPS = []
 FEEDME_ADMIN_GROUP = 'feedmeadmin'
