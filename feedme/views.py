@@ -391,6 +391,7 @@ def manage_order(request, group=None):
                 orderline.users.add(orderline.creator)
                 orderline.each = orderline.get_price_to_pay()
                 total_price += orderline.price
+            r['form'] = form
             r['order'] = order
             r['orderlines'] = orderlines
             r['total_price'] = total_price
@@ -406,10 +407,10 @@ def manage_order(request, group=None):
                             ol.price = change
                             ol.save()
                             messages.success(request, 'Changed price for %(ol)s to %(price)s' % {'ol': ol, 'price': ol.price})
-                return redirect('feedme:manage_order', group, request=r)
+                return redirect('feedme:manage_order', group=group)
             elif request.POST['act'] == 'Pay':
                 handle_payment(request, order)
-                return redirect('feedme:manage_order', group, request=r)
+                return redirect('feedme:manage_order', group=group)
         else:
             form = ManageOrderForm(request.POST)
     else:
