@@ -192,10 +192,10 @@ def create_orderline(request, group=None):
                 new_orderline.save()
                 form.save_m2m()  # Manually save the m2m relations when using commit=False
                 new_orderline.users.add(new_orderline.creator)
-                messages.success(request, 'Added NEW orderline')
+                messages.success(request, 'Added orderline')
                 return redirect('feedme:feedme_index_new', group)
             else:
-                messages.error(request, 'Failed to add NEW orderline')
+                messages.error(request, 'Failed to add orderline')
     else:
         form = OrderLineForm()
         form.fields["users"].queryset = get_order(group).available_users().exclude(id=request.user.id)
@@ -391,10 +391,10 @@ def manage_order(request, group=None):
                 orderline.users.add(orderline.creator)
                 orderline.each = orderline.get_price_to_pay()
                 total_price += orderline.price
+            r['order'] = order
+            r['orderlines'] = orderlines
+            r['total_price'] = total_price
             if request.POST['act'] == 'Load':
-                r['order'] = order
-                r['orderlines'] = orderlines
-                r['total_price'] = total_price
                 return render(request, 'feedme/manage_order.html', r)
             elif request.POST['act'] == 'Edit':
                 for rq in request.POST:
