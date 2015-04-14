@@ -42,7 +42,7 @@ def index(request):
 @login_required()
 def index_new(request, group=None):
     groups = get_feedme_groups()
-    group = Group.objects.get(name=group) if request.user in Group.objects.get(name=group).user_set.all() else None
+    group = get_object_or_404(Group, name=group) if request.user in get_object_or_404(Group, name=group).user_set.all() else None
     order = get_order(group) if group else None
     poll = get_poll(group) if group else None
     r = dict()
@@ -91,7 +91,7 @@ def orderview(request, order_id=None, group=None):
     else:
         order = Order()
 
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
 
     if request.method == 'POST':
         form = OrderForm(request.POST, instance=order)
@@ -127,7 +127,7 @@ def orderlineview(request, orderline_id=None, group=None):
         new_or_existing_orderline = 'existing'
         creator = orderline.creator
 
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
 
     if request.method == 'POST':
         form = OrderLineForm(request.POST, instance=orderline)
@@ -179,7 +179,7 @@ class OrderlineDetail(DetailView):
 
 def create_orderline(request, group=None):
     r = dict()
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
 
     if request.method == 'POST':
         form = OrderLineForm(request.POST)
@@ -211,7 +211,7 @@ def create_orderline(request, group=None):
 # Edit order line
 def edit_orderline(request, group, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
     if not is_in_current_order('orderline', group, orderline_id):
         messages.error(request, 'you can not edit orderlines from old orders')
     elif request.user != orderline.creator and request.user not in orderline.users.all():
@@ -223,7 +223,7 @@ def edit_orderline(request, group, orderline_id):
 # Delete order line
 def delete_orderline(request, group, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
     if not is_in_current_order('orderline', group, orderline_id):
         messages.error(request, 'You can not delete orderlines from old orders')
     elif orderline.creator == request.user:
@@ -237,7 +237,7 @@ def delete_orderline(request, group, orderline_id):
 @login_required()
 def join_orderline(request, group, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
     # @TODO if not buddy system enabled, disable join
     if not is_in_current_order('orderline', group, orderline_id):
         messages.error(request, 'You can not join orderlines from old orders')
@@ -255,7 +255,7 @@ def join_orderline(request, group, orderline_id):
 @login_required()
 def leave_orderline(request, group, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
     if not is_in_current_order('orderline', group, orderline_id):
         messages.error(request, 'You cannot leave old orders')
     elif request.user not in orderline.users.all():
@@ -279,7 +279,7 @@ def order_history(request):
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def new_order(request, group=None):
     print('DEPRECATED - STOP USING THIS')
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
         form = NewOrderForm(request.POST)
         if form.is_valid():
@@ -308,7 +308,7 @@ def new_order(request, group=None):
 def admin(request, group=None):
     # Admin index - defaults to new order page. Should in the future probably implement a summary page? Paid, unpaid etc.
     r = dict()
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
 
     if request.method == 'POST':
         form = NewOrderForm(request.POST)
@@ -337,7 +337,7 @@ def admin(request, group=None):
 # Manage users (deposit, withdraw, overview)
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def manage_users(request, group=None, balance=None):
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
         if balance is None:
             balance = get_or_create_balance(request.user)
@@ -358,7 +358,7 @@ def manage_users(request, group=None, balance=None):
     form.fields["user"].queryset = group.user_set.all()
 
     r = dict()
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
     r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
@@ -372,7 +372,7 @@ def manage_users(request, group=None, balance=None):
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
 def manage_order(request, group=None):
     r = dict()
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
     r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
     r['group'] = group
 
@@ -456,7 +456,7 @@ def new_restaurant(request, restaurant_id=None, group=None):
         form = NewRestaurantForm(instance=restaurant)
 
     r = dict()
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
     r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
@@ -473,7 +473,7 @@ def edit_restaurant(request, restaurant_id=None):
 
 
 def new_poll(request, group=None):
-    group = Group.objects.get(name=group)
+    group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
         form = NewPollForm(request.POST)
         if form.is_valid():
