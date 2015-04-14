@@ -1,2 +1,2 @@
-FEEDME_GROUP = 'dotKom'
+FEEDME_GROUPS = [1, ]
 FEEDME_ADMIN_GROUP = 'feedmeadmin'
