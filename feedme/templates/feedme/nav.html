@@ -1,11 +1,20 @@
 <nav class="subnavbar">
   <div class="container">
       <ul id="feedme-menu">
-        <li class="top-menu-link"><a href="{% url "feedme_index" %}">Feedme</a></li>
-        {% if is_admin %}
-          <li><a class="top-menu-link" href="{% url "feedme_admin" %}">Admin</a></li>
+        {% if group %}
+          <li class="top-menu-link"><a href="{% url "feedme:feedme_index_new" group %}">Feedme:{{ group }}</a></li>
+          <li><a class="top-menu-link" href="#{# url "feedme:feedme_order_history" #}">{{ user.username }}: {{ user.balance.get_balance_string }}</a></li>
         {% endif %}
-        <li><a class="top-menu-link" href="#{# url "feedme_order_history" #}">{{ user.username }}: {{ user.balance.get_balance_string }}</a></li>
+        {% for group in feedme_groups %}
+          <li>
+            <a class="top-menu-link" href="{% url 'feedme:feedme_index_new' group %}">{{ group }}</a>
+          </li>
+            {% if is_admin %}
+                <li>
+                    <a href="{% url 'feedme:admin' group %}"><span class="glyphicon glyphicon-cog"></span></a>
+                </li>
+            {% endif %}
+        {% endfor %}
         {% if not user.is_authenticated %}
           <li class="pull-right">
             <form method="post" action="" hidden>

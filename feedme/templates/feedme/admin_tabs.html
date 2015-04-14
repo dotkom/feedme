@@ -2,37 +2,37 @@
     <div class="container">
         <ul id="feedme-admin">
             <li class="top-menu-link {% if active == 'feedme_index' %} active{% endif %}">
-                <a href="{% url "feedme_index" %}">
+                <a href="{# url "feedme:feedme_index" #}">
                     Feedme
                 </a>
             </li>
             <li class="top-menu-link {% if active == 'new order' %} active{% endif %}">
-                <a href="{% url "new_order" %}">
+                <a href="{% url "feedme:new_order" group %}">
                     New order
                 </a>
             </li>
             <li class="top-menu-link {% if active == 'orders' %} active{% endif %}">
-                <a href="{% url "manage_order" %}">
+                <a href="{% url "feedme:manage_order" group %}">
                     Manage orders
                 </a>
             </li>
             <li class="top-menu-link {% if active == 'users' %} active{% endif %}">
-                <a href="{% url "manage_users" %}">
+                <a href="{% url "feedme:manage_users" group %}">
                     Manage users
                 </a>
             </li>
             <li class="top-menu-link {% if active == 'order limit' %} active{% endif %}">
-                <a href="{% url "set_order_limit" %}">
+                <a href="{% url "feedme:set_order_limit" group %}">
                     Order limit
                 </a>
             </li>
             <li class="top-menu-link {% if active == 'new restaurant' %} active{% endif %}">
-                <a href="{% url "new_restaurant" %}">
+                <a href="{% url "feedme:new_restaurant" group %}">
                     New restaurant
                 </a>
             </li>
             <li class="top-menu-link {% if active == 'new poll' %} active{% endif %}">
-                <a href="{% url "new_poll" %}">
+                <a href="{% url "feedme:new_poll" group %}">
                     New poll
                 </a>
             </li>

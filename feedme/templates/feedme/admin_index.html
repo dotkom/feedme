@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}
+Feedme
+{% endblock title %}
+
+{% block styles %}
+{{ block.super }}
+<link href="{{ STATIC_URL }}css/feedme.css" rel="stylesheet">
+{% endblock styles %}
+
+{% load admin_tags %}
+{% load css_stuff %}
+
+{% block submenu %}
+{% include "feedme/nav.html" %}
+{% endblock submenu %}
+
+{% block content %}
+
+<section id="feedme-admin">
+  <div class="container">
+    <div class="page-header clearfix">
+      <div class="row">
+        <div class="col-md-12">
+          <h2>Please select an item from the menu.</h2>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}

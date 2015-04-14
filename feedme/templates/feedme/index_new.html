@@ -19,6 +19,9 @@ Feedme
     <div class="page-header clearfix">
       <div class="row">
         <div class="col-md-12">
+        {% if is_admin %}
+          <a href="{% url 'feedme:admin' group %}">Admin for {{group}}</a>
+        {% endif %}
         {% if order %}
           <h2>
               {{ order }}
@@ -77,15 +80,15 @@ Feedme
                     <td>
                       {% if user.is_authenticated %}
                       {% if user == order_line.creator or user in order_line.users.all %}
-                        <a href="{% url "feedme:edit_orderline" group order_line.id %}"><button class="btn btn-primary">edit</button></a>
+                        <a href="{% url "feedme:edit_orderline" order_line.id %}"><button class="btn btn-primary">edit</button></a>
                       {% endif %}
                       {% if user not in order_line.users.all and order.restaurant.buddy_system and can_join %}
-                        <a href={% url "feedme:join_orderline" group order_line.id %}><button class="btn btn-primary">join</button></a>
+                        <a href={% url "feedme:join_orderline" order_line.id %}><button class="btn btn-primary">join</button></a>
                         {% elif user in order_line.users.all and user != order_line.creator and order.restaurant.buddy_system %}
-                        <a href={% url "feedme:leave_orderline" group order_line.id %}><button class="btn btn-danger">leave</button></a>
+                        <a href={% url "feedme:leave_orderline" order_line.id %}><button class="btn btn-danger">leave</button></a>
                       {% endif %}
                         {% if user == order_line.creator %}
-                        <a href="{% url "feedme:delete_orderline" group order_line.id %}"><button class="btn btn-danger">delete</button></a>
+                        <a href="{% url "feedme:delete_orderline" order_line.id %}"><button class="btn btn-danger">delete</button></a>
                         {% endif %}
                     {% endif %}
                     </td>
@@ -93,7 +96,7 @@ Feedme
                 {% endfor %}
               </table>
               {% if can_join and user.is_authenticated %}
-                  <a href="{% url "feedme:create_orderline" group %}"><button class="btn btn-primary">New order line</button></a>
+                  <a href="{% url "feedme:new_orderline" %}"><button class="btn btn-primary">New order line</button></a>
               {% endif %}
             </div>
             <div role="tabpanel" class="tab-pane" id="receipt">
@@ -134,9 +137,7 @@ Feedme
           {% if poll %}
             {% include 'feedme/poll.html' %}
           {% else %}
-            <div class="col-md-12 text-center">
-              <img class="text-center" src="{{ STATIC_URL }}feedme_nyan.gif" alt="No content available">
-            </div>
+            <h3>No active poll.</h3>
           {% endif %}
         {% endif %}
       </div>

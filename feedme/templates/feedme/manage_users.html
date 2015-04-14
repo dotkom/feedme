@@ -27,9 +27,6 @@ FeedMe
                     <!--{% include "messages.html" %}-->
                     <form action="" method="post">
                         {% csrf_token %}
-                        <div class="content">
-                            {% admin_tabs form.name  %}
-                        </div>
                     </form>
                     {% if users %}
                     <table class="table">

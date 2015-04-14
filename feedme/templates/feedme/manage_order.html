@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}
-FeedMe
+Feedme
 {% endblock title %}
 
 {% block styles %}
@@ -28,10 +28,8 @@ FeedMe
                     <form action="" method="post">
                         {% csrf_token %}
                         <div class="content">
-                            {% admin_tabs form.name  %}
                             {% if form %}
                             <fieldset>
-                                {% admin_tabs form.name %}
 
                                 {% for field in form %}
                                 <div class="form-group{% if orderlines %} hidden{% endif %}">

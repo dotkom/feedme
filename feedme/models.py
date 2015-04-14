@@ -23,6 +23,7 @@ class Restaurant(models.Model):
 
 @python_2_unicode_compatible
 class Order(models.Model):
+    group = models.ForeignKey(Group)
     date = models.DateField(_('date'))
     restaurant = models.ForeignKey(Restaurant)
     extra_costs = models.FloatField(_('extra costs'), default=0)
@@ -162,6 +163,7 @@ class Balance(models.Model):
 
 @python_2_unicode_compatible
 class Poll(models.Model):
+    group = models.ForeignKey(Group)
     question = models.CharField(_('question'), max_length=250)
     active = models.BooleanField(_('active'), default=True)
     due_date = models.DateTimeField(_('due date'))
