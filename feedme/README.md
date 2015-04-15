@@ -13,7 +13,7 @@ Install:
 
 2. Add the following to settings:
 
-      FEEDME_GROUP = 'dotkom'
+      FEEDME_GROUPS = []  # A list of groups who should be able to use the system
 
       FEEDME_ADMIN_GROUP = 'feedmeadmin'
 

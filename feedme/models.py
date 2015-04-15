@@ -43,7 +43,7 @@ class Order(models.Model):
     def order_users(self):
         from django.contrib.auth import get_user_model
         User = get_user_model()
-        return User.objects.filter(groups__name=settings.FEEDME_GROUP)
+        return User.objects.filter(groups=self.group)
 
     def available_users(self):
         order_users = self.order_users()
