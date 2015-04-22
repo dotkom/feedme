@@ -27,6 +27,14 @@ class OrderForm(ModelForm):
         fields = ('date', )
 
 
+class EditOrderForm(ModelForm):
+    name = u'edit order'
+
+    class Meta:
+        model = Order
+        fields = ('group', 'date', 'restaurant', 'active', 'extra_costs', 'active', 'use_validation')
+
+
 class ManageOrderForm(ModelForm):
     name = u'orders'
 

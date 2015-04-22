@@ -72,7 +72,8 @@ class Order(models.Model):
         return False
 
     def __str__(self):
-        return "%s @ %s" % (self.date.strftime("%d. %B"), self.restaurant)
+        return "%s @ %s [%s]" % (self.date.strftime("%d. %B"), self.restaurant,
+                                 "Paid" if self.paid else "Active" if self.active else "Inactive")
 
     class Meta:
         get_latest_by = 'date'

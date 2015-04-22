@@ -9,8 +9,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from django.views.generic import ListView, DetailView
 
-from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction, Poll, Answer
-from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm
+from feedme.models import OrderLine, Order, Restaurant, Balance, Transaction, Poll, Answer
+from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, EditOrderForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm
 from feedme.utils import get_feedme_groups
 
 try:
@@ -277,7 +277,7 @@ def order_history(request):
 
 # New order
 @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
-def new_order(request, group=None):
+def new_order(request, group=None, order_id=None):
     print('DEPRECATED - STOP USING THIS')
     group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
@@ -375,12 +375,26 @@ def manage_order(request, group=None):
     group = get_object_or_404(Group, name=group)
     r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
     r['group'] = group
+    r['is_admin'] = is_admin(request)
+
+    form = ManageOrderForm()
+    r['form'] = form
+
+    orders_price = {}
+    active_orders = Order.objects.filter(active=True)
+    inactive_orders = Order.objects.exclude(active=True)
+    orders = active_orders | inactive_orders
+    orders = orders.order_by('-active', '-date')
+
+    form.fields["orders"].queryset = orders
+    r['orders'] = orders
 
     if request.method == 'POST':
         form = ManageOrderForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
             order = get_object_or_404(Order, pk=data['orders'].id)
+            r['orderform'] = EditOrderForm(instance=get_object_or_404(Order, pk=data['orders'].id))
             if 'active_order_submit' in request.POST:
                 order.active = request.POST['active_order_submit'] == 'Activate'
                 order.save()
@@ -408,30 +422,16 @@ def manage_order(request, group=None):
                             ol.save()
                             messages.success(request, 'Changed price for %(ol)s to %(price)s' % {'ol': ol, 'price': ol.price})
                 return redirect('feedme:manage_order', group=group)
+            elif request.POST['act'] == 'Edit order info':
+                order_edited = NewOrderForm(request.POST, instance=order)
+                order_edited.save()
+                r['orderform'] = order_edited
+                #return redirect('feedme:manage_order', group=group)
             elif request.POST['act'] == 'Pay':
                 handle_payment(request, order)
                 return redirect('feedme:manage_order', group=group)
         else:
             form = ManageOrderForm(request.POST)
-    else:
-        form = ManageOrderForm()
-
-    orders = Order.objects.all()
-    orders_price = {}
-    active_orders = Order.objects.filter(active=True)
-    inactive_orders = Order.objects.exclude(active=True)
-    #orders = [('Active', active_orders), ('Inactive', inactive_orders)]
-    orders = active_orders | inactive_orders
-    orders = orders.order_by('-active', '-date')
-
-    #for order in orders:
-    #    orders_price[order] = order.get_total_sum()
-
-    form.fields["orders"].queryset = orders
-
-    r['form'] = form
-    r['is_admin'] = is_admin(request)
-    r['orders'] = orders
 
     return render(request, 'feedme/manage_order.html', r)
 

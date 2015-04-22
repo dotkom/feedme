@@ -1,107 +1,131 @@
 {% extends "base.html" %}
 
 {% block title %}
-Feedme
+    Feedme
 {% endblock title %}
 
 {% block styles %}
-{{ block.super }}
-<link href="{{ STATIC_URL }}css/feedme.css" rel="stylesheet">
+    {{ block.super }}
+    <link href="{{ STATIC_URL }}css/feedme.css" rel="stylesheet">
 {% endblock styles %}
 
 {% load admin_tags %}
 {% load css_stuff %}
 
 {% block submenu %}
-{% include "feedme/nav.html" %}
+    {% include "feedme/nav.html" %}
 {% endblock submenu %}
 
 {% block content %}
 
-<section id="feedme-admin">
-    <div class="container">
-        <div class="page-header clearfix">
-            <div class="row">
-                <div class="col-md-12">
-                    <h2>{{ form.name|title }}</h2>
-                    <!--{% include "messages.html" %}-->
-                    <form action="" method="post">
-                        {% csrf_token %}
-                        <div class="content">
-                            {% if form %}
-                            <fieldset>
-
-                                {% for field in form %}
-                                <div class="form-group{% if orderlines %} hidden{% endif %}">
-                                    <div class="col-md-2">
-                                        {{ field.label_tag }}
-                                    </div>
-                                    <div class="col-md-{% if field.errors %}7{% else %}10{% endif %}">
-                                        {{ field|addcss:"form-control" }}
-                                    </div>
-                                    {% if field.errors %}
-                                    <div class="col-md-3 error">
-                                        {{ field.errors }}
-                                    </div>
-                                    {% endif %}
-                                </div>
-                                {% endfor %}
-                            </fieldset>
-                            {% endif %}
-                            {% if orderlines %}
-                            <h2>
-                                {{ order }}: {{ total_price }} kr
-                                <form action="" method="post">
-                                    <input type="input" name="act" value="set_active_order" hidden>
-                                    {% if order.active %}
-                                    <input type="input" name="set_active" value="False" hidden>
-                                    <input type="submit" name="active_order_submit" value="Deactivate" class="btn btn-danger btn-lg">
-                                    {% else %}
-                                    <input type="input" name="set_active" value="True" hidden>
-                                    <input type="submit" name="active_order_submit" value="Activate" class="btn btn-success btn-lg">
-                                    {% endif %}
-                                </form>
-                                <span class="pull-right">Paid (-> inactive): <span class="glyphicon glyphicon-{% if order.active %}remove{% else %}ok{% endif %}"></span></span>
-                            </h2>
-                            <table class="table">
-                                <tr><th>Orderline</th><th>Menu item</th><th>Comments</th><th>User</th><th>To pay</th><th>Paid for</th><th></th></tr>
-                                {% for orderline in orderlines %}
-                                {% if orderline.users %}
-                                {% for user in orderline.users.all %}
-                                <tr>
-                                    <td>
-                                        {{ orderline.id }}
+    <section id="feedme-admin">
+        <div class="container">
+            <div class="page-header clearfix">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>{{ form.name|title }}</h2>
+                        <form action="" method="post">
+                            {% csrf_token %}
+                            <div class="content">
+                                {% if form %}
+                                    <fieldset>
+                                        {% for field in form %}
+                                            <div class="form-group">
+                                                <div class="col-md-2">
+                                                    {{ field.label_tag }}
+                                                </div>
+                                                <div class="col-md-{% if field.errors %}7{% else %}10{% endif %}">
+                                                    {{ field|addcss:"form-control" }}
+                                                </div>
+                                                {% if field.errors %}
+                                                    <div class="col-md-3 error">
+                                                        {{ field.errors }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </fieldset>
+                                    <hr>
+                                {% endif %}
+                                {% if orderform %}
+                                    {# Order loaded -- Let user edit order fields #}
+                                    <form action="" method="post">
+                                        <fieldset class="form form-horizontal" id="order-info">
+                                            {% for field in orderform %}
+                                                <div class="form-group">
+                                                    <div class="col-md-2">
+                                                        {{ field.label_tag }}
+                                                    </div>
+                                                    <div class="col-md-{% if field.errors %}7{% else %}10{% endif %}">
+                                                        {{ field|addcss:"form-control" }}
+                                                    </div>
+                                                    {% if field.errors %}
+                                                        <div class="col-md-3 error">
+                                                            {{ field.errors }}
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </fieldset>
+                                        <input name="act" class="btn btn-primary" type="submit" value="Edit order info">
+                                    </form>
+                                    <hr>
+                                {% endif %}
+                                {% if orderlines %}
+                                    <h2>
+                                        {{ order }}: {{ total_price }} kr
+                                        <form action="" method="post">
+                                            <input type="input" name="act" value="set_active_order" hidden>
+                                            {% if order.active %}
+                                                <input type="input" name="set_active" value="False" hidden>
+                                                <input type="submit" name="active_order_submit" value="Deactivate" class="btn btn-danger btn-lg">
+                                            {% else %}
+                                                <input type="input" name="set_active" value="True" hidden>
+                                                <input type="submit" name="active_order_submit" value="Activate" class="btn btn-success btn-lg">
+                                            {% endif %}
+                                        </form>
+                                        <span class="pull-right">Paid (-> inactive): <span class="glyphicon glyphicon-{% if order.active %}remove{% else %}ok{% endif %}"></span></span>
+                                    </h2>
+                                    <table class="table">
+                                        <tr><th>Orderline</th><th>Menu item</th><th>Comments</th><th>User</th><th>To pay</th><th>Paid for</th><th></th></tr>
+                                        {% for orderline in orderlines %}
+                                            {% if orderline.users %}
+                                                {% for user in orderline.users.all %}
+                                                    <tr>
+                                                        <td>
+                                                            {{ orderline.id }}
                                         <span class="pull-right">
                                             <input type="number" id="{{ orderline.id }}" name="edit_orderline_price-{{ orderline.id }}" id="{{ orderline.id}}" value="{{ orderline.price }}" min="0" max="999">
                                         </span>
-                                    </td>
-                                    <td>{{ orderline.menu_item }}</td>
-                                    <td>{{ orderline.comments }}</td>
-                                    <td>{{ user }}</td>
-                                    <td>{{ orderline.each }}</td>
-                                    <td>
+                                                        </td>
+                                                        <td>{{ orderline.menu_item }}</td>
+                                                        <td>{{ orderline.comments }}</td>
+                                                        <td>{{ user }}</td>
+                                                        <td>{{ orderline.each }}</td>
+                                                        <td>
                                         <span class="glyphicon glyphicon-{% if orderline.paid_for %}ok{% else %}remove{% endif %}">
                                         </span>
-                                    </td>
-                                </tr>
-                                {% endfor %}
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </table>
                                 {% endif %}
-                                {% endfor %}
-                            </table>
-                            {% else %}
-                            <h3>This order has no order lines yet.</h3>
-                            {% endif %}
-                            {% if not orderlines %}
-                            <input name="act" class="btn btn-primary" type="submit" value="Load" />
-                            {% else %}
-                            <input name="act" class="btn btn-danger" type="submit" value="Edit" />
-                            <input name="act" class="btn btn-primary" type="submit" value="Pay" />
-                            {% endif %}
-                        </div>
-                    </form>
+                                {% if form and not orderlines %}
+                                    <h3>This order has no order lines yet.</h3>
+                                {% endif %}
+                                {% if not orderlines %}
+                                    <input name="act" class="btn btn-primary" type="submit" value="Load" />
+                                {% else %}
+                                    <input name="act" class="btn btn-danger" type="submit" value="Edit" />
+                                    <input name="act" class="btn btn-primary" type="submit" value="Pay" />
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</section>
+    </section>
 {% endblock content %}
