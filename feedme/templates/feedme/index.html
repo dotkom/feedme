@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load l10n %}
 
 {% block title %}
 Feedme
@@ -21,7 +22,7 @@ Feedme
         <div class="col-md-12">
         {% if order %}
           <h2>
-              {{ order }}
+              {{ order.restaurant }} - {{ order.date|localize }}
               (<a href="{{ order.restaurant.menu_url }}" target="_blank">Menu</a>) 
               {% if user.is_staff %}
                 <span class="glyphicon glyphicon-phone-alt"></span> {{ order.restaurant.phone_number }}

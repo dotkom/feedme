@@ -1,68 +1,67 @@
 {% extends "base.html" %}
 
 {% block title %}
-Feedme
+    Feedme
 {% endblock title %}
 
 {% block styles %}
-{{ block.super }}
-<link href="{{ STATIC_URL }}css/feedme.css" rel="stylesheet">
+    {{ block.super }}
+    <link href="{{ STATIC_URL }}css/feedme.css" rel="stylesheet">
 {% endblock styles %}
 
 {% load admin_tags %}
 {% load css_stuff %}
 
 {% block submenu %}
-{% include "feedme/nav.html" %}
+    {% include "feedme/nav.html" %}
 {% endblock submenu %}
 
 {% block content %}
 
-<section id="feedme-admin">
-  <div class="container">
-    <div class="page-header clearfix">
-      <div class="row">
-        <div class="col-md-12">
-        {% if form %}
-          <h2>{{ form.name|title }}</h2>
-          <!--{% include "messages.html" %}-->
-          <form action="" method="post" class="form form-horizontal">
-            {% csrf_token %}
-            <fieldset>
-              {# admin_tabs form.name #}
+    <section id="feedme-admin">
+        <div class="container">
+            <div class="page-header clearfix">
+                <div class="row">
+                    <div class="col-md-12">
+                        {% if form %}
+                            <h2>{{ form.name|title }}</h2>
+                            <!--{% include "messages.html" %}-->
+                            <form action="" method="post" class="form form-horizontal">
+                                {% csrf_token %}
+                                <fieldset>
+                                    {# admin_tabs form.name #}
 
-              {% for field in form %}
-              <div class="form-group">
-                <div class="col-md-2">
-                  {{ field.label_tag }}
+                                    {% for field in form %}
+                                        <div class="form-group">
+                                            <div class="col-md-2">
+                                                {{ field.label_tag }}
+                                            </div>
+                                            <div class="col-md-{% if field.errors %}7{% else %}10{% endif %}">
+                                                {{ field|addcss:"form-control" }}
+                                            </div>
+                                            {% if field.errors %}
+                                                <div class="col-md-3 error">
+                                                    {{ field.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </fieldset>
+                                <input class="btn btn-primary" type="submit" value="Save" />
+                            </form>
+                        {% else %}
+                            <ul>
+                                <li><a href="{% url 'feedme:new_order' group %}">New order</a></li>
+                                <li><a href="{% url 'feedme:manage_order' group %}">Manage order</a></li>
+                                <li><a href="{% url 'feedme:manage_users' group %}">Manage users</a></li>
+                                <li class="divider"></li>
+                                <li><a href="{% url 'feedme:new_poll' group %}">Poll</a></li>
+                                <li><a href="{% url 'feedme:new_restaurant' group %}">Restaurant</a></li>
+                            </ul>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="col-md-{% if field.errors %}7{% else %}10{% endif %}">
-                  {{ field|addcss:"form-control" }}
-                </div>
-                {% if field.errors %}
-                  <div class="col-md-3 error">
-                    {{ field.errors }}
-                  </div>
-                {% endif %}
-              </div>
-              {% endfor %}
-            </fieldset>
-            <input class="btn btn-primary" type="submit" value="Save" />
             </div>
-          </form>
-      {% else %}
-            <ul>
-        <li><a href="{% url 'feedme:new_order' group %}">New order</a></li>
-        <li><a href="{% url 'feedme:manage_order' group %}">Manage order</a></li>
-        <li><a href="{% url 'feedme:manage_users' group %}">Manage users</a></li>
-        <li class="divider"></li>
-        <li><a href="{% url 'feedme:new_poll' group %}">Poll</a></li>
-        <li><a href="{% url 'feedme:new_restaurant' group %}">Restaurant</a></li>
-            </ul>
-      {% endif %}
         </div>
-      </div>
-    </div>
-  </div>
-</section>
+    </section>
 {% endblock content %}
