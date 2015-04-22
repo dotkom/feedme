@@ -112,7 +112,7 @@
                                         {% endfor %}
                                     </table>
                                 {% endif %}
-                                {% if form and not orderlines %}
+                                {% if form and order and not orderlines %}
                                     <h3>This order has no order lines yet.</h3>
                                 {% endif %}
                                 {% if not orderlines %}
