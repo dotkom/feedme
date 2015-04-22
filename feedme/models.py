@@ -64,6 +64,8 @@ class Order(models.Model):
             return False
 
     def paid(self):
+        if self.orderline_set.count() < 1:
+            return False
         if self.orderline_set.all():
             for ol in self.orderline_set.all():
                 if not ol.paid_for:
@@ -73,7 +75,7 @@ class Order(models.Model):
 
     def __str__(self):
         return "%s @ %s [%s]" % (self.date.strftime("%d. %B"), self.restaurant,
-                                 "Paid" if self.paid else "Active" if self.active else "Inactive")
+                                 "Paid" if self.paid and self.orderline_set.count() != 0 else "Active" if self.active else "Inactive")
 
     class Meta:
         get_latest_by = 'date'
