@@ -76,6 +76,10 @@ class Order(models.Model):
 
     class Meta:
         get_latest_by = 'date'
+        permissions = (
+                ('view_order', 'View Order'),
+                ('edit_order', 'Edit Order'),
+            )
 
 
 @python_2_unicode_compatible
@@ -115,8 +119,12 @@ class OrderLine(models.Model):
         return ('edit', (), {'orderline_id': self.id})
 
     class Meta:
-        verbose_name = _('Order line')
-        verbose_name_plural = _('Order lines')
+        verbose_name = _('Orderline')
+        verbose_name_plural = _('Orderlines')
+        permissions = (
+                ('view_order', 'View Order'),
+                ('edit_order', 'Edit Order'),
+            )
 
 
 @python_2_unicode_compatible
@@ -207,6 +215,13 @@ class Poll(models.Model):
     def __str__(self):
         return "%s due %s" % (self.question, self.due_date.strftime("%x"))
 
+    class Meta:
+        permissions = (
+                ('view_poll', 'View Poll'),
+                ('edit_poll', 'Edit Poll'),
+            )
+
+
 
 @python_2_unicode_compatible
 class Answer(models.Model):
@@ -216,6 +231,11 @@ class Answer(models.Model):
 
     def __str__(self):
         return "%s: %s (%s)" % (self.user, self.answer, self.poll)
+
+    class Meta:
+        permissions = (
+                ('vote_poll', 'Vote Poll'),
+            )
 
 
 class ManageBalance(models.Model):
