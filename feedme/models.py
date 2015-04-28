@@ -78,7 +78,6 @@ class Order(models.Model):
         get_latest_by = 'date'
         permissions = (
                 ('view_order', 'View Order'),
-                ('edit_order', 'Edit Order'),
             )
 
 
@@ -121,10 +120,6 @@ class OrderLine(models.Model):
     class Meta:
         verbose_name = _('Orderline')
         verbose_name_plural = _('Orderlines')
-        permissions = (
-                ('view_order', 'View Order'),
-                ('edit_order', 'Edit Order'),
-            )
 
 
 @python_2_unicode_compatible
@@ -218,7 +213,6 @@ class Poll(models.Model):
     class Meta:
         permissions = (
                 ('view_poll', 'View Poll'),
-                ('edit_poll', 'Edit Poll'),
             )
 
 
