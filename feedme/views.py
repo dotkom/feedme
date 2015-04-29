@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import Group
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from django.views.generic import ListView, DetailView
@@ -30,7 +30,6 @@ global groups
 groups = get_feedme_groups()
 
 # Index
-# @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def index(request):
     r = dict(
         is_admin=is_admin(request),
@@ -276,7 +275,7 @@ def order_history(request):
 
 
 # New order
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@permission_required('feedme.add_order', raise_exception=True)
 def new_order(request, group=None):
     print('DEPRECATED - STOP USING THIS')
     group = get_object_or_404(Group, name=group)
@@ -335,7 +334,7 @@ def admin(request, group=None):
     return render(request, 'feedme/admin.html', r)
 
 # Manage users (deposit, withdraw, overview)
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@permission_required('feedme.add_balance', raise_exception=True)
 def manage_users(request, group=None, balance=None):
     group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
@@ -369,7 +368,7 @@ def manage_users(request, group=None, balance=None):
 
 
 # Manage order (payment handling)
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@permission_required('feedme.change_balance', raise_exception=True)
 def manage_order(request, group=None):
     r = dict()
     group = get_object_or_404(Group, name=group)
@@ -437,7 +436,7 @@ def manage_order(request, group=None):
 
 
 # New restaurant
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@permission_required('feedme.add_restaurant', raise_exception=True)
 def new_restaurant(request, restaurant_id=None, group=None):
     if restaurant_id is None:
         restaurant = Restaurant()
@@ -466,12 +465,13 @@ def new_restaurant(request, restaurant_id=None, group=None):
 
 
 # Edit restaurant
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@permission_required('feedme.change_restaurant', raise_exception=True)
 def edit_restaurant(request, restaurant_id=None):
     restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
     return new_restaurant(request, restaurant)
 
 
+@permission_required('feedme.add_poll', raise_exception=True)
 def new_poll(request, group=None):
     group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
