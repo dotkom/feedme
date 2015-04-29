@@ -9,6 +9,7 @@ try:
         DATABASES={
             "default": {
                 "ENGINE": "django.db.backends.sqlite3",
+                "NAME": "db.sqlite",
             }
         },
         MIDDLEWARE_CLASSES=(
@@ -23,8 +24,6 @@ try:
             "django.contrib.sites",
             "feedme",
         ],
-        FEEDME_GROUPS=[],
-        FEEDME_ADMIN_GROUP='feedmeadmin',
         SITE_ID=1,
         NOSE_ARGS=['-s'],
     )

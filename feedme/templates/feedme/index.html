@@ -62,14 +62,8 @@ Feedme
                     <td>
                       {% if order_line.users %}
                         {% for user in order_line.users.all %}
-                          {% if user.nickname %}
-                            {% if not user == orderline.creator %}
-                                {{ user }}
-                            {% endif %}
-                          {% else %}
-                            {% if not user == order_line.creator %}
-                                {{ user }}
-                            {% endif %}
+                          {% if not user == order_line.creator %}
+                            {{ user }}
                           {% endif %}
                         {% endfor %}
                       {% endif %}

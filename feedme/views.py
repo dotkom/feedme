@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import Group
-from django.contrib.auth.decorators import user_passes_test, login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from django.views.generic import ListView, DetailView
@@ -26,15 +26,12 @@ except ImportError:
         # If all else fails, import default user model -- please report this bug
         from django.contrib.auth.models import User
 
-global groups
-groups = get_feedme_groups()
 
 # Index
-# @user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_GROUP).count() == 1)
 def index(request):
     r = dict(
         is_admin=is_admin(request),
-        feedme_groups=[g for g in groups if request.user in g.user_set.all()],
+        feedme_groups=[g for g in get_feedme_groups() if request.user in g.user_set.all()],
     )
     return render(request, 'feedme/index.html', r)
 
@@ -51,7 +48,7 @@ def index_new(request, group=None):
     r['restaurants'] = Restaurant.objects.all()
     r['is_admin'] = is_admin(request)
     r['can_join'] = not in_other_orderline(request.user)
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
 
     a_id = None
     if str(request.user) != 'AnonymousUser':
@@ -108,7 +105,7 @@ def orderview(request, order_id=None, group=None):
         form = OrderForm(instance=order)
 
     r = dict()
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -158,7 +155,7 @@ def orderlineview(request, orderline_id=None, group=None):
         form.fields["users"].queryset = get_order(group).available_users().exclude(id=request.user.id)
 
     r = dict()
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -200,7 +197,7 @@ def create_orderline(request, group=None):
         form = OrderLineForm()
         form.fields["users"].queryset = get_order(group).available_users().exclude(id=request.user.id)
 
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -276,7 +273,7 @@ def order_history(request):
 
 
 # New order
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@permission_required('feedme.add_order', raise_exception=True)
 def new_order(request, group=None):
     print('DEPRECATED - STOP USING THIS')
     group = get_object_or_404(Group, name=group)
@@ -299,7 +296,7 @@ def new_order(request, group=None):
         form.fields['group'].initial = group
     r = dict()
     r['group'] = group
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['form'] = form
     r['is_admin'] = is_admin(request)
     return render(request, 'feedme/admin.html', r)
@@ -329,13 +326,13 @@ def admin(request, group=None):
 
 
     # r['form'] = form
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['is_admin'] = is_admin(request)
     return render(request, 'feedme/admin.html', r)
 
 # Manage users (deposit, withdraw, overview)
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@permission_required('feedme.add_balance', raise_exception=True)
 def manage_users(request, group=None, balance=None):
     group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
@@ -359,7 +356,7 @@ def manage_users(request, group=None, balance=None):
 
     r = dict()
     group = get_object_or_404(Group, name=group)
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -369,11 +366,11 @@ def manage_users(request, group=None, balance=None):
 
 
 # Manage order (payment handling)
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@permission_required('feedme.change_balance', raise_exception=True)
 def manage_order(request, group=None):
     r = dict()
     group = get_object_or_404(Group, name=group)
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
 
     if request.method == 'POST':
@@ -437,7 +434,7 @@ def manage_order(request, group=None):
 
 
 # New restaurant
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@permission_required('feedme.add_restaurant', raise_exception=True)
 def new_restaurant(request, restaurant_id=None, group=None):
     if restaurant_id is None:
         restaurant = Restaurant()
@@ -457,7 +454,7 @@ def new_restaurant(request, restaurant_id=None, group=None):
 
     r = dict()
     group = get_object_or_404(Group, name=group)
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -466,12 +463,13 @@ def new_restaurant(request, restaurant_id=None, group=None):
 
 
 # Edit restaurant
-@user_passes_test(lambda u: u.groups.filter(name=settings.FEEDME_ADMIN_GROUP).count() == 1)
+@permission_required('feedme.change_restaurant', raise_exception=True)
 def edit_restaurant(request, restaurant_id=None):
     restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
     return new_restaurant(request, restaurant)
 
 
+@permission_required('feedme.add_poll', raise_exception=True)
 def new_poll(request, group=None):
     group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
@@ -489,7 +487,7 @@ def new_poll(request, group=None):
         form.fields['group'].initial = group
 
     r = dict()
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -633,7 +631,7 @@ def get_next_wednesday():
 
 
 def is_admin(request):
-    return request.user in User.objects.filter(groups__name=settings.FEEDME_ADMIN_GROUP)
+    return request.user.has_perm('feedme.change_order')
 
 
 # Gets latest active order

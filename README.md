@@ -19,7 +19,7 @@ This project was started to help 'dotKom' with ordering food for their work nigh
  - `INSTALLED_APPS = (…, 'feedme', …)  
 2. Make sure the groups defined in feedme/settings.py actually exists  
 3. Include feedme.urls into system urls.py
- - `url(r'^feedme/', include('feedme.urls'))`  
+ - `url(r'^feedme/', include('feedme.urls', namespace='feedme'))`  
 
 ---
 
