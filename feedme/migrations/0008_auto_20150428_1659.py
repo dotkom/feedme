@@ -17,14 +17,14 @@ class Migration(migrations.Migration):
         ),
         migrations.AlterModelOptions(
             name='order',
-            options={'get_latest_by': 'date', 'permissions': (('view_order', 'View Order'), ('edit_order', 'Edit Order'))},
+            options={'get_latest_by': 'date', 'permissions': (('view_order', 'View Order'),)},
         ),
         migrations.AlterModelOptions(
             name='orderline',
-            options={'verbose_name': 'Orderline', 'verbose_name_plural': 'Orderlines', 'permissions': (('view_order', 'View Order'), ('edit_order', 'Edit Order'))},
+            options={'verbose_name': 'Orderline', 'verbose_name_plural': 'Orderlines'},
         ),
         migrations.AlterModelOptions(
             name='poll',
-            options={'permissions': (('view_poll', 'View Poll'), ('edit_poll', 'Edit Poll'))},
+            options={'permissions': (('view_poll', 'View Poll'),)},
         ),
     ]
