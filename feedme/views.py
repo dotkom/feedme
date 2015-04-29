@@ -26,14 +26,12 @@ except ImportError:
         # If all else fails, import default user model -- please report this bug
         from django.contrib.auth.models import User
 
-global groups
-groups = get_feedme_groups()
 
 # Index
 def index(request):
     r = dict(
         is_admin=is_admin(request),
-        feedme_groups=[g for g in groups if request.user in g.user_set.all()],
+        feedme_groups=[g for g in get_feedme_groups() if request.user in g.user_set.all()],
     )
     return render(request, 'feedme/index.html', r)
 
@@ -50,7 +48,7 @@ def index_new(request, group=None):
     r['restaurants'] = Restaurant.objects.all()
     r['is_admin'] = is_admin(request)
     r['can_join'] = not in_other_orderline(request.user)
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
 
     a_id = None
     if str(request.user) != 'AnonymousUser':
@@ -107,7 +105,7 @@ def orderview(request, order_id=None, group=None):
         form = OrderForm(instance=order)
 
     r = dict()
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -157,7 +155,7 @@ def orderlineview(request, orderline_id=None, group=None):
         form.fields["users"].queryset = get_order(group).available_users().exclude(id=request.user.id)
 
     r = dict()
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -199,7 +197,7 @@ def create_orderline(request, group=None):
         form = OrderLineForm()
         form.fields["users"].queryset = get_order(group).available_users().exclude(id=request.user.id)
 
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -298,7 +296,7 @@ def new_order(request, group=None):
         form.fields['group'].initial = group
     r = dict()
     r['group'] = group
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['form'] = form
     r['is_admin'] = is_admin(request)
     return render(request, 'feedme/admin.html', r)
@@ -328,7 +326,7 @@ def admin(request, group=None):
 
 
     # r['form'] = form
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['is_admin'] = is_admin(request)
     return render(request, 'feedme/admin.html', r)
@@ -358,7 +356,7 @@ def manage_users(request, group=None, balance=None):
 
     r = dict()
     group = get_object_or_404(Group, name=group)
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -372,7 +370,7 @@ def manage_users(request, group=None, balance=None):
 def manage_order(request, group=None):
     r = dict()
     group = get_object_or_404(Group, name=group)
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
 
     if request.method == 'POST':
@@ -456,7 +454,7 @@ def new_restaurant(request, restaurant_id=None, group=None):
 
     r = dict()
     group = get_object_or_404(Group, name=group)
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
@@ -489,7 +487,7 @@ def new_poll(request, group=None):
         form.fields['group'].initial = group
 
     r = dict()
-    r['feedme_groups'] = [g for g in groups if request.user in g.user_set.all()]
+    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['form'] = form
     r['is_admin'] = is_admin(request)
