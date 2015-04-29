@@ -54,7 +54,8 @@ class Order(models.Model):
     def taken_users(self):
         return self.orderline_set.values_list(_('creator'), flat=True)
 
-    def get_latest(self):
+    @classmethod
+    def get_latest(cls):
         if Order.objects.all():
             orders = Order.objects.all().order_by('-id')
             for order in orders:
@@ -77,8 +78,8 @@ class Order(models.Model):
     class Meta:
         get_latest_by = 'date'
         permissions = (
-                ('view_order', 'View Order'),
-            )
+            ('view_order', 'View Order'),
+        )
 
 
 @python_2_unicode_compatible
@@ -115,7 +116,7 @@ class OrderLine(models.Model):
 
     @models.permalink
     def get_absolute_url(self):
-        return ('edit', (), {'orderline_id': self.id})
+        return 'edit', (), {'orderline_id': self.id}
 
     class Meta:
         verbose_name = _('Orderline')
@@ -163,7 +164,6 @@ class Balance(models.Model):
         return "%s: %s" % (self.user, self.get_balance())
 
 
-
 @python_2_unicode_compatible
 class Poll(models.Model):
     group = models.ForeignKey(Group)
@@ -182,7 +182,7 @@ class Poll(models.Model):
         # Throw some exception if fails?
 
     @classmethod
-    def get_active(self):
+    def get_active(cls):
         if Poll.objects.count() == 0:
             return None
         if Poll.objects.latest('id').active:
@@ -200,7 +200,7 @@ class Poll(models.Model):
         return r
 
     def get_winner(self):
-        winner = (None,-1)
+        winner = (None, -1)
         results = self.get_result()
         for key in results:
             if results[key] > winner[1]:
@@ -212,9 +212,8 @@ class Poll(models.Model):
 
     class Meta:
         permissions = (
-                ('view_poll', 'View Poll'),
-            )
-
+            ('view_poll', 'View Poll'),
+        )
 
 
 @python_2_unicode_compatible
@@ -228,8 +227,8 @@ class Answer(models.Model):
 
     class Meta:
         permissions = (
-                ('vote_poll', 'Vote Poll'),
-            )
+            ('vote_poll', 'Vote Poll'),
+        )
 
 
 class ManageBalance(models.Model):
