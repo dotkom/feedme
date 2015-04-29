@@ -7,9 +7,3 @@ def get_feedme_groups():
     order_ctype = ContentType.objects.get_for_model(Order)
     permission = Permission.objects.get(codename='view_order', content_type=order_ctype)
     return [g for g in Group.objects.all() if permission in g.permissions.all()]
-
-    """
-    group_ids = settings.FEEDME_GROUPS
-    groups = [Group.objects.get(pk=i) for i in group_ids]
-    return groups
-    """
