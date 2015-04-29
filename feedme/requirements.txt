@@ -1,7 +1,6 @@
 # Django
 Django==1.7.1
 django-dynamic-fixture==1.8.0
-django-guardian==1.2.5
 
 # API
 django-tastypie==0.12.1
