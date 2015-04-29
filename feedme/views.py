@@ -633,7 +633,7 @@ def get_next_wednesday():
 
 
 def is_admin(request):
-    return request.user in User.objects.filter(groups__name=settings.FEEDME_ADMIN_GROUP)
+    return request.user.has_perm('feedme.change_order')
 
 
 # Gets latest active order
