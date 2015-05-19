@@ -109,8 +109,9 @@ class OrderLine(models.Model):
     def get_num_users(self):
         return self.get_users().count()
 
+    # Should rename to "get_orderline_total"
     def get_total_price(self):
-        return self.order.extra_costs + self.price
+        return self.price + (self.order.get_extra_costs() * self.get_num_users())
 
     def get_price_to_pay(self):
         return self.get_total_price() / self.get_num_users()
