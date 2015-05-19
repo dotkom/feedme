@@ -38,7 +38,10 @@ class Order(models.Model):
 
     # Should rename to "get_extra_costs_for_each_user" or -each_payer
     def get_extra_costs(self):
-        users = self.orderline_set.aggregate(models.Sum('users'))['users__sum']
+        # users = self.orderline_set.aggregate(models.Sum('users'))['users__sum']
+        users = 0
+        for ol in self.orderline_set.all():
+            users += ol.users.count()
         return self.extra_costs / users if users > 0 else self.extra_costs
 
     def order_users(self):
