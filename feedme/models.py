@@ -36,9 +36,10 @@ class Order(models.Model):
             s = 0
         return s + self.extra_costs
 
+    # Should rename to "get_extra_costs_for_each_user" or -each_payer
     def get_extra_costs(self):
         users = self.orderline_set.aggregate(models.Sum('users'))['users__sum']
-        return self.extra_costs / users
+        return self.extra_costs / users if users > 0 else self.extra_costs
 
     def order_users(self):
         from django.contrib.auth import get_user_model
