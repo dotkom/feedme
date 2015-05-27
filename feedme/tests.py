@@ -84,11 +84,60 @@ class OrderTestCase(TestCase):
         r = order_2.get_total_sum()
         self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
 
-    def test_get_extra_costs(self):
+    def get_total_sum_with_extra_costs(self):
+        order = G(Order, extra_costs=50)
+        user_1 = G(User)
+        user_2 = G(User)
+        user_3 = G(User)
+        orderline_1 = G(OrderLine, order=order, users=[user_1, user_2], price=25)
+        orderline_2 = G(OrderLine, order=order, users=[user_3, ], price=25)
+        self.assertEqual(order.get_total_sum(), 100)
+
+    def get_price_per_user(self):
+        order = G(Order, extra_costs=50)
+        user_1 = G(User)
+        user_2 = G(User)
+        user_3 = G(User)
+        user_4 = G(User)
+        orderline_1 = G(OrderLine, order=order, users=[user_1, user_2], price=25)
+        orderline_2 = G(OrderLine, order=order, users=[user_3, ], price=25)
+        self.assertEqual(orderline_1.get_price_to_pay(), 25, 'expected %s, got %s' % '25', orderline_1.get_price_to_pay())
+
+    def test_get_extra_costs_one_user(self):
+        order = G(Order, extra_costs=50)
+        user = G(User)
+        orderline = G(OrderLine, order=order, creator=user, users=[user, ])
+        self.assertEqual(order.get_extra_costs(), 50)
+
+    def test_get_extra_costs_two_users_one_orderline(self):
+        order = G(Order, extra_costs=50)
+        user_1 = G(User)
+        user_2 = G(User)
+        orderline = G(OrderLine, order=order, creator=user_1, users=[user_1, user_2])
+        self.assertEqual(order.get_extra_costs(), 25)
+
+    def test_get_extra_costs_two_users_two_orderlines(self):
+        order = G(Order, extra_costs=50)
+        user_1 = G(User)
+        user_2 = G(User)
+        orderline_1 = G(OrderLine, order=order, creator=user_1, users=[user_1, ])
+        orderline_2 = G(OrderLine, order=order, creator=user_2, users=[user_2, ])
+        self.assertEqual(order.get_extra_costs(), 25)
+
+    def test_get_extra_costs_one_user_two_orderlines(self):
         order = G(Order, extra_costs=50)
         user = G(User)
         G(OrderLine, order=order, creator=user, users=[user, ])
         G(OrderLine, order=order, creator=user, users=[user, ])
+        self.assertEqual(order.get_extra_costs(), 25)
+
+    def test_get_extra_costs_two_orderlines_three_users(self):
+        order = G(Order, extra_costs=75)
+        user_1 = G(User)
+        user_2 = G(User)
+        user_3 = G(User)
+        orderline_1 = G(OrderLine, order=order, creator=user_1, users=[user_1, user_2])
+        orderline_2 = G(OrderLine, order=order, creator=user_3, users=[user_3, ])
         self.assertEqual(order.get_extra_costs(), 25)
 
     def test_get_latest(self):
@@ -134,6 +183,32 @@ class OrderLineTestCase(TestCase):
         user = G(User)
         orderline.users.add(user)
         self.assertEquals(orderline.get_price_to_pay(), 50)
+
+    def test_get_price_to_pay_two_users_one_orderline(self):
+        order = G(Order, extra_costs=50)
+        user_1 = G(User)
+        user_2 = G(User)
+        orderline = G(OrderLine, order=order, creator=user_1, users=[user_1, user_2], price=100)
+        self.assertEqual(orderline.get_price_to_pay(), 75)
+
+    def test_get_price_to_pay_two_users_two_orderlines(self):
+        order = G(Order, extra_costs=50)
+        user_1 = G(User)
+        user_2 = G(User)
+        orderline_1 = G(OrderLine, order=order, creator=user_1, users=[user_1, ], price=100)
+        orderline_2 = G(OrderLine, order=order, creator=user_2, users=[user_2, ], price=100)
+        self.assertEqual(orderline_1.get_price_to_pay(), 125)
+        self.assertEqual(orderline_2.get_price_to_pay(), 125)
+
+    def test_get_price_to_pay_three_users_two_orderlines(self):
+        order = G(Order, extra_costs=75)
+        user_1 = G(User)
+        user_2 = G(User)
+        user_3 = G(User)
+        orderline_1 = G(OrderLine, order=order, creator=user_1, users=[user_1, user_2], price=100)
+        orderline_2 = G(OrderLine, order=order, creator=user_3, users=[user_3, ], price=100)
+        self.assertEqual(orderline_1.get_price_to_pay(), 75)
+        self.assertEqual(orderline_2.get_price_to_pay(), 125)
 
 
 class TransactionTestCase(TestCase):
