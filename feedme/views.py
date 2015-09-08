@@ -336,16 +336,20 @@ def admin(request, group=None):
 def manage_users(request, group=None, balance=None):
     group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
+        print('Got post method')
         if balance is None:
             balance = get_or_create_balance(request.user)
         else:
             balance = get_object_or_404(Balance, balance)
+        print('balance: %s, %s' % (balance.user.id, balance))
         form = ManageBalanceForm(request.POST)
         if form.is_valid():
+            print('form is valid, doing handle deposit')
             data = form.cleaned_data
             handle_deposit(data)
             messages.success(request, 'Deposit successful')
             return redirect('feedme:manage_users', group)
+        print('form is not valid')
     else:
         form = ManageBalanceForm()
     users = []
@@ -582,13 +586,15 @@ def pay(user, amount):
 
 # Deposit of funds
 def handle_deposit(data):
-    user = data['user']
-    get_or_create_balance(user)
+    balance = data['user']
+    print('got %s, %s object' % (balance.user.id, balance))
+    x = get_or_create_balance(balance)
+    print('get or create gave me %s, same as prv? %s' % (x, x == balance))
     amount = data['amount']
     if amount >= 0:
-        user.user.balance.deposit(amount)
+        balance.deposit(amount)
     else:
-        user.user.balance.withdraw(amount)
+        balance.withdraw(amount)
 
 
 # Get or create balance for a user
