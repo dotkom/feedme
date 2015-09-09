@@ -10,7 +10,7 @@ from django.db.models import Q
 from django.views.generic import ListView, DetailView, FormView
 
 from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction, Poll, Answer
-from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm, DepositMoneyForm
+from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm
 from feedme.utils import get_feedme_groups
 
 try:
