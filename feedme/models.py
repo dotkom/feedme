@@ -166,7 +166,7 @@ class Balance(models.Model):
         # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
 
     def __str__(self):
-        return "%s: %s" % (self.user, self.get_balance())
+        return "%s: %s" % (self.user.username, self.get_balance())
 
 
 @python_2_unicode_compatible
