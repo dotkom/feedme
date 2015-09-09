@@ -25,39 +25,13 @@ FeedMe
                     <h2>{{ form.name|title }}</h2>
                     <h3>HER KAN DU OPPPPPDATERE BRUKERES BALANSE</h3>
                     <!--{% include "messages.html" %}-->
-                    <form action="" method="post">
+                    {% if user or group %}
+                      <form action="" method="POST">
                         {% csrf_token %}
-                    </form>
-                    {% if users %}
-                    <table class="table">
-                        <tr>
-                            <th>User</th>
-                            <th>Balance</th>
-                            <th>Amount</th>
-                            <th></th>
-                        </tr>
-                        {% for user in users %}
-                        <form action="" method="POST">
-                            {% csrf_token %}
-                            <tr>
-                                <input type="text" name="act" value="deposit-table" hidden>
-                                <td>
-                                    <input type="text" name="user" value="{{ user.id }}" hidden required>
-                                    {{ user }}
-                                </td>
-                                <td>
-                                    {{ user.balance.get_balance_string }}
-                                </td>
-                                <td>
-                                    {{ form.amount }}
-                                </td>
-                                <td>
-                                    <input type="submit" name="submit" value="Deposit" class="btn btn-primary">
-                                </td>
-                            </tr>
-                        </form>
-                        {% endfor %}
-                    </table>
+                        {{ form.errors }}
+                        {{ form }}
+                        <input type="submit" class="btn btn-primary" value="Deposit">
+                      </form>
                     {% endif %}
                 </div>
             </div>

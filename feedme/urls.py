@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
+from django.contrib.auth.decorators import permission_required
 
-from feedme.views import OrderlineDetail
+from feedme.views import OrderlineDetail, ManageUserViewSet
 
 # API
 from tastypie.api import Api
@@ -35,7 +36,7 @@ urlpatterns = patterns(
     url(r'^admin/$', 'new_order', name='feedme_admin'),
     url(r'^admin/neworder/$', 'new_order', name='new_order'),
     url(r'^admin/orders/$', 'manage_order', name='manage_order'),
-    url(r'^admin/users/$', 'manage_users', name='manage_users'),
+    # url(r'^admin/users/$', 'manage_users', name='manage_users'),
     url(r'^admin/newrestaurant/$', 'new_restaurant', name='new_restaurant'),
     url(r'^admin/newpoll/$', 'new_poll', name='new_poll'),
 
@@ -54,7 +55,7 @@ urlpatterns = patterns(
     url(r'^(?P<group>\w+)/admin/$', 'admin', name='admin'),
     url(r'^(?P<group>\w+)/admin/neworder/$', 'new_order', name='new_order'),
     url(r'^(?P<group>\w+)/admin/orders/$', 'manage_order', name='manage_order'),
-    url(r'^(?P<group>\w+)/admin/users/$', 'manage_users', name='manage_users'),
+    url(r'^(?P<group>\w+)/admin/users/$', permission_required('feedme.add_balance')(ManageUserViewSet.as_view()), name='manage_users'),
     url(r'^(?P<group>\w+)/admin/newrestaurant/$', 'new_restaurant', name='new_restaurant'),
     url(r'^(?P<group>\w+)/admin/newpoll/$', 'new_poll', name='new_poll'),
 

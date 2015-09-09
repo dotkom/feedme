@@ -7,10 +7,10 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, FormView
 
 from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction, Poll, Answer
-from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm
+from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm, DepositMoneyForm
 from feedme.utils import get_feedme_groups
 
 try:
@@ -332,42 +332,37 @@ def admin(request, group=None):
     return render(request, 'feedme/admin.html', r)
 
 # Manage users (deposit, withdraw, overview)
-@permission_required('feedme.add_balance', raise_exception=True)
-def manage_users(request, group=None, balance=None):
-    group = get_object_or_404(Group, name=group)
-    if request.method == 'POST':
-        print('Got post method')
-        if balance is None:
-            balance = get_or_create_balance(request.user)
-        else:
-            balance = get_object_or_404(Balance, balance)
-        print('balance: %s, %s' % (balance.user.id, balance))
+class ManageUserViewSet(DetailView):
+    model = Balance
+    fields = ('user', 'get_balance')
+    template_name = 'feedme/manage_users.html'
+
+    def get(self, request, group=None):
+        r = {}
+        group = get_object_or_404(Group, name=group)
+        r['group'] = group
+        r['form'] = ManageBalanceForm()
+        r['form'].fields["user"].queryset = Balance.objects.filter(user__groups=group)
+
+        return render(request, 'feedme/manage_users.html', r)
+
+    def post(self, request, group=None):
+        r = {}
+        group = get_object_or_404(Group, name=group)
         form = ManageBalanceForm(request.POST)
         if form.is_valid():
-            print('form is valid, doing handle deposit')
-            data = form.cleaned_data
-            handle_deposit(data)
-            messages.success(request, 'Deposit successful')
+            balance = form.cleaned_data['user']
+            amount = form.cleaned_data['amount']
+            user_balance = [balance.get_balance(),]
+            balance.deposit(amount) if amount > 0 else balance.withdraw(amount * -1)
+            user_balance.append(balance.get_balance())
+            messages.success(request, 'Successfully deposited %s for %s (Changed from %s to %s)' % (balance.user, amount, user_balance[0], user_balance[1]))
             return redirect('feedme:manage_users', group)
-        print('form is not valid')
-    else:
-        form = ManageBalanceForm()
-    users = []
-    for user in group.user_set.all():
-        get_or_create_balance(user)
-        users.append(user)
-    form.fields["user"].queryset = group.user_set.all()
+        else:
+            r['form'] = form
+            messages.error(request, 'Invalid values supplied, check form error for details.')
 
-    r = dict()
-    group = get_object_or_404(Group, name=group)
-    r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
-    r['group'] = group
-    r['form'] = form
-    r['is_admin'] = is_admin(request)
-    r['users'] = users
-
-    return render(request, 'feedme/manage_users.html', r)
-
+        return render(request, 'feedme/manage_users.html', r)
 
 # Manage order (payment handling)
 @permission_required('feedme.change_balance', raise_exception=True)
@@ -586,10 +581,8 @@ def pay(user, amount):
 
 # Deposit of funds
 def handle_deposit(data):
-    balance = data['user']
-    print('got %s, %s object' % (balance.user.id, balance))
-    x = get_or_create_balance(balance)
-    print('get or create gave me %s, same as prv? %s' % (x, x == balance))
+    balance = get_or_create_balance(data['user'])
+    print('updating %s' % balance)
     amount = data['amount']
     if amount >= 0:
         balance.deposit(amount)
@@ -599,15 +592,7 @@ def handle_deposit(data):
 
 # Get or create balance for a user
 def get_or_create_balance(user):
-    try:
-        user_balance = Balance.objects.get(user=user)
-        if user_balance:
-            return user_balance.get_balance()
-    except:
-        balance = Balance()
-        balance.user = user
-        balance.save()
-        return user.balance.get_balance()
+    return Balance.objects.get_or_create(user=user)[0]
 
 
 # yes
