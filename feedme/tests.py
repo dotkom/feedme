@@ -215,16 +215,23 @@ class TransactionTestCase(TestCase):
     def set_up(self):
         self.user = G(User)
 
+    def test_get_user_balance(self):
+        user = G(User)
+        balance = G(Balance, user=user)
+        goc_balance = get_or_create_balance(user)
+        self.assertEquals(user, balance.user, 'User should match balance.user')
+        self.assertEquals(user, goc_balance.user, 'User should match balance_user from get_or_create()')
+
     def test_transactions(self):
         user = G(User)
-        get_or_create_balance(user)  # This creates an empty transaction!
+        get_or_create_balance(user)
 
         G(Transaction, user=user, amount=100.0)
         self.assertTrue(user.balance.get_balance(), 100.0)
 
         G(Transaction, user=user, amount=-100.0)
         self.assertEqual(user.balance.get_balance(), 0.0)
-        self.assertEqual(user.transaction_set.count(), 3)
+        self.assertEqual(user.transaction_set.count(), 2)
 
     def test_negative_transactions(self):
         # It is expected that people CAN go below zero!
