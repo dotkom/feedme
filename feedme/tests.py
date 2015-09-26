@@ -303,24 +303,26 @@ class ViewLogicTestCase(TestCase):
     def test_join_multiple_orderlines_as_creator(self):
         user_1 = G(User)
         user_2 = G(User)
+        group = G(Group)
 
-        order = G(Order)
+        order = G(Order, group=group)
         G(OrderLine, order=order, creator=user_1)
         G(OrderLine, order=order)
 
-        self.assertTrue(in_other_orderline(user_1), 'User should be in another orderline')
-        self.assertFalse(in_other_orderline(user_2), 'User should not be in another orderline')
+        self.assertTrue(in_other_orderline(order, user_1), 'User should be in another orderline')
+        self.assertFalse(in_other_orderline(order, user_2), 'User should not be in another orderline')
 
     def test_join_multiple_orderlines_as_buddy(self):
         user_1 = G(User)
         user_2 = G(User)
+        group = G(Group)
 
-        order = G(Order)
+        order = G(Order, group=group)
         G(OrderLine, order=order, users=[user_1])
         G(OrderLine, order=order)
 
-        self.assertTrue(in_other_orderline(user_1), 'User should be in another orderline')
-        self.assertFalse(in_other_orderline(user_2), 'User should not be in another orderline')
+        self.assertTrue(in_other_orderline(order, user_1), 'User should be in another orderline')
+        self.assertFalse(in_other_orderline(order, user_2), 'User should not be in another orderline')
 
 
 class PollTestCase(TestCase):

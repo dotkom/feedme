@@ -47,7 +47,7 @@ def index_new(request, group=None):
     r['order'] = order
     r['restaurants'] = Restaurant.objects.all()
     r['is_admin'] = is_admin(request)
-    r['can_join'] = not in_other_orderline(request.user)
+    r['can_join'] = not in_other_orderline(order, request.user)
     r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
 
     a_id = None
@@ -238,7 +238,7 @@ def join_orderline(request, group, orderline_id):
     # @TODO if not buddy system enabled, disable join
     if not is_in_current_order('orderline', group, orderline_id):
         messages.error(request, 'You can not join orderlines from old orders')
-    elif in_other_orderline(request.user):
+    elif in_other_orderline(get_order(group), request.user):
         messages.error(request, 'You cannot be in multiple orderlines')
     elif orderline.order.use_validation and not validate_user_funds(request.user, (orderline.price / (orderline.users.count() + 1))):  # Adds us to the test aswell
         messages.error(request, 'You need cashes')
@@ -673,8 +673,7 @@ def manually_parse_users(form):
 
 
 # Checks if user is in another orderline
-def in_other_orderline(user):
-    order = get_order(user)
+def in_other_orderline(order, user):
     r1 = ""
     r2 = ""
     if order:
