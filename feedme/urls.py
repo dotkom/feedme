@@ -50,3 +50,4 @@ urlpatterns = patterns(
     url(r'^(?P<group>\w+)/admin/newrestaurant/$', 'new_restaurant', name='new_restaurant'),
     url(r'^(?P<group>\w+)/admin/newpoll/$', 'new_poll', name='new_poll'),
 )
+
