@@ -20,8 +20,9 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
 
 class OrderLineSerializer(serializers.ModelSerializer):
+    creator = serializers.CharField(read_only=True)
     # creator = FeedmeUserSerializer()  # @todo fix loading actual users
-    # users = FeedmeUserSerializer(many=True)
+    # users = serializers.CharField(many=True)
 
     class Meta:
         model = OrderLine
