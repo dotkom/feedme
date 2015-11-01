@@ -41,7 +41,16 @@ var OrderLine = React.createClass({
       $("#soda").val(orderline.soda)
       $("#extras").val(orderline.extras)
       $("#price").val(orderline.price)
+      $("#users").val(orderline.users)
       this.setState({hideOrderLine: true})
+
+      // On form submit, reload current orderline
+      var that = this
+      $("#formSubmit").click(function() {
+        setTimeout(function() {
+          that.loadOrderLine()
+        }, 500) // I hope 500ms is enough to wait for a POST request to complete.
+      })
     },
     // @ToDo: join and leave events
 

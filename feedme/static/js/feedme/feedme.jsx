@@ -1,9 +1,3 @@
-console.log("starting loading")
-
-// var React = require('react')
-
-// console.log("loaded react")
-
 var Button = require('./Buttons.jsx')
 
 var Order = require('./Order.jsx')
