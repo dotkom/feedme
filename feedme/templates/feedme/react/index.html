@@ -14,8 +14,10 @@ Feedme in React.js
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script>
+      var csrf_token = "{{ csrf_token }}"
       var api_base = "../feedme-api/";
       var order = {{ order.id }};
+      var username = "{{ username }}"
 
     function getCookie(name) {
         var cookieValue = null;
@@ -42,6 +44,7 @@ Feedme in React.js
         beforeSend: function(xhr, settings) {
             if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                 xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                console.log("Setting csrf token in header", csrftoken)
             }
         }
     });

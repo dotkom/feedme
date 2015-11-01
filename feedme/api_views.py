@@ -14,7 +14,7 @@ class OrderViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Retrie
 
 
 class OrderLineViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin,
-                       mixins.CreateModelMixin, mixins.DestroyModelMixin):
+                       mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin):
     queryset = OrderLine.objects.all()
     serializer_class = OrderLineSerializer
     permission_classes = (IsAuthenticatedOrReadOnly,)

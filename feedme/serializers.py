@@ -30,7 +30,7 @@ class OrderLineSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    orderlines = OrderLineSerializer(source="order__orderlines", many=True, read_only=True)
+    # orderlines = OrderLineSerializer(source="order__orderlines", many=True, read_only=True)
     restaurant = RestaurantSerializer()
 
     class Meta:
