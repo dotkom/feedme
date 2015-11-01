@@ -10,10 +10,7 @@ var OrderLineForm = React.createClass({
         url: api_base + "orderlines/",
         method: 'OPTIONS',
         success: function(success) {
-            console.log(success)
-            var users = success.actions.POST.users.choices
-            console.log(users)
-            this.setState({users: users})
+            this.setState({users: success.actions.POST.users.choices})
         }.bind(this),
         error: function(xhr, status, err) {
             console.log(xhr, status, err)
@@ -28,17 +25,14 @@ var OrderLineForm = React.createClass({
       var users = []
       var users_list = $('#users_list').children()
       for (var i = 0; i < users_list.length; i++) {
-        console.log(users_list[i], users_list[i].value)
         if (this.refs.users.value === users_list[i].value) {
           users.push(parseInt(users_list[i].innerHTML))
         }
       }
 
-      console.log("pre ", users)
       if (users.length > 0) {
         users = $.parseJSON(users)
       }
-      console.log("post", users)
 
       this.props.onOrderLineSubmit({
           id: this.refs.id.value,
@@ -93,7 +87,7 @@ var OrderLineForm = React.createClass({
                         {users}
                     </datalist>
                   </div>
-                  <input type="submit" value="Save" id="formSubmit" className="btn btn-success btn-sm" />
+                  <input type="submit" value="Save" id="formSubmit" className="btn btn-success" />
                 </form>
               </div>
             </div>
