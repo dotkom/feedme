@@ -11,3 +11,4 @@ install:
   - pip install -q Django==$DJANGO_VERSION
   - pip install -q -r feedme/requirements.txt
 script: python runtests.py
+sudo: false
