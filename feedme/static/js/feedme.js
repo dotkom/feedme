@@ -28,25 +28,14 @@ var OrderLine = React.createClass({
       this.loadOrderLine()
     },
 
-    /*
-    shouldComponentUpdate: function(nextProps, nextState) {
-      // console.log(nextProps, nextState)
-      console.log(this.hideOrderLine !== nextState.hideOrderLine)
-      return this.hideOrderLine !== nextState.hideOrderLine
-    },
-
-    componentDidUpdate: function() {
-      this.loadOrderLine()
-    },
-    */
-
     handleRemove: function(orderline) {
       this.setState({hideOrderLine: true})
       this.props.onRemoveOrderLine(orderline)
     },
 
     handleEdit: function(orderline) {
-      // Place back in form
+      // @ToDo: Make this better, and send a callback which updates this state
+      // Place values in form
       $("#id").val(orderline.id)
       $("#menu_item").val(orderline.menu_item)
       $("#soda").val(orderline.soda)
@@ -54,6 +43,7 @@ var OrderLine = React.createClass({
       $("#price").val(orderline.price)
       this.setState({hideOrderLine: true})
     },
+    // @ToDo: join and leave events
 
     render: function() {
         var deleteButton = this.state.orderline.creator === username ? <DangerButton value="Delete" clickHandler={this.handleRemove.bind(this, this.state.orderline)} /> : ""
@@ -91,6 +81,7 @@ var OrderLineForm = React.createClass({
       this.refs.price.value = "";
       return;
     },
+    // @ToDo: Add buddy system (probably by sending pre-flight HTTP OPTIONS which should populate a list)
 
     render: function() {
         return (
@@ -245,6 +236,7 @@ var SuccessButton = React.createClass({
     }
 })
 
+// @ToDo: Use "require" syntax for files
 ReactDOM.render(
     <Order apiroot={"../feedme-api/"} url={"/feedme-api/orderlines/?order=" + order} />,
     document.getElementById("feedme-main")
