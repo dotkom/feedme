@@ -39,3 +39,6 @@ coverage*
 
 # online ordering system virtualenv @ sklirg
 onlineorder/
+
+bower_components/
+*.min.js
