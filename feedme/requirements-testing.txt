@@ -1,0 +1,8 @@
+pytest==2.6.4
+pytest-django==2.8.0
+pytest-cov==1.8.1
+
+# code style
+flake8==2.4.0
+pep8==1.5.7
+isort==3.9.6

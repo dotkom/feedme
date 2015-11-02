@@ -33,6 +33,9 @@ filedump
 _tmp
 local.py
 dist/
+.cache
+.tox
+coverage*
 
 # online ordering system virtualenv @ sklirg
 onlineorder/

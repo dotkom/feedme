@@ -1,65 +1,126 @@
+#! /usr/bin/env python
+from __future__ import print_function
+
+import os
+import subprocess
 import sys
 
-try:
-    from django.conf import settings
+import pytest
 
-    settings.configure(
-        DEBUG=True,
-        USE_TZ=True,
-        DATABASES={
-            "default": {
-                "ENGINE": "django.db.backends.sqlite3",
-                "NAME": "db.sqlite",
-            }
-        },
-        MIDDLEWARE_CLASSES=(
-            'django.contrib.sessions.middleware.SessionMiddleware',
-            'django.contrib.messages.middleware.MessageMiddleware',
-            'django.middleware.clickjacking.XFrameOptionsMiddleware',
-            ),
-        ROOT_URLCONF="feedme.urls",
-        INSTALLED_APPS=[
-            "django.contrib.auth",
-            "django.contrib.contenttypes",
-            "django.contrib.sites",
-            "feedme",
-        ],
-        SITE_ID=1,
-        NOSE_ARGS=['-s'],
-    )
+PYTEST_ARGS = {
+    'default': ['tests', '--tb=short', '-s'],
+    'fast': ['tests', '--tb=short', '-q', '-s'],
+}
+
+FLAKE8_ARGS = ['feedme', 'tests']
+
+ISORT_ARGS = ['--recursive', '--check-only', 'feedme', 'tests']
+
+sys.path.append(os.path.dirname(__file__))
+
+
+def exit_on_failure(ret, message=None):
+    if ret:
+        sys.exit(ret)
+
+
+def flake8_main(args):
+    print('Running flake8 code linting')
+    ret = subprocess.call(['flake8'] + args)
+    print('flake8 failed' if ret else 'flake8 passed')
+    return ret
+
+
+def isort_main(args):
+    print('Running isort code checking')
+    ret = subprocess.call(['isort'] + args)
+
+    if ret:
+        print('isort failed: Some modules have incorrectly ordered imports. Fix by running `isort --recursive .`')
+    else:
+        print('isort passed')
+
+    return ret
+
+
+def split_class_and_function(string):
+    class_string, function_string = string.split('.', 1)
+    return "%s and %s" % (class_string, function_string)
+
+
+def is_function(string):
+    # `True` if it looks like a test function is included in the string.
+    print('%s startswith test or .test in %s' %(string, string))
+    return string.startswith('test') or '.test' in string
+
+
+def is_class(string):
+    # `True` if first character is uppercase - assume it's a class name.
+    return string[0] == string[0].upper()
+
+
+if __name__ == "__main__":
+    try:
+        sys.argv.remove('--nolint')
+    except ValueError:
+        run_flake8 = True
+        run_isort = True
+    else:
+        run_flake8 = False
+        run_isort = False
 
     try:
-        import django
-        setup = django.setup
-    except AttributeError:
-        pass
+        sys.argv.remove('--lintonly')
+    except ValueError:
+        run_tests = True
     else:
-        setup()
+        run_tests = False
 
-    #from django.test.simple import DjangoTestSuiteRunner
-    from django_nose import NoseTestSuiteRunner
-except ImportError:
-    raise ImportError("Missing NoseTestSuiteRunner -- install nosetests")
+    try:
+        sys.argv.remove('--fast')
+    except ValueError:
+        style = 'default'
+    else:
+        style = 'fast'
+        run_flake8 = False
+        run_isort = False
 
+    if len(sys.argv) > 1:
+        pytest_args = sys.argv[1:]
+        first_arg = pytest_args[0]
 
-def run_tests(*test_args):
-    if not test_args:
         try:
-            # This runs on Online/dotKom Jenkins to create statistics
-            import nosexcover
-            test_args = ['feedme', '--with-xunit', '--with-xcoverage', '--cover-package=feedme']
-        except:
-            test_args = ['feedme', '--with-coverage','--cover-package=feedme']
+            pytest_args.remove('--coverage')
+        except ValueError:
+            pass
+        else:
+            pytest_args = [
+                '--cov-report',
+                'xml',
+                '--cov',
+                'feedme'] + pytest_args
 
+        if first_arg.startswith('-'):
+            # `runtests.py [flags]`
+            pytest_args = ['tests'] + pytest_args
+        elif is_class(first_arg) and is_function(first_arg):
+            # `runtests.py TestCase.test_function [flags]`
+            expression = split_class_and_function(first_arg)
+            pytest_args = ['tests', '-k', expression] + pytest_args[1:]
+        elif is_class(first_arg) or is_function(first_arg):
+            # `runtests.py TestCase [flags]`
+            # `runtests.py test_function [flags]`
+            pytest_args = ['tests', '-k', pytest_args[0]] + pytest_args[1:]
+    else:
+        pytest_args = PYTEST_ARGS[style]
 
-    # Run tests
-    test_runner = NoseTestSuiteRunner(verbosity=1)
+    if run_tests:
+        exit_on_failure(pytest.main(pytest_args))
 
-    failures = test_runner.run_tests(test_args)
+    if run_flake8:
+        #exit_on_failure(flake8_main(FLAKE8_ARGS))
+        flake8_main(FLAKE8_ARGS)
 
-    if failures:
-        sys.exit(failures)
-
-
-if __name__ == '__main__':
-    run_tests(*sys.argv[1:])
+    if run_isort:
+        #exit_on_failure(isort_main(ISORT_ARGS))
+        isort_main(ISORT_ARGS)
