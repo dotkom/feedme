@@ -78,10 +78,10 @@ class OrderTestCase(TestCase):
         orderline_4 = G(OrderLine, order=order_2)
 
         s = orderline_1.price + orderline_2.price + order_1.extra_costs
-        r = order_1.get_total_sum()
+        r = order_1.get_total_sum
         self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
         s = orderline_3.price + orderline_4.price + order_2.extra_costs
-        r = order_2.get_total_sum()
+        r = order_2.get_total_sum
         self.assertEqual(r, s, 'Got %s, expected %s' % (r, s))
 
     def get_total_sum_with_extra_costs(self):
@@ -91,7 +91,7 @@ class OrderTestCase(TestCase):
         user_3 = G(User)
         orderline_1 = G(OrderLine, order=order, users=[user_1, user_2], price=25)
         orderline_2 = G(OrderLine, order=order, users=[user_3, ], price=25)
-        self.assertEqual(order.get_total_sum(), 100)
+        self.assertEqual(order.get_total_sum, 100)
 
     def get_price_per_user(self):
         order = G(Order, extra_costs=50)
