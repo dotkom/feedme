@@ -5,13 +5,6 @@ from rest_framework import serializers
 from feedme.models import Restaurant, Order, OrderLine, Poll, Answer
 
 
-class FeedmeUserSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = settings.AUTH_USER_MODEL
-        fields = ('username', 'first_name', 'last_name')
-
-
 class RestaurantSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -21,8 +14,7 @@ class RestaurantSerializer(serializers.ModelSerializer):
 
 class OrderLineSerializer(serializers.ModelSerializer):
     creator = serializers.CharField(read_only=True)
-    # creator = FeedmeUserSerializer()  # @todo fix loading actual users
-    # users = serializers.CharField(many=True)
+    paid_for = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = OrderLine
@@ -35,4 +27,4 @@ class OrderSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Order
-        fields = ('id', 'group', 'date', 'restaurant', 'extra_costs', 'active', 'use_validation', 'orderlines',)
+        fields = ('id', 'group', 'date', 'restaurant', 'extra_costs', 'active', 'use_validation',)

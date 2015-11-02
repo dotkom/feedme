@@ -1,4 +1,18 @@
 var Order = React.createClass({
+  loadOrder: function(orderid) {
+    $.ajax({
+      url: api_base + 'orders/' + orderid,
+      dataType: 'json',
+      success: function(success) {
+        this.setState({order: success})
+        this.setState({restaurant: success.restaurant})
+      }.bind(this),
+      error: function(xhr, status, err) {
+        console.log(xhr, status, err)
+      }.bind(this)
+    })
+  },
+
   loadOrderLines: function(path) {
       $.ajax({
       url: path || this.props.url,
@@ -22,7 +36,6 @@ var Order = React.createClass({
     // Submit to server and refresh list
     orderline.csrfmiddlewaretoken = csrftoken;
     orderline.order = order;
-    console.log("posting stuff ", orderline, " to ", (api_base) + "orderlines/" + (shouldPut ? orderline.id : ''))
     var shouldPut = orderline.id !== ""
     $.ajax({
         url: api_base + "orderlines/" + (shouldPut ? orderline.id : ''),
@@ -33,7 +46,6 @@ var Order = React.createClass({
         type: shouldPut ? 'PUT' : 'POST',
         data: orderline,
         success: function(response) {
-            console.log(response)
             if (shouldPut) {
                 var data = this.state.data
                 for (var attrname in response) {data[response[attrname].id] = response[attrname]; }
@@ -50,19 +62,58 @@ var Order = React.createClass({
   },
 
   getInitialState: function() {
-    return {data: []}
+    return {
+      data: [],
+      order: {},
+      restaurant: {restaurant_name: ''}
+    }
   },
 
   componentDidMount: function() {
+    this.loadOrder(this.props.orderid)
     this.loadOrderLines()
   },
 
   render: function() {
+    var that = this
+    var Menu = React.createClass({
+      render: function () {
+        return (
+          <span>
+            <i className="fa fa-cutlery"></i> <a href={that.state.restaurant.menu_url}>Menu</a>
+          </span>
+        )
+      }
+    })
+    var Phone = React.createClass({
+      render: function () {
+        return (
+          <span>
+            <i className="fa fa-phone"></i> <a href={"tel:" + that.state.restaurant.phone_number}>{that.state.restaurant.phone_number}</a>
+          </span>
+        )
+      }
+    })
+
     return (
-      <div className="order">
-        <h1>Order lines</h1>
-        <OrderLineList data={this.state.data} url={this.props.url} apiroot={this.props.apiroot} />
-        <OrderLineForm onOrderLineSubmit={this.handleOrderLineSubmit} />
+      <div className="container order">
+        <div className="row">
+          <h1>Feedme</h1>
+          <h2>
+              {this.state.restaurant.restaurant_name} &nbsp;
+              <small>
+                <Menu /> &nbsp;
+                <Phone />
+              </small>
+          </h2>
+          <OrderLineList
+              apiroot={this.props.apiroot}
+              data={this.state.data}
+              url={this.props.url}
+              extra_costs={this.state.order.extra_costs}
+              />
+          <OrderLineForm onOrderLineSubmit={this.handleOrderLineSubmit} />
+        </div>
       </div>
     );
   }

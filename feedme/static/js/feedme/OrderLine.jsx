@@ -55,10 +55,10 @@ var OrderLine = React.createClass({
     // @ToDo: join and leave events
 
     render: function() {
-        var deleteButton =  this.state.orderline.creator === username ? <Button value="Delete" type="danger" clickHandler={this.handleRemove.bind(this, this.state.orderline)} /> : ""
-        var editButton = this.state.orderline.creator === username ? <Button value="Edit" type="primary" clickHandler={this.handleEdit.bind(this, this.state.orderline)} /> : ""
-        var joinButton = this.state.orderline.creator !== username ? <Button value="Join" type="primary" clickHandler={this.handleJoin} /> : ""
-        var leaveButton = this.state.orderline.creator !== username ? <Button value="Leave" type="primary" clickHandler={this.handleLeave} /> : ""
+        var deleteButton =  this.state.orderline.creator === username ? <IconButton value="trash-o" type="danger" btnsize="btn-sm" clickHandler={this.handleRemove.bind(this, this.state.orderline)} /> : ""
+        var editButton = this.state.orderline.creator === username ? <IconButton value="pencil-square-o" type="primary" btnsize="btn-sm" clickHandler={this.handleEdit.bind(this, this.state.orderline)} /> : ""
+        var joinButton = this.state.orderline.creator !== username ? <IconButton value="sign-in" type="primary" btnsize="btn-sm" clickHandler={this.handleJoin} /> : ""
+        var leaveButton = this.state.orderline.creator !== username ? <IconButton value="sign-out" type="primary" btnsize="btn-sm" clickHandler={this.handleLeave} /> : ""
         return (
             <tr className={this.state.hideOrderLine ? 'hide' : ''} id={"orderline-" + this.state.orderline.id}>
                 <td><b>{this.state.orderline.creator}</b> {this.state.orderline.users}</td>

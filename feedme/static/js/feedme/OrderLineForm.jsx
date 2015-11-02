@@ -59,8 +59,8 @@ var OrderLineForm = React.createClass({
           )
         })
         return (
-            <div>
-              <h3>New</h3>
+            <div className="col-md-12">
+              <h3>New orderline</h3>
               <div className="col-md-12">
                 <form className="form-inline orderLineForm" onSubmit={this.handleSubmit}>
                   <input type="number" id="id" ref="id" hidden />
@@ -87,7 +87,7 @@ var OrderLineForm = React.createClass({
                         {users}
                     </datalist>
                   </div>
-                  <input type="submit" value="Save" id="formSubmit" className="btn btn-success" />
+                  <IconButton value="floppy-o" btnid="formSubmit" type="success" btnsize="primary" />
                 </form>
               </div>
             </div>

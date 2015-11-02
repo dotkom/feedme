@@ -22,21 +22,31 @@ var OrderLineList = React.createClass({
         );
     });
     return (
-      <table className="table table-striped orderLineList">
+      <div className="col-md-12">
+        <table className="table table-striped orderLineList">
           <thead>
-              <tr>
-                  <th>User(s)</th>
-                  <th>Menu item</th>
-                  <th>Soda</th>
-                  <th>Extras</th>
-                  <th>Price</th>
-                  <th>Status</th>
-              </tr>
+            <tr>
+              <th>User(s)</th>
+              <th>Menu item</th>
+              <th>Soda</th>
+              <th>Extras</th>
+              <th>Price</th>
+              <th>Status</th>
+            </tr>
           </thead>
           <tbody>
             {orderlines}
+            <tr>
+              <td><i className="fa fa-2x fa-truck"></i></td>
+              <td>Extra costs</td>
+              <td><i className="fa fa-2x fa-bicycle"></i> <i className="fa fa-2x fa-rocket"></i></td>
+              <td></td>
+              <td>{this.props.extra_costs}</td>
+              <td></td>
+            </tr>
           </tbody>
-      </table>
+        </table>
+      </div>
     );
   }
 });
