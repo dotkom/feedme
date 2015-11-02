@@ -30,6 +30,7 @@ class Order(models.Model):
     active = models.BooleanField(_('Order currently active'), default=True)
     use_validation = models.BooleanField(_('Enable funds validation'), default=True)
 
+    @property
     def get_total_sum(self):
         s = self.orderline_set.aggregate(models.Sum('price'))['price__sum']
         if s is None:
@@ -44,6 +45,7 @@ class Order(models.Model):
             users += ol.users.count()
         return self.extra_costs / users if users > 0 else self.extra_costs
 
+    @property
     def order_users(self):
         from django.contrib.auth import get_user_model
         User = get_user_model()
@@ -68,6 +70,7 @@ class Order(models.Model):
         else:
             return False
 
+    @property
     def paid(self):
         if self.orderline_set.all():
             for ol in self.orderline_set.all():
@@ -114,7 +117,7 @@ class OrderLine(models.Model):
         return self.price + (self.order.get_extra_costs() * self.get_num_users())
 
     def get_price_to_pay(self):
-        return self.get_total_price() / self.get_num_users()
+        return self.get_total_price() / self.get_num_users() if self.get_num_users() > 0 else 0
 
     def __str__(self):
         return self.creator.get_username()
