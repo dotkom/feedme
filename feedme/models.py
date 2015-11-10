@@ -45,7 +45,6 @@ class Order(models.Model):
             users += ol.users.count()
         return self.extra_costs / users if users > 0 else self.extra_costs
 
-    @property
     def order_users(self):
         from django.contrib.auth import get_user_model
         User = get_user_model()
