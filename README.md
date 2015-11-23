@@ -12,14 +12,12 @@ This project was started to help 'dotKom' with ordering food for their work nigh
 ### Install via pip
 `pip install feedme`
 
-### Manual install:
+### Add app to project
 
-0. Download any of the releases.
-1. Add "feedme" to INSTALLED_APPS  
- - `INSTALLED_APPS = (…, 'feedme', …)  
-2. Make sure the groups defined in feedme/settings.py actually exists  
-3. Include feedme.urls into system urls.py
- - `url(r'^feedme/', include('feedme.urls', namespace='feedme'))`  
+- `INSTALLED_APPS = (…, 'feedme', …)`
+- `url(r'^feedme/', include('feedme.urls', namespace='feedme'))`
+
+Give some groups the permissions to use feedme.
 
 ---
 
