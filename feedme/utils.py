@@ -133,10 +133,10 @@ def in_other_orderline(order, user):
 
 
 def get_orderline_for_order_and_creator(order, creator):
-    created = False
+    created = True
     try:
         orderline = OrderLine.objects.get(order=order, creator=creator)
-        created = True
+        created = False
     except OrderLine.DoesNotExist:
         orderline = OrderLine()
         orderline.creator = creator
@@ -161,8 +161,8 @@ def check_orderline(group, creator, price, buddies=None):
 
     orderline, created = get_orderline_for_order_and_creator(order, creator)
 
-    logger.debug('Validating %s orderline "%s" (%.2f) by "%s".' %
-                 ("new" if created else "existing", orderline, price, creator))
+    logger.debug('Validating %s orderline for "%s" (%.2f kr) by "%s".' %
+                 ("new" if created else "existing", orderline.order, price, creator))
 
     # Update users
     users = [orderline.creator]
@@ -190,36 +190,25 @@ def handle_payment(request, order):
     # Go through each orderline, paying it for each user
     for orderline in orderlines:
         if not orderline.paid_for:
-            # Pay for each user, or only for creator (see next comment @ToDo)
-            if orderline.users.count() > 0:
-                amount = orderline.get_price_to_pay()
+            amount = orderline.get_price_to_pay()
+            logger.info('Paying orderline for "%s" (%.2f kr, %.2f kr ea) for "%s".'
+                        % (orderline.order, orderline.price, amount, orderline.users.all()))
+            # Pay for each user
+            for user in orderline.users.all():
+                pay(user, amount)
+                paid.append(user.get_username())
+                if user.balance.get_balance() < 0:
+                    negatives.append(user.get_username())
+            orderline.paid_for = True
+            orderline.save()
 
-                # Some funky validation to check if creator is in orderline. @ToDo: Move to signals
-                if orderline.creator not in orderline.users.all():
-                    pay(orderline.creator, amount)
-
-                # Pay for each user
-                for user in orderline.users.all():
-                    pay(user, amount)
-                    paid.append(user.get_username())
-                    if user.balance.get_balance() < 0:
-                        negatives.append(user.get_username())
-                orderline.paid_for = True
-                orderline.save()
-            else:
-                pay(orderline.creator, orderline.get_price_to_pay())
-                orderline.paid_for = True
-                orderline.save()
-                paid.append(orderline.creator.get_username())
-                if orderline.creator.balance.get_balance() < 0:
-                    negatives.append(orderline.creator.get_username())
         else:
             # Tell that these have already been paid
             already_paid.append(orderline.creator.get_username())
             if orderline.users.all().count() > 0:
                 for user in orderline.users.all():
                     if user == orderline.creator:
-                        print('user both in users and creator')
+                        logger.warn('Creator (%s) both in users and creator for orderline #%i' % (user, orderline.id))
                     else:
                         already_paid.append(user.get_username())
 
