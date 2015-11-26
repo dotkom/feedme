@@ -41,7 +41,6 @@ def index(request):
 
 @login_required()
 def index_new(request, group=None):
-    groups = get_feedme_groups()
     group = get_object_or_404(Group, name=group) if \
         request.user in get_object_or_404(Group, name=group).user_set.all() else None
     order = get_order(group) if group else None

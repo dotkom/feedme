@@ -154,7 +154,6 @@ def validate_users_funds(users, price):
 
 
 # Validation of orderline
-# @ToDo: Make this func run multiple tests, not all in one
 def check_orderline(group, creator, price, buddies=None):
     order = get_order(group)
 
@@ -167,9 +166,7 @@ def check_orderline(group, creator, price, buddies=None):
 
     # Update users
     users = [orderline.creator]
-    logger.debug("Users  pre: %s" % users)  # @ToDo: Remove these loggers after debugging is done
     users.extend(buddies)
-    logger.debug("Users post: %s" % users)  # @ToDo: Remove these loggers after debugging is done
 
     unsufficient_funds_users = validate_users_funds(users, price)
 
@@ -183,7 +180,6 @@ def check_orderline(group, creator, price, buddies=None):
 
 # Handle payment
 def handle_payment(request, order):
-    # Get all orderlines
     orderlines = order.orderline_set.all()
 
     # Initialize empty lists for users
