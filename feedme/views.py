@@ -7,6 +7,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 from django.views.generic import DetailView
 
+import logging
+
 from feedme.models import OrderLine, Order, Restaurant, Balance, Poll, Answer
 from feedme.forms import (
     OrderLineForm, OrderForm, ManageOrderForm, NewOrderForm,
@@ -16,6 +18,7 @@ from feedme.utils import (
     in_other_orderline, manually_parse_users, validate_user_funds, check_orderline, handle_payment
 )
 
+logger = logging.getLogger(__name__)
 try:
     # Django 1.7 way for importing custom user
     from django.contrib.auth import AUTH_USER_MODEL
@@ -234,10 +237,14 @@ def join_orderline(request, group, orderline_id):
     # @TODO if not buddy system enabled, disable join
     if in_other_orderline(get_order(group), request.user):
         messages.error(request, 'You cannot be in multiple orderlines')
+        logger.warn('%s tried to join multiple orderlines (new: %i) for "%s"!' %
+                     (request.user, orderline.id, get_order(group)))
     elif orderline.order.use_validation and \
             not validate_user_funds(
-                request.user, (orderline.price / (orderline.users.count() + 1))):  # Adds us to the test aswell
+                request.user, (orderline.price / (orderline.users.count() + 1))):  # Adds us to the test as well
         messages.error(request, 'You need cashes')
+        logger.info('%s tried to join an orderline for "%s", by %s,  with insufficient funds.' %
+                    (request.user, orderline.order, orderline.creator))
     else:
         orderline.users.add(request.user)
         orderline.save()
@@ -251,6 +258,8 @@ def leave_orderline(request, group, orderline_id):
     group = get_object_or_404(Group, name=group)
     if request.user not in orderline.users.all():
         messages.error(request, 'You cannot leave since you are not in the users')
+        logger.warn('%s tried to leave orderline#%i for "%s" without being in it!' %
+                     (request.user, orderline.id, get_order(group)))
     else:
         orderline.users.remove(request.user)
         orderline.save()
@@ -269,7 +278,7 @@ def order_history(request):
 # New order
 @permission_required('feedme.add_order', raise_exception=True)
 def new_order(request, group=None):
-    print('DEPRECATED - STOP USING THIS')
+    logger.warn('DEPRECATED - STOP USING THIS')
     group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
         form = NewOrderForm(request.POST)
@@ -279,6 +288,7 @@ def new_order(request, group=None):
             if poll:
                 poll.deactivate()
             messages.success(request, 'New order added')
+            logger.info('%s created a new order for %s: "%s".' % (request.user, group, get_order(group)))
             return redirect('feedme:feedme_index_new', group)
     else:
         form = NewOrderForm()
@@ -309,6 +319,7 @@ def admin(request, group=None):
             if poll:
                 poll.deactivate()
             messages.success(request, 'New order added')
+            logger.info('%s created a new order for %s: "%s".' % (request.user, group, get_order(group)))
             return redirect('feedme:feedme_index_new', group)
     else:
         form = NewOrderForm()
@@ -347,10 +358,13 @@ class ManageUserViewSet(DetailView):
         if form.is_valid():
             balance = form.cleaned_data['user']
             amount = form.cleaned_data['amount']
-            user_balance = [balance.get_balance(),]
+            user_balance = [balance.get_balance(), ]
             balance.deposit(amount) if amount > 0 else balance.withdraw(amount * -1)
             user_balance.append(balance.get_balance())
-            messages.success(request, 'Successfully deposited %s for %s (Changed from %s to %s)' % (balance.user, amount, user_balance[0], user_balance[1]))
+            messages.success(request, 'Successfully deposited %s for %s (Changed from %s to %s)' %
+                             (balance.user, amount, user_balance[0], user_balance[1]))
+            logger.info('%s deposited %.2f kr for %s. Balance is now %.2f.' %
+                        (request.user, amount, balance.user, user_balance[1]))
             return redirect('feedme:manage_users', group)
         else:
             r['form'] = form
@@ -399,6 +413,8 @@ def manage_order(request, group=None):
                             ol.save()
                             messages.success(
                                 request, 'Changed price for %(ol)s to %(price)s' % {'ol': ol, 'price': ol.price})
+                            logger.info('%s changed price of orderline#%i for %s from %.2f to %.2f.' %
+                                        (request.user, orderline.id, orderline.creator, (ol.price - change), ol.price))
                 return redirect('feedme:manage_order', group=group)
             elif request.POST['act'] == 'Pay':
                 paid, existing, negatives = handle_payment(request, order)
@@ -472,12 +488,13 @@ def new_poll(request, group=None):
         if form.is_valid():
             form.save()
             messages.success(request, 'New poll added')
+            logger.info('%s created a new poll for %s.' % (request.user, group))
             return redirect('feedme:feedme_index_new', group)
         else:
             messages.error(request, 'Form not validated')
     else:
         form = NewPollForm()
-        form.fields['question'].initial = "Hvor skal dotKom spise?"
+        form.fields['question'].initial = "Hvor skal %s spise?" % group.name
         form.fields['due_date'].initial = get_next_tuesday()
         form.fields['group'].initial = group
 
