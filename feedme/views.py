@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+# -*- coding: utf-8 -*-
 
 from django.contrib import messages
 from django.contrib.auth.models import Group
@@ -11,7 +11,10 @@ from feedme.models import OrderLine, Order, Restaurant, Balance, Poll, Answer
 from feedme.forms import (
     OrderLineForm, OrderForm, ManageOrderForm, NewOrderForm,
     NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm)
-from feedme.utils import get_feedme_groups
+from feedme.utils import (
+    get_feedme_groups, get_next_tuesday, get_next_wednesday, get_order, get_poll, is_admin,
+    in_other_orderline, manually_parse_users, validate_user_funds, check_orderline, handle_payment
+)
 
 try:
     # Django 1.7 way for importing custom user
@@ -137,7 +140,7 @@ def orderlineview(request, orderline_id=None, group=None):
                 new_orderline.creator = request.user
             new_orderline.order = get_order(group)
             users = manually_parse_users(form)
-            if check_orderline(request, new_orderline, orderline_id, buddies=users, group=group):
+            if check_orderline(group, creator, orderline.price, buddies=users):
                 new_orderline.save()
                 form.save_m2m()  # Manually save the m2m relations when using commit=False
                 if new_or_existing_orderline == 'new':
@@ -148,9 +151,6 @@ def orderlineview(request, orderline_id=None, group=None):
                 return redirect('feedme:feedme_index_new', group)
             else:
                 messages.error(request, "Orderline validation failed, please verify your data and try again.")
-                new_orderline = OrderLineForm(request.POST, auto_id=True)
-        else:
-            new_orderline = OrderLineForm(request.POST, auto_id=True)
     else:
         form = OrderLineForm(instance=orderline)
         form.fields["users"].queryset = get_order(group).available_users().exclude(id=request.user.id)
@@ -186,7 +186,7 @@ def create_orderline(request, group=None):
             new_orderline.creator = request.user
             new_orderline.order = get_order(group)
             users = manually_parse_users(form)
-            if check_orderline(request, new_orderline, buddies=users, group=group):
+            if check_orderline(group, new_orderline.creator, new_orderline.price, buddies=users):
                 new_orderline.save()
                 form.save_m2m()  # Manually save the m2m relations when using commit=False
                 new_orderline.users.add(new_orderline.creator)
@@ -210,9 +210,7 @@ def create_orderline(request, group=None):
 def edit_orderline(request, group, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     group = get_object_or_404(Group, name=group)
-    if not is_in_current_order('orderline', group, orderline_id):
-        messages.error(request, 'you can not edit orderlines from old orders')
-    elif request.user != orderline.creator and request.user not in orderline.users.all():
+    if request.user != orderline.creator and request.user not in orderline.users.all():
         messages.error(request, 'You need to be the creator')
         return redirect('feedme:feedme_index_new', group)
     return orderlineview(request, orderline_id=orderline_id, group=group)
@@ -222,9 +220,7 @@ def edit_orderline(request, group, orderline_id):
 def delete_orderline(request, group, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     group = get_object_or_404(Group, name=group)
-    if not is_in_current_order('orderline', group, orderline_id):
-        messages.error(request, 'You can not delete orderlines from old orders')
-    elif orderline.creator == request.user:
+    if orderline.creator == request.user:
         orderline.delete()
         messages.success(request, 'Orderline deleted')
     else:
@@ -237,11 +233,11 @@ def join_orderline(request, group, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     group = get_object_or_404(Group, name=group)
     # @TODO if not buddy system enabled, disable join
-    if not is_in_current_order('orderline', group, orderline_id):
-        messages.error(request, 'You can not join orderlines from old orders')
-    elif in_other_orderline(get_order(group), request.user):
+    if in_other_orderline(get_order(group), request.user):
         messages.error(request, 'You cannot be in multiple orderlines')
-    elif orderline.order.use_validation and not validate_user_funds(request.user, (orderline.price / (orderline.users.count() + 1))):  # Adds us to the test aswell
+    elif orderline.order.use_validation and \
+            not validate_user_funds(
+                request.user, (orderline.price / (orderline.users.count() + 1))):  # Adds us to the test aswell
         messages.error(request, 'You need cashes')
     else:
         orderline.users.add(request.user)
@@ -254,9 +250,7 @@ def join_orderline(request, group, orderline_id):
 def leave_orderline(request, group, orderline_id):
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     group = get_object_or_404(Group, name=group)
-    if not is_in_current_order('orderline', group, orderline_id):
-        messages.error(request, 'You cannot leave old orders')
-    elif request.user not in orderline.users.all():
+    if request.user not in orderline.users.all():
         messages.error(request, 'You cannot leave since you are not in the users')
     else:
         orderline.users.remove(request.user)
@@ -408,23 +402,23 @@ def manage_order(request, group=None):
                                 request, 'Changed price for %(ol)s to %(price)s' % {'ol': ol, 'price': ol.price})
                 return redirect('feedme:manage_order', group=group)
             elif request.POST['act'] == 'Pay':
-                handle_payment(request, order)
+                paid, existing, negatives = handle_payment(request, order)
+                if len(paid) > 0:
+                    messages.success(request, 'Paid orderlines for %s.' % ', '.join(paid))
+                if len(existing) > 0:
+                    messages.error(request, 'Already paid orderlines for %s.' % ', '.join(existing))
+                if len(negatives) > 0:
+                    messages.error(request, 'These users now have negative balances: %s' % ', '.join(negatives))
                 return redirect('feedme:manage_order', group=group)
         else:
             form = ManageOrderForm(request.POST)
     else:
         form = ManageOrderForm()
 
-    orders = Order.objects.all()
-    orders_price = {}
     active_orders = Order.objects.filter(active=True)
     inactive_orders = Order.objects.exclude(active=True)
-    # orders = [('Active', active_orders), ('Inactive', inactive_orders)]
     orders = active_orders | inactive_orders
     orders = orders.order_by('-active', '-date')
-
-    # for order in orders:
-    #    orders_price[order] = order.get_total_sum()
 
     form.fields["orders"].queryset = orders
 
@@ -495,194 +489,3 @@ def new_poll(request, group=None):
     r['is_admin'] = is_admin(request)
 
     return render(request, 'feedme/admin.html', r)
-
-
-# Validation of orderline
-def check_orderline(request, form, orderline_id=None, buddies=None, group=None):
-    orderline_exists = False
-    if orderline_id is None:
-        orderline = OrderLine()
-        orderline.creator = User.objects.get(username=form.creator.username)
-    else:
-        orderline = get_object_or_404(OrderLine, pk=orderline_id)
-        orderline_exists = True
-    amount = form.price
-    users = [orderline.creator]
-    if orderline_exists:
-        if len(orderline.users.all()) > 0:
-            users.extend(orderline.users.all())
-    else:
-        users.extend(buddies)
-    amount /= len(users)
-    if get_order(group).use_validation:
-        for user in users:
-            if not validate_user_funds(user, amount):
-                messages.error(request, 'Unsufficient funds caught for %s' % user)
-                return False
-    return True
-
-
-# Check that the user has enough funds
-def validate_user_funds(user, amount):
-    get_or_create_balance(user)
-    return user.balance.get_balance() >= amount
-
-
-# Handle payment
-def handle_payment(request, order):
-    orderlines = order.orderline_set.all()
-
-    paid = []
-    already_paid = []
-    negatives = []
-
-    for orderline in orderlines:
-        if not orderline.paid_for:
-            if orderline.users.count() > 0:
-                amount = orderline.get_price_to_pay()
-                if orderline.creator not in orderline.users.all():
-                    pay(orderline.creator, amount)
-                for user in orderline.users.all():
-                    pay(user, amount)
-                    paid.append(user.get_username())
-                    if user.balance.get_balance() < 0:
-                        negatives.append(user.get_username())
-                orderline.paid_for = True
-                orderline.save()
-            else:
-                pay(orderline.creator, orderline.get_price_to_pay())
-                orderline.paid_for = True
-                orderline.save()
-                paid.append(orderline.creator.get_username())
-                if orderline.creator.balance.get_balance() < 0:
-                    negatives.append(orderline.creator.get_username())
-        else:
-            already_paid.append(orderline.creator.get_username())
-            if orderline.users.all().count() > 0:
-                for user in orderline.users.all():
-                    if user == orderline.creator:
-                        print('user both in users and creator')
-                    else:
-                        already_paid.append(user.get_username())
-    if len(paid) > 0:
-        messages.success(request, 'Paid orderlines for %s.' % ', '.join(paid))
-    if len(already_paid) > 0:
-        messages.error(request, 'Already paid orderlines for %s.' % ', '.join(already_paid))
-    if len(negatives) > 0:
-        messages.error(request, 'These users now have negative balances: %s' % ', '.join(negatives))
-
-    order.active = False
-    order.save()
-
-
-# The actual function for payment
-def pay(user, amount):
-    user.balance.withdraw(amount)  # This returns True/False whether or not the payment was possible.
-    user.balance.save()
-
-
-# Deposit of funds
-def handle_deposit(data):
-    balance = get_or_create_balance(data['user'])
-    print('updating %s' % balance)
-    amount = data['amount']
-    if amount >= 0:
-        balance.deposit(amount)
-    else:
-        balance.withdraw(amount)
-
-
-# Get or create balance for a user
-def get_or_create_balance(user):
-    return Balance.objects.get_or_create(user=user)[0]
-
-
-# yes
-def get_next_tuesday():
-    today = date.today()
-    day = today.weekday()
-    if day < 1:
-        diff = timedelta(days=(1 - day))
-    elif day > 1:
-        diff = timedelta(days=(7 - day + 1))
-    else:
-        diff = timedelta(days=0)
-
-    return today + diff
-
-
-def get_next_wednesday():
-    today = date.today()
-    day = today.weekday()
-    if day < 2:
-        diff = timedelta(days=(1 - day))
-    elif day > 2:
-        diff = timedelta(days=(7 - day + 1))
-    else:
-        diff = timedelta(days=0)
-
-    return today + diff
-
-
-def is_admin(request):
-    return request.user.has_perm('feedme.change_order')
-
-
-# Gets latest active order
-def get_order(group=None):
-    if Order.objects.filter(group=group):
-        orders = Order.objects.filter(group=group).order_by('-id')
-        for order in orders:
-            if order.active:
-                return order
-    else:
-        return False
-
-
-# Gets latest active poll
-def get_poll(group=None):
-    if Poll.objects.filter():
-        if Poll.objects.filter(group=group, active=True).count() >= 1:
-            return Poll.objects.filter(group=group, active=True).order_by('-id')[0]
-        else:
-            return None
-
-
-# Checks if user is in current order line
-def is_in_current_order(order_type, group, order_id):
-    order = get_order(group)
-    if order_type == 'orderline':
-        orderline = get_object_or_404(OrderLine, pk=order_id)
-        return orderline in order.orderline_set.all()
-    elif order_type == 'order':
-        order = get_object_or_404(Order, pk=order_id)
-        return order in order.order_set.all()
-    else:
-        return False
-
-
-# Manually parses users to validate user funds on buddy-add on initial orderline creation
-def manually_parse_users(form):
-    li = str(form).split('<select')
-    potential_users = li[1].split('<option')
-    user_ids = []
-    for user in potential_users:
-        if 'selected' in user:
-            user_ids.append(user.split('value="')[1].split('"')[0])
-    users = []
-    for i in user_ids:
-        users.append(User.objects.get(pk=i))
-    return users
-
-
-# Checks if user is in another orderline
-def in_other_orderline(order, user):
-    r1 = ""
-    r2 = ""
-    if order:
-        if order.orderline_set:
-            if order.orderline_set.filter(creator=user.id):
-                r1 = user == order.orderline_set.filter(creator=user.id)[0].creator
-            if order.orderline_set.filter(users=user.id):
-                r2 = user in order.orderline_set.filter(users=user.id)[0].users.all()
-    return r1 or r2
