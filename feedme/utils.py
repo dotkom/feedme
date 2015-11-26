@@ -39,8 +39,9 @@ def validate_user_funds(user, amount):
 
 # The actual function for payment
 def pay(user, amount):
-    user.balance.withdraw(amount)  # This returns True/False whether or not the payment was possible.
-    user.balance.save()
+    balance = get_or_create_balance(user)
+    balance.withdraw(amount)  # This returns True/False whether or not the payment was possible.
+    balance.save()
 
 
 # Deposit of funds
@@ -162,7 +163,7 @@ def check_orderline(group, creator, price, buddies=None):
     orderline, created = get_orderline_for_order_and_creator(order, creator)
 
     logger.debug('Validating %s orderline for "%s" (%.2f kr) by "%s".' %
-                 ("new" if created else "existing", orderline.order, price, creator))
+                 ("new" if created else "existing", order, price, creator))
 
     # Update users
     users = [orderline.creator]
