@@ -1,16 +1,16 @@
 from datetime import date, timedelta
 
 from django.contrib import messages
-from django.conf import settings
-from django.contrib.auth import authenticate, login
 from django.contrib.auth.models import Group
 from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
-from django.views.generic import ListView, DetailView, FormView
+from django.views.generic import DetailView
 
-from feedme.models import OrderLine, Order, ManageOrderLimit, Restaurant, Balance, Transaction, Poll, Answer
-from feedme.forms import OrderLineForm, OrderForm, ManageOrderForm, ManageOrderLimitForm, NewOrderForm, NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm
+from feedme.models import OrderLine, Order, Restaurant, Balance, Poll, Answer
+from feedme.forms import (
+    OrderLineForm, OrderForm, ManageOrderForm, NewOrderForm,
+    NewRestaurantForm, ManageBalanceForm, NewPollForm, PollAnswerForm)
 from feedme.utils import get_feedme_groups
 
 try:
@@ -39,7 +39,8 @@ def index(request):
 @login_required()
 def index_new(request, group=None):
     groups = get_feedme_groups()
-    group = get_object_or_404(Group, name=group) if request.user in get_object_or_404(Group, name=group).user_set.all() else None
+    group = get_object_or_404(Group, name=group) if \
+        request.user in get_object_or_404(Group, name=group).user_set.all() else None
     order = get_order(group) if group else None
     poll = get_poll(group) if group else None
     r = dict()
@@ -146,7 +147,7 @@ def orderlineview(request, orderline_id=None, group=None):
                 new_orderline.users.add(new_orderline.creator)
                 return redirect('feedme:feedme_index_new', group)
             else:
-                messages.error(request, "Orderline validation failed, please verify your data and try again.")  # @ToDo More useful errors
+                messages.error(request, "Orderline validation failed, please verify your data and try again.")
                 new_orderline = OrderLineForm(request.POST, auto_id=True)
         else:
             new_orderline = OrderLineForm(request.POST, auto_id=True)
@@ -303,7 +304,7 @@ def new_order(request, group=None):
 
 
 def admin(request, group=None):
-    # Admin index - defaults to new order page. Should in the future probably implement a summary page? Paid, unpaid etc.
+    # Admin index - defaults to new order page
     r = dict()
     group = get_object_or_404(Group, name=group)
 
@@ -324,12 +325,12 @@ def admin(request, group=None):
                 form.fields['restaurant'].initial = poll.get_winner()
         form.fields["date"].initial = get_next_wednesday()
 
-
     # r['form'] = form
     r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
     r['group'] = group
     r['is_admin'] = is_admin(request)
     return render(request, 'feedme/admin.html', r)
+
 
 # Manage users (deposit, withdraw, overview)
 class ManageUserViewSet(DetailView):
@@ -363,6 +364,7 @@ class ManageUserViewSet(DetailView):
             messages.error(request, 'Invalid values supplied, check form error for details.')
 
         return render(request, 'feedme/manage_users.html', r)
+
 
 # Manage order (payment handling)
 @permission_required('feedme.change_balance', raise_exception=True)
@@ -402,7 +404,8 @@ def manage_order(request, group=None):
                         if ol.price != change:
                             ol.price = change
                             ol.save()
-                            messages.success(request, 'Changed price for %(ol)s to %(price)s' % {'ol': ol, 'price': ol.price})
+                            messages.success(
+                                request, 'Changed price for %(ol)s to %(price)s' % {'ol': ol, 'price': ol.price})
                 return redirect('feedme:manage_order', group=group)
             elif request.POST['act'] == 'Pay':
                 handle_payment(request, order)
@@ -416,11 +419,11 @@ def manage_order(request, group=None):
     orders_price = {}
     active_orders = Order.objects.filter(active=True)
     inactive_orders = Order.objects.exclude(active=True)
-    #orders = [('Active', active_orders), ('Inactive', inactive_orders)]
+    # orders = [('Active', active_orders), ('Inactive', inactive_orders)]
     orders = active_orders | inactive_orders
     orders = orders.order_by('-active', '-date')
 
-    #for order in orders:
+    # for order in orders:
     #    orders_price[order] = order.get_total_sum()
 
     form.fields["orders"].queryset = orders
@@ -510,7 +513,7 @@ def check_orderline(request, form, orderline_id=None, buddies=None, group=None):
             users.extend(orderline.users.all())
     else:
         users.extend(buddies)
-    amount = amount / len(users)
+    amount /= len(users)
     if get_order(group).use_validation:
         for user in users:
             if not validate_user_funds(user, amount):
@@ -536,7 +539,6 @@ def handle_payment(request, order):
     for orderline in orderlines:
         if not orderline.paid_for:
             if orderline.users.count() > 0:
-                #amount = (orderline.get_total_price()) / (orderline.users.count() + 1)
                 amount = orderline.get_price_to_pay()
                 if orderline.creator not in orderline.users.all():
                     pay(orderline.creator, amount)
@@ -607,6 +609,7 @@ def get_next_tuesday():
         diff = timedelta(days=0)
 
     return today + diff
+
 
 def get_next_wednesday():
     today = date.today()

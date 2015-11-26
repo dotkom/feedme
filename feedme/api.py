@@ -4,19 +4,24 @@ from tastypie import fields
 from tastypie.utils import trailing_slash
 from feedme.models import Poll, Restaurant, Answer, Order, OrderLine
 
+
 class RestaurantResource(ModelResource):
     class Meta:
         queryset = Restaurant.objects.all()
         resource_name = 'restaurant'
 
+
 class VoteResource(ModelResource):
     restaurant = fields.ToOneField(RestaurantResource, 'answer', full=True, null=True)
+
     class Meta:
         queryset = Answer.objects.all()
         resource_name = 'vote'
 
+
 class PollResource(ModelResource):
     votes = fields.ToManyField(VoteResource, 'votes', full=True, null=True)
+
     class Meta:
         queryset = Poll.objects.all()
         resource_name = 'poll'
@@ -39,16 +44,17 @@ class PollResource(ModelResource):
 
         return self.create_response(request, poll.get_winner())
 
+
 class OrderResource(ModelResource):
+
     class Meta:
         queryset = Order.objects.all()
         resource_name = 'order'
 
+
 class OrderLineResource(ModelResource):
     order = fields.ForeignKey(OrderResource, 'order')
+
     class Meta:
         queryset = OrderLine.objects.all()
         resource_name = 'orderline'
-
-# Todo - Need some kind of auth?
-#class BalanceResource(ModelResource):
