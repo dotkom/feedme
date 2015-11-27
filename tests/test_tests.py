@@ -8,8 +8,7 @@ from django.test import TestCase
 
 from django.contrib.auth.models import User, Group
 from feedme.models import Order, OrderLine, Restaurant, Balance, Transaction, Poll, Answer
-from feedme.views import get_or_create_balance, validate_user_funds, handle_payment
-from feedme.views import in_other_orderline
+from feedme.utils import validate_user_funds, in_other_orderline, get_or_create_balance
 
 
 class ModelTestCase(TestCase):
