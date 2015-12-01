@@ -94,7 +94,7 @@ def get_order(group=None):
             if order.active:
                 return order
     else:
-        return False
+        return None
 
 
 # Gets latest active poll

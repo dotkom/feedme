@@ -1,6 +1,10 @@
+# pytest
 pytest==2.6.4
 pytest-django==2.8.0
 pytest-cov==1.8.1
+
+# django
+django-dynamic-fixture==1.8.5
 
 # code style
 flake8==2.4.0
