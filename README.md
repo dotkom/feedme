@@ -1,7 +1,7 @@
 FeedMe
 ===========  
 
-[![Build Status](https://travis-ci.org/dotKom/feedme.svg)](https://travis-ci.org/dotKom/feedme)
+[![Build Status](https://travis-ci.org/dotKom/feedme.svg?branch=master)](https://travis-ci.org/dotKom/feedme) [![codecov.io](https://codecov.io/github/dotKom/feedme/coverage.svg?branch=master)](https://codecov.io/github/dotKom/feedme?branch=master)
 
 A food ordering management system for Django. 
 
