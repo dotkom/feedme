@@ -73,9 +73,9 @@ def get_next_wednesday():
     today = date.today()
     day = today.weekday()
     if day < 2:
-        diff = timedelta(days=(1 - day))
+        diff = timedelta(days=(2 - day))
     elif day > 2:
-        diff = timedelta(days=(7 - day + 1))
+        diff = timedelta(days=(7 - day + 2))
     else:
         diff = timedelta(days=0)
 
