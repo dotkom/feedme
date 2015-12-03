@@ -2,7 +2,7 @@
 Django==1.7.1
 
 # API
-django-tastypie==0.12.1
+djangorestframework<=3.3.0
 
 # Testing
 django-nose==1.2
