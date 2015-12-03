@@ -101,7 +101,7 @@ var Order = React.createClass({
     return (
       <div className="container order">
         <div className="row">
-          <h1>Feedme</h1>
+          <h1>Feedme <small><a href=".."><i className="fa fa-level-up"></i></a></small></h1>
           <h2>
               {this.state.restaurant.restaurant_name} &nbsp;
               <small>
