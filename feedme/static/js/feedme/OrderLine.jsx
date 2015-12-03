@@ -11,6 +11,10 @@ var OrderLine = React.createClass({
       }
     },
 
+    componentDidMount: function() {
+      this.loadOrderLine()
+    },
+
     loadOrderLine: function(path) {
       $.ajax({
         url: path || api_base + "orderlines/" + this.props.olid + "/",
@@ -24,8 +28,10 @@ var OrderLine = React.createClass({
       this.setState({hideOrderLine: false})
     },
 
-    componentDidMount: function() {
-      this.loadOrderLine()
+    generateAlert: function(type, message) {
+      var alert_type = type | "danger"
+      var alert_message = "<div class=\"alert alert-" + alert_type + "\"><a class=\"close\" data-dismiss=\"alert\">&times</a> " + message + "</div>"
+      $('#bootstrap-messages').append(alert_message)
     },
 
     handleRemove: function(orderline) {
@@ -60,11 +66,13 @@ var OrderLine = React.createClass({
         },
         method: 'put',
         success: function(result) {
+          this.generateAlert('info', 'Joined orderline')
           var users = this.state.users
           users.push({username: username})
           this.setState({users: users})
         }.bind(this),
         error: function(xhr, err, status) {
+          this.generateAlert('danger', 'Failed to join orderline: ' + xhr.responseText)
           console.log("Something went wrong.", xhr, err, status)
         }.bind(this)
       })
@@ -78,6 +86,7 @@ var OrderLine = React.createClass({
         },
         method: 'put',
         success: function(result) {
+          this.generateAlert('info', 'Left orderline')
           var users = this.state.users
           users.pop(username)
           this.setState({users: users})
