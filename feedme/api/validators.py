@@ -11,3 +11,4 @@ def validate_funds(user, amount):
     enough = validate_user_funds(user, amount)
     if not enough:
         raise ValidationError('Insufficient funds')
+    return True

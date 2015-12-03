@@ -29,8 +29,7 @@ var OrderLine = React.createClass({
     },
 
     generateAlert: function(type, message) {
-      var alert_type = type | "danger"
-      var alert_message = "<div class=\"alert alert-" + alert_type + "\"><a class=\"close\" data-dismiss=\"alert\">&times</a> " + message + "</div>"
+      var alert_message = "<div class=\"alert alert-" + type + "\"><a class=\"close\" data-dismiss=\"alert\">&times</a> " + message + "</div>"
       $('#bootstrap-messages').append(alert_message)
     },
 

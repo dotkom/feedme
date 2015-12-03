@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 
 from rest_framework import serializers
 
-from feedme.models import Restaurant, Order, OrderLine, Poll, Answer
+from feedme.models import Balance, Restaurant, Order, OrderLine, Poll, Answer
 
 User = get_user_model()
 
@@ -14,17 +14,18 @@ class RestaurantSerializer(serializers.ModelSerializer):
         fields = ('id', 'restaurant_name', 'menu_url', 'phone_number', 'email', 'buddy_system',)
 
 
-class UserSerializer(serializers.ModelSerializer):
+class BalanceSerializer(serializers.ModelSerializer):
+    balance = serializers.CharField(read_only=True)
 
     class Meta:
-        model = User
-        fields = ('username',)
+        model = Balance
+        fields = ('username', 'balance')
 
 
 class OrderLineSerializer(serializers.ModelSerializer):
     creator = serializers.CharField(read_only=True)
     paid_for = serializers.BooleanField(read_only=True)
-    users = UserSerializer(many=True, allow_null=True)
+    users = BalanceSerializer(many=True, allow_null=True)
 
     class Meta:
         model = OrderLine

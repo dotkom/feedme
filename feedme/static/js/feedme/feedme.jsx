@@ -1,3 +1,5 @@
+var Balance = require('./Balance.jsx')
+
 var Button = require('./Buttons.jsx')
 
 var IconButton = require('./IconButton.jsx')
