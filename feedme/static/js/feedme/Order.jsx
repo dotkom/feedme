@@ -89,7 +89,10 @@ var Order = React.createClass({
       render: function () {
         return (
           <span>
-            <i className="fa fa-phone"></i> <a href={"tel:" + that.state.restaurant.phone_number}>{that.state.restaurant.phone_number}</a>
+            <i className="fa fa-phone"></i>
+              <a href={"tel:" + that.state.restaurant.phone_number}>
+              {that.state.restaurant.phone_number}
+          </a>
           </span>
         )
       }
@@ -111,6 +114,7 @@ var Order = React.createClass({
               data={this.state.data}
               url={this.props.url}
               extra_costs={this.state.order.extra_costs}
+              total_cost={this.state.order.total_cost}
               />
           <OrderLineForm onOrderLineSubmit={this.handleOrderLineSubmit} />
         </div>

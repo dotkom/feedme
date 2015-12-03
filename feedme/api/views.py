@@ -1,4 +1,5 @@
 from rest_framework import viewsets, mixins, status
+from rest_framework.decorators import detail_route
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
@@ -29,3 +30,24 @@ class OrderLineViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
     def perform_create(self, serializer):
         serializer.save(creator=self.request.user)
+
+    @detail_route(methods=['put'], permission_classes=[IsAuthenticatedOrReadOnly])
+    def join(self, request, pk=None):
+        instance = self.queryset.get(pk=pk)
+        instance.users.add(request.user)
+        instance.save()
+
+        serializer = self.serializer_class(initial=instance)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @detail_route(methods=['put'], permission_classes=[IsAuthenticatedOrReadOnly])
+    def leave(self, request, pk=None):
+        instance = self.queryset.get(pk=pk)
+        instance.users.remove(request.user)
+        instance.save()
+
+        serializer = self.serializer_class(initial=instance)
+        headers = self.get_success_headers(serializer.data)
+        print(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

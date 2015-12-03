@@ -42,7 +42,7 @@ var OrderLineList = React.createClass({
               <td><i className="fa fa-2x fa-bicycle"></i> <i className="fa fa-2x fa-rocket"></i></td>
               <td></td>
               <td>{this.props.extra_costs}</td>
-              <td></td>
+              <td>Total: {this.props.total_cost}</td>
             </tr>
           </tbody>
         </table>

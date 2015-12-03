@@ -6,41 +6,17 @@ var OrderLineForm = React.createClass({
     },
 
     componentDidMount: function() {
-      $.ajax({
-        url: api_base + "orderlines/",
-        method: 'OPTIONS',
-        success: function(success) {
-            this.setState({users: success.actions.POST.users.choices})
-        }.bind(this),
-        error: function(xhr, status, err) {
-            console.log(xhr, status, err)
-        }.bind(this)
-      })
     },
 
     handleSubmit: function(e) {
       e.preventDefault();
-
-      // Get a list of users id's (buddies)
-      var users = []
-      var users_list = $('#users_list').children()
-      for (var i = 0; i < users_list.length; i++) {
-        if (this.refs.users.value === users_list[i].value) {
-          users.push(parseInt(users_list[i].innerHTML))
-        }
-      }
-
-      if (users.length > 0) {
-        users = $.parseJSON(users)
-      }
 
       this.props.onOrderLineSubmit({
           id: this.refs.id.value,
           menu_item: this.refs.menu_item.value,
           soda: this.refs.soda.value,
           extras: this.refs.extras.value,
-          price: this.refs.price.value,
-          users: users
+          price: this.refs.price.value
       });
       // Reset all the stuff
       this.refs.id.value = "";
@@ -53,11 +29,6 @@ var OrderLineForm = React.createClass({
     },
 
     render: function() {
-        var users = this.state.users.map(function (user) {
-        return (
-            <option key={user.value} value={user.display_name}>{user.value}</option>
-          )
-        })
         return (
             <div className="col-md-12">
               <h3>New orderline</h3>
@@ -80,12 +51,9 @@ var OrderLineForm = React.createClass({
                     <label className="sr-only" htmlFor="price">Price</label>
                     <input type="number" className="form-control" placeholder="Price" id="price" ref="price" />
                   </div>
-                  <div className="form-group">
+                  <div className="form-group hidden">
                     <label className="sr-only" htmlFor="users">Additional users</label>
-                    <input type="text" list="users_list" className="form-control" placeholder="Additional users" id="users" ref="users" />
-                    <datalist id="users_list">
-                        {users}
-                    </datalist>
+                    <input type="text" className="form-control" placeholder="Additional users" id="users" ref="users" disabled />
                   </div>
                   <IconButton value="floppy-o" btnid="formSubmit" type="success" btnsize="primary" />
                 </form>

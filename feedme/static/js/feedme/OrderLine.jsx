@@ -2,6 +2,7 @@ var OrderLine = React.createClass({
     getInitialState: function() {
       return {
           orderline: {},
+          users: [],
           hidden: false,
           showDelete: false,
           showEdit: false,
@@ -12,10 +13,9 @@ var OrderLine = React.createClass({
 
     loadOrderLine: function(path) {
       $.ajax({
-        url: path || api_base + "orderlines/" + this.props.olid,
+        url: path || api_base + "orderlines/" + this.props.olid + "/",
         success: function(result) {
-          // console.log(result)
-          this.setState({orderline: result})
+          this.setState({orderline: result, users: result.users})
         }.bind(this),
         error: function(xhr, err, status) {
           console.log("Something went wrong.", xhr, err, status)
@@ -41,7 +41,6 @@ var OrderLine = React.createClass({
       $("#soda").val(orderline.soda)
       $("#extras").val(orderline.extras)
       $("#price").val(orderline.price)
-      $("#users").val(orderline.users)
       this.setState({hideOrderLine: true})
 
       // On form submit, reload current orderline
@@ -52,21 +51,83 @@ var OrderLine = React.createClass({
         }, 500) // I hope 500ms is enough to wait for a POST request to complete.
       })
     },
-    // @ToDo: join and leave events
+
+    handleJoin: function(orderline) {
+        $.ajax({
+        url: api_base + "orderlines/" + this.props.olid + "/join/",
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+        },
+        method: 'put',
+        success: function(result) {
+          var users = this.state.users
+          users.push({username: username})
+          this.setState({users: users})
+        }.bind(this),
+        error: function(xhr, err, status) {
+          console.log("Something went wrong.", xhr, err, status)
+        }.bind(this)
+      })
+    },
+
+    handleLeave: function(orderline) {
+        $.ajax({
+        url: api_base + "orderlines/" + this.props.olid + "/leave/",
+        beforeSend: function(xhr) {
+          xhr.setRequestHeader("X-CSRFToken", getCookie("csrftoken"));
+        },
+        method: 'put',
+        success: function(result) {
+          var users = this.state.users
+          users.pop(username)
+          this.setState({users: users})
+        }.bind(this),
+        error: function(xhr, err, status) {
+          console.log("Something went wrong.", xhr, err, status)
+        }.bind(this)
+      })
+    },
 
     render: function() {
-        var deleteButton =  this.state.orderline.creator === username ? <IconButton value="trash-o" type="danger" btnsize="btn-sm" clickHandler={this.handleRemove.bind(this, this.state.orderline)} /> : ""
-        var editButton = this.state.orderline.creator === username ? <IconButton value="pencil-square-o" type="primary" btnsize="btn-sm" clickHandler={this.handleEdit.bind(this, this.state.orderline)} /> : ""
-        var joinButton = this.state.orderline.creator !== username ? <IconButton value="sign-in" type="primary" btnsize="btn-sm" clickHandler={this.handleJoin} /> : ""
-        var leaveButton = this.state.orderline.creator !== username ? <IconButton value="sign-out" type="primary" btnsize="btn-sm" clickHandler={this.handleLeave} /> : ""
+        var is_in = false
+        for (var i = 0; i < this.state.users.length; i++) {
+            if (this.state.users[i].username === username) {
+                is_in = true
+            }
+        }
+
+        var can_join = (this.props.can_join || (!is_in && this.state.orderline.creator !== username))
+
+        var deleteButton =  this.state.orderline.creator === username ?
+            <IconButton
+                value="trash-o" type="danger" btnsize="btn-sm"
+                clickHandler={this.handleRemove.bind(this, this.state.orderline)} /> : ""
+        var editButton = (is_in || this.state.orderline.creator === username) ?
+            <IconButton
+                value="pencil-square-o" type="primary" btnsize="btn-sm"
+                clickHandler={this.handleEdit.bind(this, this.state.orderline)} /> : ""
+        var joinButton = (can_join) ?
+            <IconButton
+                value="sign-in" type="primary" btnsize="btn-sm"
+                clickHandler={this.handleJoin.bind(this, this.state.orderline)} /> : ""
+        var leaveButton = (is_in) ?
+            <IconButton
+                value="sign-out" type="danger" btnsize="btn-sm"
+                clickHandler={this.handleLeave.bind(this, this.state.orderline)} /> : ""
+
+        var users = this.state.users.map(function(user) {
+            return (
+                <span key={user.id}>{user.username} </span>
+            )
+        })
         return (
             <tr className={this.state.hideOrderLine ? 'hide' : ''} id={"orderline-" + this.state.orderline.id}>
-                <td><b>{this.state.orderline.creator}</b> {this.state.orderline.users}</td>
+                <td><b>{this.state.orderline.creator}</b> {users}</td>
                 <td>{this.state.orderline.menu_item}</td>
                 <td>{this.state.orderline.soda}</td>
                 <td>{this.state.orderline.extras}</td>
                 <td>{this.state.orderline.price}</td>
-                <td><div className="btn-group">{joinButton} {leaveButton} {editButton} {deleteButton}</div></td>
+                <td>{joinButton}<div className="btn-group">{editButton} {leaveButton} {deleteButton}</div></td>
             </tr>
         );
     }
