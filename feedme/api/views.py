@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 
 from feedme.models import Order, OrderLine, Restaurant, Poll, Answer
-from feedme.serializers import OrderSerializer, OrderLineSerializer, RestaurantSerializer
+from feedme.api.serializers import OrderSerializer, OrderLineSerializer, RestaurantSerializer
 
 
 class OrderViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.RetrieveModelMixin):
@@ -22,7 +22,6 @@ class OrderLineViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Re
 
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
-        print(request.data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)

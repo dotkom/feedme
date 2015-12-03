@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from feedme.api_views import OrderViewSet, OrderLineViewSet
+from feedme.api.views import OrderViewSet, OrderLineViewSet
 
 
 router = routers.SimpleRouter()
