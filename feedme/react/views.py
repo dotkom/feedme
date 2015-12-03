@@ -14,10 +14,14 @@ def index(request):
 
 def order(request, group=None):
     group = get_object_or_404(Group, name=group)
+    active_order = get_order(group)
 
     context = {}
     context['api_url'] = '/feedme-api/'
-    context['order'] = get_order(group)
+    context['order'] = active_order
     context['username'] = request.user
+
+    if not active_order:
+        return render(request, 'feedme/404.html', context)
 
     return render(request, 'feedme/react/index.html', context)
