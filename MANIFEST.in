@@ -1,5 +1,7 @@
 include README.md
-recursive-include feedme/static *
+recursive-include feedme/api *
+recursive-include feedme/migrations *
+recursive-include feedme/react *
 recursive-include feedme/templates *
 recursive-include feedme/templatetags *
-recursive-include feedme/migrations *
+recursive-include feedme/static *
