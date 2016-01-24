@@ -54,9 +54,10 @@ Feedme in React.js
 {% endblock %}
 
 {% block content %}
-    <div id="bootstrap-messages"></div>
-
-    <div id="feedme-main"></div>
+    <section id="feedme">
+      <div id="bootstrap-messages" class="container"></div>
+      <div id="feedme-main"></div>
+    </section>
 
     <script src="{{ STATIC_URL }}js/feedme.min.js"></script>
 {% endblock %}
