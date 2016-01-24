@@ -143,6 +143,10 @@ class Transaction(models.Model):
 class Balance(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
 
+    @property
+    def balance(self):
+        return self.get_balance()
+
     def get_balance(self):
         if self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum'] is None:
             self.add_transaction(0)
@@ -165,6 +169,10 @@ class Balance(models.Model):
     def withdraw(self, amount):
         return self.add_transaction(amount * -1)
         # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
+
+    @property
+    def username(self):
+        return self.user.username
 
     def __str__(self):
         return "%s: %s" % (self.user.username, self.get_balance())

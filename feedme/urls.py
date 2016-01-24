@@ -3,18 +3,6 @@ from django.contrib.auth.decorators import permission_required
 
 from feedme.views import ManageUserViewSet
 
-"""
-# API
-from tastypie.api import Api
-from feedme.api import PollResource, RestaurantResource, VoteResource, OrderResource, OrderLineResource
-
-v1_api = Api(api_name='v1')
-v1_api.register(PollResource())
-v1_api.register(RestaurantResource())
-v1_api.register(VoteResource())
-v1_api.register(OrderResource())
-v1_api.register(OrderLineResource())
-"""
 
 urlpatterns = patterns(
     'feedme.views',
@@ -61,7 +49,5 @@ urlpatterns = patterns(
         name='manage_users'),
     url(r'^(?P<group>\w+)/admin/newrestaurant/$', 'new_restaurant', name='new_restaurant'),
     url(r'^(?P<group>\w+)/admin/newpoll/$', 'new_poll', name='new_poll'),
-
-    # Api
-    # url(r'api/', include(v1_api.urls)),
 )
+
