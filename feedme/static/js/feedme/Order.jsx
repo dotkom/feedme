@@ -32,6 +32,11 @@ var Order = React.createClass({
     });
   },
 
+  generateAlert: function(type, message) {
+    var alert_message = "<div class=\"alert alert-" + type + "\"><a class=\"close\" data-dismiss=\"alert\">&times</a> " + message + "</div>"
+    $('#bootstrap-messages').append(alert_message)
+  },
+
   handleOrderLineSubmit: function(orderline) {
     // Submit to server and refresh list
     orderline.csrfmiddlewaretoken = csrftoken;
@@ -57,6 +62,7 @@ var Order = React.createClass({
         }.bind(this),
         error: function(xhr, status, error) {
             console.error(xhr, status, error)
+            this.generateAlert('danger', 'Failed to join orderline: ' + xhr.responseText)
         }.bind(this)
     });
   },

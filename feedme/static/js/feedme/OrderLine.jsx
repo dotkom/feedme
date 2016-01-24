@@ -103,14 +103,14 @@ var OrderLine = React.createClass({
                 is_in = true
             }
         }
+        var can_join = (this.props.can_join ||
+        (!is_in && (this.state.orderline.creator !== username && this.state.orderline.creator !== user)))
 
-        var can_join = (this.props.can_join || (!is_in && this.state.orderline.creator !== username))
-
-        var deleteButton =  this.state.orderline.creator === username ?
+        var deleteButton =  this.state.orderline.creator === username || this.state.orderline.creator === user ?
             <IconButton
                 value="trash-o" type="danger" btnsize="btn-sm"
                 clickHandler={this.handleRemove.bind(this, this.state.orderline)} /> : ""
-        var editButton = (is_in || this.state.orderline.creator === username) ?
+        var editButton = (is_in || this.state.orderline.creator === username || this.state.orderline.creator === user) ?
             <IconButton
                 value="pencil-square-o" type="primary" btnsize="btn-sm"
                 clickHandler={this.handleEdit.bind(this, this.state.orderline)} /> : ""
