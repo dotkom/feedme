@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from django.conf import settings
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
@@ -157,8 +156,6 @@ def validate_users_funds(users, price):
 # Validation of orderline
 def check_orderline(group, creator, price, buddies=None):
     order = get_order(group)
-
-    orderline_exists = False
 
     orderline, created = get_orderline_for_order_and_creator(order, creator)
 

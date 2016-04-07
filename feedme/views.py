@@ -21,16 +21,16 @@ from feedme.utils import (
 logger = logging.getLogger(__name__)
 try:
     # Django 1.7 way for importing custom user
-    from django.contrib.auth import AUTH_USER_MODEL
-    User = get_user_model()
+    from django.contrib.auth import AUTH_USER_MODEL  # flake8: noqa
+    User = get_user_model()  # flake8: noqa
 except ImportError:
     try:
         # Django 1.6 way for importing custom user, will crash in Django 1.7
-        from django.contrib.auth import get_user_model
-        User = get_user_model()
+        from django.contrib.auth import get_user_model  # flake8: noqa
+        User = get_user_model()  # flake8: noqa
     except AppRegistryNotReady:
         # If all else fails, import default user model -- please report this bug
-        from django.contrib.auth.models import User
+        from django.contrib.auth.models import User  # flake8: noqa
 
 
 # Index
@@ -238,7 +238,7 @@ def join_orderline(request, group, orderline_id):
     if in_other_orderline(get_order(group), request.user):
         messages.error(request, 'You cannot be in multiple orderlines')
         logger.warn('%s tried to join multiple orderlines (new: %i) for "%s"!' %
-                     (request.user, orderline.id, get_order(group)))
+                   (request.user, orderline.id, get_order(group)))
     elif orderline.order.use_validation and \
             not validate_user_funds(
                 request.user, (orderline.price / (orderline.users.count() + 1))):  # Adds us to the test as well
@@ -259,7 +259,7 @@ def leave_orderline(request, group, orderline_id):
     if request.user not in orderline.users.all():
         messages.error(request, 'You cannot leave since you are not in the users')
         logger.warn('%s tried to leave orderline#%i for "%s" without being in it!' %
-                     (request.user, orderline.id, get_order(group)))
+                   (request.user, orderline.id, get_order(group)))
     else:
         orderline.users.remove(request.user)
         orderline.save()
