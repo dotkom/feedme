@@ -20,31 +20,48 @@ except ImportError:
 
 
 def get_feedme_groups():
+    """
+    Get the Group objects with Permission to use feedme
+    :return: A list of Group objects
+    """
     order_ctype = ContentType.objects.get_for_model(Order)
     permission = Permission.objects.get(codename='view_order', content_type=order_ctype)
     return [g for g in Group.objects.all() if permission in g.permissions.all()]
 
 
-# Get or create balance for a user
 def get_or_create_balance(user):
     return Balance.objects.get_or_create(user=user)[0]
 
 
-# Check that the user has enough funds
 def validate_user_funds(user, amount):
+    """
+    Make sure that a User can pay the given amount given their Balance.
+    :param user: The User to validate
+    :param amount: The amount to validate
+    :return: Boolean, whether the User can complete the Transaction or not.
+    """
     get_or_create_balance(user)
     return user.balance.get_balance() >= amount
 
 
-# The actual function for payment
 def pay(user, amount):
+    """
+    Pay a given amount for a given user.
+    :param user: The User to pay for.
+    :param amount: The amount to pay.
+    :return: None
+    """
     balance = get_or_create_balance(user)
     balance.withdraw(amount)  # This returns True/False whether or not the payment was possible.
     balance.save()
 
 
-# Deposit of funds
 def handle_deposit(data):
+    """
+    Handles depositing funds using a generic data object.
+    :param data: A Generic data object.
+    :return: None
+    """
     balance = get_or_create_balance(data['user'])
     print('updating %s' % balance)
     amount = data['amount']
@@ -56,6 +73,10 @@ def handle_deposit(data):
 
 # yes
 def get_next_tuesday():
+    """
+    Gets the next Tuesday (useful to automatically populate the "Poll deadline" form field).
+    :return: A datetime for the next Tuesday
+    """
     today = date.today()
     day = today.weekday()
     if day < 1:
@@ -69,6 +90,10 @@ def get_next_tuesday():
 
 
 def get_next_wednesday():
+    """
+    Gets the next Wednesday (useful to automatically populate the "Order deadline" form field).
+    :return: A datetime for the next Wednesday
+    """
     today = date.today()
     day = today.weekday()
     if day < 2:
@@ -82,11 +107,20 @@ def get_next_wednesday():
 
 
 def is_admin(request):
+    """
+    Defines if the user in the request is an administrator for the Order
+    :param request: Django HTTP Request Object
+    :return: Boolean, whether the User is administrator or not.
+    """
     return request.user.has_perm('feedme.change_order')
 
 
-# Gets latest active order
 def get_order(group=None):
+    """
+    Get the latest active Order.
+    :param group: A Group to get the latest active Order for.
+    :return: An active Order
+    """
     if Order.objects.filter(group=group):
         orders = Order.objects.filter(group=group).order_by('-id')
         for order in orders:
@@ -96,8 +130,12 @@ def get_order(group=None):
         return None
 
 
-# Gets latest active poll
 def get_poll(group=None):
+    """
+    Get the latest active Poll.
+    :param group: A Group to get the latest active Poll for.
+    :return: An active Poll
+    """
     if Poll.objects.filter():
         if Poll.objects.filter(group=group, active=True).count() >= 1:
             return Poll.objects.filter(group=group, active=True).order_by('-id')[0]
@@ -105,8 +143,12 @@ def get_poll(group=None):
             return None
 
 
-# Manually parses users to validate user funds on buddy-add on initial orderline creation
 def manually_parse_users(form):
+    """
+    A hacky way to find out which users are in the Orderline, to do Orderline validation on.
+    :param form: An HTML form.
+    :return: The Users partaking in the Orderline
+    """
     li = str(form).split('<select')
     potential_users = li[1].split('<option')
     user_ids = []
@@ -119,8 +161,13 @@ def manually_parse_users(form):
     return users
 
 
-# Checks if user is in another orderline
 def in_other_orderline(order, user):
+    """
+    Checks if a User partakes in an Orderline in the given Order.
+    :param order: The Order to verify against.
+    :param user: The User to check.
+    :return: Boolean, whether the User is in another Orderline or not.
+    """
     r1 = ""
     r2 = ""
     if order:
@@ -133,6 +180,12 @@ def in_other_orderline(order, user):
 
 
 def get_orderline_for_order_and_creator(order, creator):
+    """
+    Get the OrderLine for a User and an Order.
+    :param order: The Order to get an Orderline from.
+    :param creator: The User who created the Order.
+    :return: An Orderline as well as a Boolean if a new Order was created.
+    """
     created = True
     try:
         orderline = OrderLine.objects.get(order=order, creator=creator)
@@ -144,6 +197,12 @@ def get_orderline_for_order_and_creator(order, creator):
 
 
 def validate_users_funds(users, price):
+    """
+    Validate if a given set of Users can pay a given price.
+    :param users: A list of Users
+    :param price: A price to pay
+    :return: A list of Users not being able to pay.
+    """
     # Temporarily calculate price to pay per user, check if all users have sufficient funds
     price /= len(users)
     unsufficient_funds_users = []
@@ -153,8 +212,15 @@ def validate_users_funds(users, price):
     return unsufficient_funds_users
 
 
-# Validation of orderline
 def check_orderline(group, creator, price, buddies=None):
+    """
+    Health check an Orderline.
+    :param group: The Group to validate the Orderline for.
+    :param creator: The Orderline creator.
+    :param price: The price of the Orderline.
+    :param buddies: The buddy Users for the Orderline.
+    :return: Boolean, whether the Orderline passed the health checks.
+    """
     order = get_order(group)
 
     orderline, created = get_orderline_for_order_and_creator(order, creator)
@@ -176,8 +242,13 @@ def check_orderline(group, creator, price, buddies=None):
         return True
 
 
-# Handle payment
 def handle_payment(request, order):
+    """
+    Do what's required to pay for an Order.
+    :param request: Django HTTP Request Object.
+    :param order: The Order to process payment for.
+    :return: Three lists: Users paid for, Users already having paid and Users who now have a negative Balance.
+    """
     orderlines = order.orderline_set.all()
 
     # Initialize empty lists for users

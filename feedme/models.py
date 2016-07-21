@@ -10,6 +10,7 @@ from django.utils.encoding import python_2_unicode_compatible
 
 @python_2_unicode_compatible
 class Restaurant(models.Model):
+    """Restaurant is a model for providing information about where an Order is placed."""
     restaurant_name = models.CharField(_('name'), max_length=50)
     menu_url = models.URLField(_('menu url'), max_length=250)
     phone_number = models.CharField(_('phone number'), max_length=15)
@@ -22,6 +23,7 @@ class Restaurant(models.Model):
 
 @python_2_unicode_compatible
 class Order(models.Model):
+    """Order is the wrapper for multiple OrderLines for a Restaurant at a given date and time."""
     group = models.ForeignKey(Group)
     date = models.DateField(_('date'))
     restaurant = models.ForeignKey(Restaurant)
@@ -31,6 +33,11 @@ class Order(models.Model):
 
     @property
     def get_total_sum(self):
+        """
+        Gets the total price for an order, including any extra costs. This is the price that should be paid to
+        the Restaurant.
+        :return: The total price for this Order
+        """
         s = self.orderline_set.aggregate(models.Sum('price'))['price__sum']
         if s is None:
             s = 0
@@ -38,6 +45,7 @@ class Order(models.Model):
 
     # Should rename to "get_extra_costs_for_each_user" or -each_payer
     def get_extra_costs(self):
+        """Calculate the amount each person partaking in this order should pay of this Order.extra_costs."""
         # users = self.orderline_set.aggregate(models.Sum('users'))['users__sum']
         users = 0
         for ol in self.orderline_set.all():
@@ -45,11 +53,13 @@ class Order(models.Model):
         return self.extra_costs / users if users > 0 else self.extra_costs
 
     def order_users(self):
+        """Get the users available for partaking in this Order."""
         from django.contrib.auth import get_user_model
         User = get_user_model()
         return User.objects.filter(groups=self.group)
 
     def available_users(self):
+        """Get the available users for partaking in a new (or current) OrderLine for this Order."""
         order_users = self.order_users()
         taken_users = self.taken_users()
         available_users = order_users.exclude(id__in=taken_users)
@@ -60,6 +70,7 @@ class Order(models.Model):
 
     @classmethod
     def get_latest(cls):
+        """Get the latest active Order."""
         if Order.objects.all():
             orders = Order.objects.all().order_by('-id')
             for order in orders:
@@ -70,6 +81,7 @@ class Order(models.Model):
 
     @property
     def paid(self):
+        """Is this Order, and all related OrderLines, paid for?"""
         if self.orderline_set.all():
             for ol in self.orderline_set.all():
                 if not ol.paid_for:
@@ -89,6 +101,7 @@ class Order(models.Model):
 
 @python_2_unicode_compatible
 class OrderLine(models.Model):
+    """The relation between a number of users (creator and users) and an Order."""
     order = models.ForeignKey(Order)
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('owner'))
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name=_('buddies'), blank=True)
@@ -112,9 +125,11 @@ class OrderLine(models.Model):
 
     # Should rename to "get_orderline_total"
     def get_total_price(self):
+        """Calculate the total cost for this OrderLine, including extra_costs as a sum of the partaking users."""
         return self.price + (self.order.get_extra_costs() * self.get_num_users())
 
     def get_price_to_pay(self):
+        """Calculate how much each person partaking in this OrderLine should pay, including extra_costs."""
         return self.get_total_price() / self.get_num_users() if self.get_num_users() > 0 else 0
 
     def __str__(self):
@@ -131,6 +146,9 @@ class OrderLine(models.Model):
 
 @python_2_unicode_compatible
 class Transaction(models.Model):
+    """Transaction is the model used for keeping a history of users actions towards their Balance,
+    e.g. withdrawing money from their Balance to pay for an Order, or depositing to be able to participate
+    in an upcoming Order with funds validation enabled."""
     user = models.ForeignKey(settings.AUTH_USER_MODEL)
     amount = models.FloatField(_('amount'), default=0)
     date = models.DateTimeField(_('transaction date'), auto_now_add=True)
@@ -141,6 +159,7 @@ class Transaction(models.Model):
 
 @python_2_unicode_compatible
 class Balance(models.Model):
+    """Balance is a wrapper for a User's Transactions."""
     user = models.OneToOneField(settings.AUTH_USER_MODEL)
 
     @property
@@ -148,14 +167,27 @@ class Balance(models.Model):
         return self.get_balance()
 
     def get_balance(self):
+        """
+        Calculate the Balance of a given User. Create an initial Transaction if none exist from before.
+        :return: The Balance of a given user.
+        """
         if self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum'] is None:
             self.add_transaction(0)
         return self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum']
 
     def get_balance_string(self):
+        """
+        Format the Balance string
+        :return: A string-formatted Balance.
+        """
         return "%.2f kr" % self.get_balance()
 
     def add_transaction(self, amount):
+        """
+        Add a Transaction for the current user.
+        :param amount: The value of this Transaction
+        :return: True if the Transaction completed successfully.
+        """
         transaction = Transaction()
         transaction.user = self.user
         transaction.amount = amount
@@ -163,10 +195,20 @@ class Balance(models.Model):
         return True
 
     def deposit(self, amount):
+        """
+        Proxy for add_transaction.
+        :param amount: The value of this Transaction
+        :return: True if the Transaction completed successfully.
+        """
         return self.add_transaction(amount)
         # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
 
     def withdraw(self, amount):
+        """
+        Proxy for add_transaction.
+        :param amount: The value of this Transaction
+        :return: True if the Transaction completed successfully.
+        """
         return self.add_transaction(amount * -1)
         # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
 
@@ -180,6 +222,7 @@ class Balance(models.Model):
 
 @python_2_unicode_compatible
 class Poll(models.Model):
+    """Poll allows for democratic voting for a Restaurant for an Order"""
     group = models.ForeignKey(Group)
     question = models.CharField(_('question'), max_length=250)
     active = models.BooleanField(_('active'), default=True)
@@ -193,10 +236,13 @@ class Poll(models.Model):
         if datetime.now() < self.due_date:
             self.active = True
             self.save()
-        # Throw some exception if fails?
 
     @classmethod
     def get_active(cls):
+        """
+        Get an active Poll, if any.
+        :return: An active Poll, or None if no Polls are active.
+        """
         if Poll.objects.count() == 0:
             return None
         if Poll.objects.latest('id').active:
@@ -205,6 +251,10 @@ class Poll(models.Model):
             return None
 
     def get_result(self):
+        """
+        Get the results of a Poll
+        :return: A dict containing the Answer choices and the amount of votes for each Answer
+        """
         answers = Answer.objects.filter(poll=self)
         r = dict()
         for answer in answers:
@@ -214,6 +264,10 @@ class Poll(models.Model):
         return r
 
     def get_winner(self):
+        """
+        Get the winner of a Poll
+        :return: The winning Answer
+        """
         winner = (None, -1)
         results = self.get_result()
         for key in results:
@@ -232,6 +286,7 @@ class Poll(models.Model):
 
 @python_2_unicode_compatible
 class Answer(models.Model):
+    """Answer is used to partake in a Poll"""
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name=_('user'))
     poll = models.ForeignKey(Poll, related_name=_('votes'))
     answer = models.ForeignKey(Restaurant, related_name=_('answer'))

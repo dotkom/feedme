@@ -35,6 +35,7 @@ except ImportError:
 
 # Index
 def index(request):
+    """Renders an index view containing the available groups for the User to view an Order in."""
     r = dict(
         is_admin=is_admin(request),
         feedme_groups=[g for g in get_feedme_groups() if request.user in g.user_set.all()],
@@ -44,6 +45,7 @@ def index(request):
 
 @login_required()
 def index_new(request, group=None):
+    """The index view for a Group"""
     group = get_object_or_404(Group, name=group) if \
         request.user in get_object_or_404(Group, name=group).user_set.all() else None
     order = get_order(group) if group else None
@@ -62,6 +64,7 @@ def index_new(request, group=None):
             a_id = Answer.objects.get(poll=poll, user=request.user)
 
     if request.method == 'POST':
+        # Handle voting if the request is a vote request.
         if request.POST['act'] == 'vote':
             if a_id is not None:
                 form = PollAnswerForm(request.POST, instance=a_id)
@@ -75,6 +78,7 @@ def index_new(request, group=None):
                 messages.success(request, 'Voted for %s' % answer.answer)
                 return redirect('feedme:feedme_index_new', group)
 
+    # If there's a Poll, either render the Poll or render the Poll with the current User's answer.
     if poll is not None:
         r['poll'] = poll
         if a_id is None:
@@ -178,6 +182,7 @@ class OrderlineDetail(DetailView):
 
 
 def create_orderline(request, group=None):
+    """The view used for adding a new Orderline"""
     r = dict()
     group = get_object_or_404(Group, name=group)
 
@@ -208,8 +213,8 @@ def create_orderline(request, group=None):
     return render(request, 'feedme/orderview.html', r)
 
 
-# Edit order line
 def edit_orderline(request, group, orderline_id):
+    """The view used for editing an Orderline"""
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     group = get_object_or_404(Group, name=group)
     if request.user != orderline.creator and request.user not in orderline.users.all():
@@ -218,8 +223,8 @@ def edit_orderline(request, group, orderline_id):
     return orderlineview(request, orderline_id=orderline_id, group=group)
 
 
-# Delete order line
 def delete_orderline(request, group, orderline_id):
+    """The view used for deleting an Orderline"""
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     group = get_object_or_404(Group, name=group)
     if orderline.creator == request.user:
@@ -232,6 +237,7 @@ def delete_orderline(request, group, orderline_id):
 
 @login_required()
 def join_orderline(request, group, orderline_id):
+    """The view used to join an Orderline"""
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     group = get_object_or_404(Group, name=group)
     # @TODO if not buddy system enabled, disable join
@@ -254,6 +260,7 @@ def join_orderline(request, group, orderline_id):
 
 @login_required()
 def leave_orderline(request, group, orderline_id):
+    """The view used to leave an Orderline"""
     orderline = get_object_or_404(OrderLine, pk=orderline_id)
     group = get_object_or_404(Group, name=group)
     if request.user not in orderline.users.all():
@@ -269,15 +276,16 @@ def leave_orderline(request, group, orderline_id):
 
 @login_required
 def order_history(request):
+    """History of joined Orders"""
     user_orders = OrderLine.objects.filter(Q(creator=request.user) | Q(users=request.user))
     return render(request, 'feedme/order_history.html', {'order_history': user_orders})
 
 # ADMIN
 
 
-# New order
 @permission_required('feedme.add_order', raise_exception=True)
 def new_order(request, group=None):
+    """The view used to create new Orders"""
     logger.warn('DEPRECATED - STOP USING THIS')
     group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
@@ -307,7 +315,7 @@ def new_order(request, group=None):
 
 
 def admin(request, group=None):
-    # Admin index - defaults to new order page
+    """Admin index - defaults to new order page"""
     r = dict()
     group = get_object_or_404(Group, name=group)
 
@@ -336,13 +344,14 @@ def admin(request, group=None):
     return render(request, 'feedme/admin.html', r)
 
 
-# Manage users (deposit, withdraw, overview)
 class ManageUserViewSet(DetailView):
+    """Manage users (deposit, withdraw, overview)"""
     model = Balance
     fields = ('user', 'get_balance')
     template_name = 'feedme/manage_users.html'
 
     def get(self, request, group=None):
+        """Populate a list of all Users and their Balance"""
         r = {}
         group = get_object_or_404(Group, name=group)
         r['group'] = group
@@ -352,6 +361,7 @@ class ManageUserViewSet(DetailView):
         return render(request, 'feedme/manage_users.html', r)
 
     def post(self, request, group=None):
+        """Update a User's Balance"""
         r = {}
         group = get_object_or_404(Group, name=group)
         form = ManageBalanceForm(request.POST)
@@ -373,9 +383,9 @@ class ManageUserViewSet(DetailView):
         return render(request, 'feedme/manage_users.html', r)
 
 
-# Manage order (payment handling)
 @permission_required('feedme.change_balance', raise_exception=True)
 def manage_order(request, group=None):
+    """Manage an Order. Used for paying or editing/updating an existing Order"""
     r = dict()
     group = get_object_or_404(Group, name=group)
     r['feedme_groups'] = [g for g in get_feedme_groups() if request.user in g.user_set.all()]
@@ -444,9 +454,9 @@ def manage_order(request, group=None):
     return render(request, 'feedme/manage_order.html', r)
 
 
-# New restaurant
 @permission_required('feedme.add_restaurant', raise_exception=True)
 def new_restaurant(request, restaurant_id=None, group=None):
+    """The view used to add a new Restaurant"""
     if restaurant_id is None:
         restaurant = Restaurant()
     else:
@@ -473,15 +483,16 @@ def new_restaurant(request, restaurant_id=None, group=None):
     return render(request, 'feedme/admin.html', r)
 
 
-# Edit restaurant
 @permission_required('feedme.change_restaurant', raise_exception=True)
 def edit_restaurant(request, restaurant_id=None):
+    """The view used to edit a Restaurant"""
     restaurant = get_object_or_404(Restaurant, pk=restaurant_id)
     return new_restaurant(request, restaurant)
 
 
 @permission_required('feedme.add_poll', raise_exception=True)
 def new_poll(request, group=None):
+    """The view used to add a new Poll"""
     group = get_object_or_404(Group, name=group)
     if request.method == 'POST':
         form = NewPollForm(request.POST)
