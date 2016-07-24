@@ -37,6 +37,7 @@ class Order(models.Model):
         Gets the total price for an order, including any extra costs. This is the price that should be paid to
         the Restaurant.
         :return: The total price for this Order
+        :rtype: float
         """
         s = self.orderline_set.aggregate(models.Sum('price'))['price__sum']
         if s is None:
@@ -45,7 +46,11 @@ class Order(models.Model):
 
     # Should rename to "get_extra_costs_for_each_user" or -each_payer
     def get_extra_costs(self):
-        """Calculate the amount each person partaking in this order should pay of this Order.extra_costs."""
+        """
+        Calculate the amount each person partaking in this order should pay of this Order.extra_costs.
+        :return: The amount each person partaking in this order should pay of this Order.extra_costs
+        :rtype: float
+        """
         # users = self.orderline_set.aggregate(models.Sum('users'))['users__sum']
         users = 0
         for ol in self.orderline_set.all():
@@ -53,13 +58,20 @@ class Order(models.Model):
         return self.extra_costs / users if users > 0 else self.extra_costs
 
     def order_users(self):
-        """Get the users available for partaking in this Order."""
+        """
+        :return: A Django QuerySet containing the users available for partaking in this Order
+        :rtype: list
+        """
         from django.contrib.auth import get_user_model
         User = get_user_model()
         return User.objects.filter(groups=self.group)
 
     def available_users(self):
-        """Get the available users for partaking in a new (or current) OrderLine for this Order."""
+        """
+        Get the available users for partaking in a new (or current) OrderLine for this Order
+        :return: the available users for partaking in a new (or current) OrderLine for this Order
+        :rtype: list
+        """
         order_users = self.order_users()
         taken_users = self.taken_users()
         available_users = order_users.exclude(id__in=taken_users)
@@ -70,7 +82,11 @@ class Order(models.Model):
 
     @classmethod
     def get_latest(cls):
-        """Get the latest active Order."""
+        """
+        Get the latest active Order
+        :return: The latest active Order
+        :rtype: Order
+        """
         if Order.objects.all():
             orders = Order.objects.all().order_by('-id')
             for order in orders:
@@ -81,7 +97,11 @@ class Order(models.Model):
 
     @property
     def paid(self):
-        """Is this Order, and all related OrderLines, paid for?"""
+        """
+        Checks if the Order and all related Orderlines are paid for.
+        :return: Whether the Order is fully paid for or not.
+        :rtype: bool
+        """
         if self.orderline_set.all():
             for ol in self.orderline_set.all():
                 if not ol.paid_for:
@@ -112,24 +132,52 @@ class OrderLine(models.Model):
     paid_for = models.BooleanField(_('paid for'), default=False)
 
     def get_order(self):
+        """
+        Get the Order for this Orderline
+        :return: the Order related to this Orderline
+        :rtype: Order
+        """
         return self.order
 
     def get_users(self):
+        """
+        Get this Orderline's users
+        :return: The users related to this Orderline
+        :rtype: User
+        """
         return self.users
 
     def get_buddies(self):
+        """
+        Proxy for "get_users()"
+        :return: The users related to this Orderline
+        :rtype: User
+        """
         return self.get_users()
 
     def get_num_users(self):
+        """
+        Get the number of users in this Orderline
+        :return: The number of users in this Orderline
+        :rtype: int
+        """
         return self.get_users().count()
 
     # Should rename to "get_orderline_total"
     def get_total_price(self):
-        """Calculate the total cost for this OrderLine, including extra_costs as a sum of the partaking users."""
+        """
+        Calculate the total cost for this Orderline, including extra_costs as a sum of the partaking users.
+        :return: The total price of this Orderline
+        :rtype: float
+        """
         return self.price + (self.order.get_extra_costs() * self.get_num_users())
 
     def get_price_to_pay(self):
-        """Calculate how much each person partaking in this OrderLine should pay, including extra_costs."""
+        """
+        Calculate how much each person partaking in this OrderLine should pay, including extra_costs.
+        :return: The price to pay for one user.
+        :rtype: float
+        """
         return self.get_total_price() / self.get_num_users() if self.get_num_users() > 0 else 0
 
     def __str__(self):
@@ -170,6 +218,7 @@ class Balance(models.Model):
         """
         Calculate the Balance of a given User. Create an initial Transaction if none exist from before.
         :return: The Balance of a given user.
+        :rtype: float
         """
         if self.user.transaction_set.aggregate(models.Sum('amount'))['amount__sum'] is None:
             self.add_transaction(0)
@@ -179,6 +228,7 @@ class Balance(models.Model):
         """
         Format the Balance string
         :return: A string-formatted Balance.
+        :rtype: str
         """
         return "%.2f kr" % self.get_balance()
 
@@ -187,6 +237,7 @@ class Balance(models.Model):
         Add a Transaction for the current user.
         :param amount: The value of this Transaction
         :return: True if the Transaction completed successfully.
+        :rtype: bool
         """
         transaction = Transaction()
         transaction.user = self.user
@@ -199,6 +250,7 @@ class Balance(models.Model):
         Proxy for add_transaction.
         :param amount: The value of this Transaction
         :return: True if the Transaction completed successfully.
+        :rtype: bool
         """
         return self.add_transaction(amount)
         # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
@@ -208,6 +260,7 @@ class Balance(models.Model):
         Proxy for add_transaction.
         :param amount: The value of this Transaction
         :return: True if the Transaction completed successfully.
+        :rtype: bool
         """
         return self.add_transaction(amount * -1)
         # print('Deprecated notice, please add new transaction objects rather than calling the Balance object')
@@ -242,6 +295,7 @@ class Poll(models.Model):
         """
         Get an active Poll, if any.
         :return: An active Poll, or None if no Polls are active.
+        :rtype: Poll
         """
         if Poll.objects.count() == 0:
             return None
@@ -254,6 +308,7 @@ class Poll(models.Model):
         """
         Get the results of a Poll
         :return: A dict containing the Answer choices and the amount of votes for each Answer
+        :rtype: dict
         """
         answers = Answer.objects.filter(poll=self)
         r = dict()
@@ -267,6 +322,7 @@ class Poll(models.Model):
         """
         Get the winner of a Poll
         :return: The winning Answer
+        :rtype: User
         """
         winner = (None, -1)
         results = self.get_result()
